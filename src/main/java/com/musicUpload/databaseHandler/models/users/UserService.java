@@ -1,5 +1,7 @@
 package com.musicUpload.databaseHandler.models.users;
 
+import com.musicUpload.databaseHandler.models.albums.AlbumService;
+import com.musicUpload.databaseHandler.models.songs.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +17,10 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private SongService songService;
+    @Autowired
+    private AlbumService albumService;
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Override
@@ -45,8 +51,10 @@ public class UserService implements UserDetailsService {
         }
         user.setPassword(encoder.encode(user.getPassword()));
 
-        System.out.println("asd");
+        return userRepository.save(user);
+    }
 
+    public User saveUser(User user){
         return userRepository.save(user);
     }
 }

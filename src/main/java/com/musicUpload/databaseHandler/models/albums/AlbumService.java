@@ -11,4 +11,8 @@ public class AlbumService {
     public AlbumService(AlbumRepository albumRepository) {
         this.albumRepository = albumRepository;
     }
+
+    public Album saveAlbum(Album album){
+        return albumRepository.save(album);
+    }
 }

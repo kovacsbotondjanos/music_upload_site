@@ -11,4 +11,8 @@ public class SongService {
     public SongService(SongRepository songRepository) {
         this.songRepository = songRepository;
     }
+
+    public Song saveSong(Song song){
+        return songRepository.save(song);
+    }
 }

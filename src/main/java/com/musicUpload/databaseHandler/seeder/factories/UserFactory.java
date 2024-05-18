@@ -22,19 +22,25 @@ public class UserFactory {
         imageFactory.createImagesDir();
     }
 
+    public List<User> createFollow(List<User> users){
+        Random random = new Random();
+
+        users.stream().parallel().forEach(currUser -> {
+            IntStream.range(0, random.nextInt() % users.size()).forEachOrdered(__ -> {
+                User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
+                if(currUser.getFollowedUsers().stream().noneMatch(u -> u.equals(user) || u.equals(currUser))){
+                    currUser.getFollowedUsers().add(user);
+                }
+            });
+        });
+
+        return users;
+    }
+
     public List<User> createUsers(int number){
         List<User> users = new CopyOnWriteArrayList<>();
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> users.add(createUser()));
-
-        Random random = new Random();
-
-        users.stream().parallel().forEach(currUser -> {
-            User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
-            if(user.getFollowedUsers().stream().noneMatch(u -> u.equals(user) || u.equals(currUser))){
-                currUser.getFollowedUsers().add(user);
-            }
-        });
 
         return users;
     }

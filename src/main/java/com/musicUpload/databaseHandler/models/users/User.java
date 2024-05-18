@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "USERS")
-@ToString(exclude = {"songs", "albums", "followers", "followedUsers"})
+@ToString(exclude = {"followers", "followedUsers"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

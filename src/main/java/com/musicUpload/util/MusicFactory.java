@@ -64,7 +64,7 @@ public class MusicFactory {
             System.out.println(e.getMessage());
         }
 
-        return "";
+        return " ";
     }
 
     private byte[] generateRandomAudioData() {

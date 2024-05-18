@@ -46,9 +46,14 @@ public class SongFactory {
         song.setNameHashed(musicFactory.createRandomSong());
         song.setImage(imageFactory.getRandomImage());
         song.setProtectionType(protectionTypes.get(random.nextInt(1, Integer.MAX_VALUE) % protectionTypes.size()));
-        song.setUser(users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size()));
 
-        System.out.println(song.getName());
+        User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
+
+        synchronized (user){
+            song.setUser(user);
+            user.getSongs().add(song);
+        }
+
 
         return song;
     }

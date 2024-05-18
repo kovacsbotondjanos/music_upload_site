@@ -1,0 +1,54 @@
+package com.musicUpload.databaseHandler.seeder.factories;
+
+import com.github.javafaker.Faker;
+import com.musicUpload.databaseHandler.models.albums.Album;
+import com.musicUpload.databaseHandler.models.songs.Song;
+import com.musicUpload.databaseHandler.models.users.User;
+import com.musicUpload.util.ImageFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.IntStream;
+
+@Service
+public class AlbumFactory {
+    @Autowired
+    private final ImageFactory imageFactory;
+
+    public AlbumFactory(ImageFactory imageFactory) {
+        this.imageFactory = imageFactory;
+    }
+
+    public List<Album> createAlbums(int number, List<User> users, List<Song> songs){
+        List<Album> albums = new CopyOnWriteArrayList<>();
+
+        IntStream.range(0, number).parallel().forEachOrdered(__ -> albums.add(createAlbum(users, songs)));
+
+        return albums;
+    }
+
+    private Album createAlbum(List<User> users, List<Song> songs){
+        Album album = new Album();
+        Random random = new Random();
+
+        Faker faker = new Faker(new Random());
+        String name = faker.book().title();
+
+        album.setName(name);
+        album.setImage(imageFactory.getRandomImage());
+        album.setUser(users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size()));
+
+        IntStream.range(0, random.nextInt(1, Integer.MAX_VALUE) % songs.size()).forEachOrdered(__ -> {
+            Song song = songs.get(random.nextInt(1, Integer.MAX_VALUE) % songs.size());
+            if(album.getSongs().stream().noneMatch(s -> s.equals(song))){
+                album.getSongs().add(song);
+            }
+        });
+
+        return album;
+    }
+}

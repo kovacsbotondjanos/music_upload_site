@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class Album {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private String image;
     private String name;
 
     @ManyToOne
@@ -30,7 +32,7 @@ public class Album {
             joinColumns = @JoinColumn(name = "album_id"),
             inverseJoinColumns = @JoinColumn(name = "song_id")
     )
-    private List<Song> songs;
+    private List<Song> songs = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")

@@ -1,6 +1,7 @@
 package com.musicUpload.databaseHandler.models.users;
 
 import com.musicUpload.databaseHandler.models.albums.Album;
+import com.musicUpload.databaseHandler.models.auth.Auth;
 import com.musicUpload.databaseHandler.models.songs.Song;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -20,7 +21,7 @@ public class User {
     private Long id;
 
     private String profilePicture;
-    private String role;
+//    private String role;
     private String email;
     private String password;
     private String username;
@@ -30,6 +31,10 @@ public class User {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Song> songs = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "auth_id")
+    private Auth authority;
 
     @ManyToMany
     @JoinTable(

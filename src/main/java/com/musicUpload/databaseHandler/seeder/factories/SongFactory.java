@@ -1,6 +1,7 @@
 package com.musicUpload.databaseHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
+import com.musicUpload.databaseHandler.models.protectionType.ProtectionType;
 import com.musicUpload.databaseHandler.models.songs.Song;
 import com.musicUpload.databaseHandler.models.users.User;
 import com.musicUpload.util.ImageFactory;
@@ -19,7 +20,6 @@ public class SongFactory {
     private final ImageFactory imageFactory;
     @Autowired
     private final MusicFactory musicFactory;
-    private final List<String> protectionTypes = List.of("PRIVATE", "PUBLIC", "PROTECTED");
 
     public SongFactory(ImageFactory imageFactory, MusicFactory musicFactory) {
         this.imageFactory = imageFactory;
@@ -27,15 +27,15 @@ public class SongFactory {
         musicFactory.createMusicDir();
     }
 
-    public List<Song> generateSongs(int number, List<User> users){
+    public List<Song> generateSongs(int number, List<User> users, List<ProtectionType> protectionTypes){
         List<Song> songs = new CopyOnWriteArrayList<>();
 
-        IntStream.range(0, number).parallel().forEachOrdered(__ -> songs.add(createSong(users)));
+        IntStream.range(0, number).parallel().forEachOrdered(__ -> songs.add(createSong(users, protectionTypes)));
 
         return songs;
     }
 
-    private Song createSong(List<User> users){
+    private Song createSong(List<User> users, List<ProtectionType> protectionTypes){
         Song song = new Song();
         Random random = new Random();
 
@@ -43,7 +43,7 @@ public class SongFactory {
         String name = faker.book().title();
 
         song.setName(name);
-        song.setNameHashed(musicFactory.createRandomSong());
+        song.setNameHashed(musicFactory.createSong());
         song.setImage(imageFactory.getRandomImage());
         song.setProtectionType(protectionTypes.get(random.nextInt(1, Integer.MAX_VALUE) % protectionTypes.size()));
 

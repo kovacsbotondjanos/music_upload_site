@@ -1,13 +1,14 @@
 package com.musicUpload.databaseHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
-import com.musicUpload.databaseHandler.models.songs.Song;
+import com.musicUpload.databaseHandler.models.auth.Auth;
 import com.musicUpload.databaseHandler.models.users.User;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
@@ -37,15 +38,15 @@ public class UserFactory {
         return users;
     }
 
-    public List<User> createUsers(int number){
+    public List<User> createUsers(int number, List<Auth> auths){
         List<User> users = new CopyOnWriteArrayList<>();
 
-        IntStream.range(0, number).parallel().forEachOrdered(__ -> users.add(createUser()));
+        IntStream.range(0, number).parallel().forEachOrdered(__ -> users.add(createUser(auths)));
 
         return users;
     }
 
-    private User createUser(){
+    private User createUser(List<Auth> auths){
         Faker faker = new Faker(new Random());
         String firstName = faker.name().firstName();
         String lastName = faker.name().lastName();
@@ -54,7 +55,10 @@ public class UserFactory {
         User user = new User();
         user.setUsername(firstName + " " + lastName);
         user.setEmail(email);
-        user.setRole("USER");
+
+        Optional<Auth> auth = auths.stream().filter(a -> a.getName().equals("USER")).findAny();
+        auth.ifPresent(user::setAuthority);
+
         user.setPassword("password");
         user.setProfilePicture(imageFactory.getRandomImage());
 

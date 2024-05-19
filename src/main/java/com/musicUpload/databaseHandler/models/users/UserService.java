@@ -32,7 +32,7 @@ public class UserService implements UserDetailsService {
                     userObj.getId(),
                     userObj.getUsername(),
                     userObj.getPassword(),
-                    Collections.singletonList(new SimpleGrantedAuthority(userObj.getRole())),
+                    Collections.singletonList(new SimpleGrantedAuthority(userObj.getAuthority().getName())),
                     userObj.getProfilePicture(),
                     userObj.getSongs(),
                     userObj.getAlbums()

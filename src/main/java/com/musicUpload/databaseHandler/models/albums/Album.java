@@ -1,5 +1,6 @@
 package com.musicUpload.databaseHandler.models.albums;
 
+import com.musicUpload.databaseHandler.models.protectionType.ProtectionType;
 import com.musicUpload.databaseHandler.models.songs.Song;
 import com.musicUpload.databaseHandler.models.users.User;
 import jakarta.persistence.*;
@@ -21,6 +22,10 @@ public class Album {
 
     private String image;
     private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "protection_id")
+    private ProtectionType protectionType;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

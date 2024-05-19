@@ -2,13 +2,13 @@ package com.musicUpload.databaseHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
 import com.musicUpload.databaseHandler.models.albums.Album;
+import com.musicUpload.databaseHandler.models.protectionType.ProtectionType;
 import com.musicUpload.databaseHandler.models.songs.Song;
 import com.musicUpload.databaseHandler.models.users.User;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,15 +23,15 @@ public class AlbumFactory {
         this.imageFactory = imageFactory;
     }
 
-    public List<Album> createAlbums(int number, List<User> users, List<Song> songs){
+    public List<Album> createAlbums(int number, List<User> users, List<Song> songs, List<ProtectionType> protectionTypes){
         List<Album> albums = new CopyOnWriteArrayList<>();
 
-        IntStream.range(0, number).parallel().forEachOrdered(__ -> albums.add(createAlbum(users, songs)));
+        IntStream.range(0, number).parallel().forEachOrdered(__ -> albums.add(createAlbum(users, songs, protectionTypes)));
 
         return albums;
     }
 
-    private Album createAlbum(List<User> users, List<Song> songs){
+    private Album createAlbum(List<User> users, List<Song> songs, List<ProtectionType> protectionTypes){
         Album album = new Album();
         Random random = new Random();
 
@@ -40,6 +40,7 @@ public class AlbumFactory {
 
         album.setName(name);
         album.setImage(imageFactory.getRandomImage());
+        album.setProtectionType(protectionTypes.get(random.nextInt(1, Integer.MAX_VALUE) % protectionTypes.size()));
 
         User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
         synchronized (user){

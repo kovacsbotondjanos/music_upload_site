@@ -12,6 +12,8 @@ public class MusicUploadApplication {
         ConfigurableApplicationContext context = SpringApplication.run(MusicUploadApplication.class, args);
 		DatabaseSeeder dbSeeder = context.getBean(DatabaseSeeder.class);
 		dbSeeder.seedDatabaseIfEmpty();
+		//TODO: take this out soon
+		dbSeeder.seedDatabase();
 	}
 
 }

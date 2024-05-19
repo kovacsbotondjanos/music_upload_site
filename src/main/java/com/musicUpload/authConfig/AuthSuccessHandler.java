@@ -11,7 +11,7 @@ import java.io.IOException;
 public class AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
-        setDefaultTargetUrl("/albums");
+        setDefaultTargetUrl("/home");
         super.onAuthenticationSuccess(request, response, authentication);
     }
 }

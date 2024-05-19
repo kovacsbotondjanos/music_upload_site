@@ -63,10 +63,10 @@ public class DatabaseSeeder {
         users = userFactory.createFollow(users);
         users.stream().parallel().forEach(userService::saveUser);
 
-        List<Song> songs = songFactory.generateSongs(10, users, protectionTypes);
+        List<Song> songs = songFactory.generateSongs(50, users, protectionTypes);
         songs.stream().parallel().forEach(songService::saveSong);
 
-        List<Album> albums = albumFactory.createAlbums(10, users, songs, protectionTypes);
+        List<Album> albums = albumFactory.createAlbums(20, users, songs, protectionTypes);
         albums.stream().parallel().forEach(albumService::saveAlbum);
     }
 

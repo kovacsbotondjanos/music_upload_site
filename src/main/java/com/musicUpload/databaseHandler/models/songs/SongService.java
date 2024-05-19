@@ -3,6 +3,7 @@ package com.musicUpload.databaseHandler.models.songs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,5 +25,9 @@ public class SongService {
 
     public Optional<Song> findById(Long id){
         return songRepository.findById(id);
+    }
+
+    public List<Song> getRandomSongs(){
+        return songRepository.findRandomSongs();
     }
 }

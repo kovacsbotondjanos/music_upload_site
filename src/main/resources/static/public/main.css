@@ -242,11 +242,3 @@ input {
     all: unset;
     background-color: transparent !important;
 }
-
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1) !important;
-  transition: 0.4s;
-  padding: 3px;
-}

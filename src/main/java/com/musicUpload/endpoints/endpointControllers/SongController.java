@@ -6,6 +6,8 @@ import com.musicUpload.databaseHandler.models.songs.SongService;
 import com.musicUpload.databaseHandler.models.users.CustomUserDetails;
 import com.musicUpload.databaseHandler.models.users.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,6 +15,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -26,6 +32,7 @@ public class SongController {
     private final AlbumService albumService;
     @Autowired
     private final UserService userService;
+    private final String pathName = "music\\";
 
     public SongController(SongService songService, AlbumService albumService, UserService userService) {
         this.songService = songService;
@@ -43,23 +50,44 @@ public class SongController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getSong(@PathVariable Long id){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            Optional<Song> songOptional = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
+    public ResponseEntity<Resource> getSong(@PathVariable Long id){
 
-            if(songOptional.isPresent()){
-                return new ResponseEntity<>(songOptional.get(), HttpStatus.OK);
+        Path path = Paths.get(pathName);
+
+        Optional<Song> songOptional = songService.findById(id);
+        if(songOptional.isPresent() && !songOptional.get().getProtectionType().getName().equals("PRIVATE")){
+            try{
+                Path imagePath = path.resolve(songOptional.get().getName());
+                Resource resource = new UrlResource(imagePath.toUri());
+                return ResponseEntity.ok().body(resource);
             }
-            else{
-                Optional<Song> songOptional2 = songService.findById(id);
-                if(songOptional2.isPresent() && !songOptional2.get().getProtectionType().getName().equals("PRIVATE")){
-                    return new ResponseEntity<>(songOptional2.get(), HttpStatus.OK);
-                }
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+            catch (IOException e){
+                return ResponseEntity.notFound().build();
             }
         }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            Optional<Song> songOptionalForUser = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
+
+            if(songOptionalForUser.isPresent()){
+                try{
+                    Path imagePath = path.resolve(songOptionalForUser.get().getName());
+                    Resource resource = new UrlResource(imagePath.toUri());
+                    return ResponseEntity.ok().body(resource);
+                }
+                catch (IOException e){
+                    return ResponseEntity.notFound().build();
+                }
+            }
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/random")
+    public ResponseEntity<?> getRandomSongs(){
+        List<Song> songs = songService.getRandomSongs();
+        return new ResponseEntity<>(songs, HttpStatus.OK);
     }
 
     @PostMapping("/create")

@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             const songs = document.getElementById('albums');
+            console.log(data);
             //TODO: iterate thorugh the data adn add it in divs
         })
         .catch(error => {

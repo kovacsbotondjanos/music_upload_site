@@ -100,7 +100,7 @@ html {
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsl(0, 0%, 100%);
+    /* background-color: hsl(0, 0%, 100%); */
   }
 }
 
@@ -195,6 +195,12 @@ th {
 
 a:hover {
   color: black !important;
+  background-color: hsl(0, 0%, 100%);
+}
+
+a.profile_div:hover{
+  color: black !important;
+  background-color: transparent;
 }
 
 .navbar {
@@ -247,6 +253,6 @@ input {
     border-radius: 5px;
 }
 
-.profile-div::hover {
+.profile-div:hover {
     background-color: black !important;
 }

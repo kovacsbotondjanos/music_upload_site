@@ -39,4 +39,17 @@ public class UserInterfaceController {
 
         return "home";
     }
+
+    @GetMapping("/profile")
+    public String getProfile(Model model){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            model.addAttribute("profilePicture", userDetails.getProfilePicture());
+            model.addAttribute("userName", userDetails.getUsername());
+            model.addAttribute("id", userDetails.getId());
+
+            return "user";
+        }
+        return "unauthenticated";
+    }
 }

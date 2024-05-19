@@ -13,16 +13,11 @@
     <link rel="stylesheet" th:href="@{/public/main.css}"/>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg bg-transparent">
+<nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#"></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
-                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div th:if="${loggedIn}" class="collapse navbar-collapse">
-            <a class="justify-content" th:href="@{'/users/' + ${id}}">
-                <img width="50px" height="50px" th:src="@{'/images/' + ${profilePicture}}" alt="User's Profile Picture" class="img-thumbnail rounded-circle profile-pic">
+        <div th:if="${loggedIn}" class="collapse navbar-collapse profile_div">
+            <a class="justify-content profile_div" th:href="@{'/users/' + ${id}}">
+                <img width="50px" height="50px" th:src="@{'/images/' + ${profilePicture}}" alt="User's Profile Picture" class="profile">
             </a>
         </div>
         <div class="collapse navbar-collapse">
@@ -33,6 +28,11 @@
         <div th:if="${loggedIn}" class="collapse navbar-collapse">
             <div class="navbar-nav">
                 <a class="nav-link active text-white" href="/logout">Log out</a>
+            </div>
+        </div>
+        <div th:if="${loggedIn == false}" class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-link active text-white" href="/register">Register</a>
             </div>
         </div>
         <div th:if="${loggedIn == false}" class="collapse navbar-collapse">
@@ -48,8 +48,8 @@
             <h1>Recommended songs:</h1>
             <br>
             <div th:each="song: ${songs}">
-                <div class="container mt-5 mb-5 bg-secondary d-flex justify-content-between align-items-center rounded">
-                    <img width="50px" height="50px" th:src="@{'/images/' + ${song.getImage()}}" alt="User's Profile Picture" class="img-thumbnail rounded-circle profile-pic">
+                <div class="container mt-5 mb-5 d-flex justify-content-between align-items-center rounded">
+                    <img width="50px" height="50px" th:src="@{'/images/' + ${song.getImage()}}" alt="User's Profile Picture" class="profile">
                     <div class="d-flex align-items-center">
                         <h2 th:text="${song.getName()}" class="text-white"></h2>
                     </div>

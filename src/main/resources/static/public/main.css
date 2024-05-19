@@ -242,3 +242,11 @@ input {
     all: unset;
     background-color: transparent !important;
 }
+
+.profile {
+    border-radius: 5px;
+}
+
+.profile-div::hover {
+    background-color: black !important;
+}

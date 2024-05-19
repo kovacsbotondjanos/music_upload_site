@@ -3,6 +3,8 @@ package com.musicUpload.databaseHandler.models.albums;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AlbumService {
     @Autowired
@@ -14,5 +16,13 @@ public class AlbumService {
 
     public Album saveAlbum(Album album){
         return albumRepository.save(album);
+    }
+
+    public void deleteAlbum(Album album){
+        albumRepository.delete(album);
+    }
+
+    public Optional<Album> findById(Long id){
+        return albumRepository.findById(id);
     }
 }

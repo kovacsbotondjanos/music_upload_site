@@ -3,6 +3,8 @@ package com.musicUpload.databaseHandler.models.songs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class SongService {
     @Autowired
@@ -14,5 +16,13 @@ public class SongService {
 
     public Song saveSong(Song song){
         return songRepository.save(song);
+    }
+
+    public void deleteSong(Song song){
+        songRepository.delete(song);
+    }
+
+    public Optional<Song> findById(Long id){
+        return songRepository.findById(id);
     }
 }

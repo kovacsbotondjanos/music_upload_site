@@ -54,11 +54,8 @@ public class DatabaseSeeder {
     }
 
     public void seedDatabase(){
-        List<Auth> auths = authFactory.createAuthorities();
-        auths.stream().parallel().forEach(authService::save);
-
-        List<ProtectionType> protectionTypes = protectionTypeFactory.generateProtectionTypes();
-        protectionTypes.stream().parallel().forEach(protectionTypeService::save);
+        List<Auth> auths = authService.getAllPossibleAuth();
+        List<ProtectionType> protectionTypes = protectionTypeService.getAllPossibleProtectionType();
 
         List<User> users = userFactory.createUsers(10, auths);
         users.stream().parallel().forEach(userService::registerUser);
@@ -85,8 +82,9 @@ public class DatabaseSeeder {
             user.ifPresent(value -> {
                 Optional<Auth> auth = auths.stream().filter(a -> a.getName().equals("ADMIN")).findAny();
                 auth.ifPresent(value::setAuthority);
-                userService.saveUser(user.get());
+                userService.registerUser(user.get());
             });
+            seedDatabase();
         }
     }
 }

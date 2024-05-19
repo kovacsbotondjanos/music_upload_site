@@ -3,6 +3,8 @@ package com.musicUpload.databaseHandler.models.auth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AuthService {
     @Autowired
@@ -14,5 +16,9 @@ public class AuthService {
 
     public Auth save(Auth auth){
         return authRepository.save(auth);
+    }
+
+    public List<Auth> getAllPossibleAuth(){
+        return authRepository.findAll();
     }
 }

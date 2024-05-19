@@ -36,10 +36,11 @@ public class MusicFactory {
     }
 
     public String createSong(){
-        return saveAsWAV(generateRandomAudioData());
+        return saveAsMP3(generateRandomAudioData());
     }
 
-    private String saveAsWAV(byte[] audioData) {
+    private String saveAsMP3(byte[] audioData) {
+        //TODO: actually encode the file to mp3 format
         try {
             AudioFormat format = new AudioFormat(sampleRate, sampleSizeBits, numChannels, true, false);
             ByteArrayInputStream bais = new ByteArrayInputStream(audioData);

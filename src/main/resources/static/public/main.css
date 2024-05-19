@@ -256,3 +256,26 @@ input {
 .profile-div:hover {
     background-color: black !important;
 }
+
+#songs {
+    flex: 1;
+    padding: 20px;
+}
+
+#music-player {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #f8f8f8;
+    padding: 10px;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+}
+
+audio {
+    width: 100%;
+}
+
+.song {
+    cursor: pointer;
+    margin-bottom: 5px;
+}

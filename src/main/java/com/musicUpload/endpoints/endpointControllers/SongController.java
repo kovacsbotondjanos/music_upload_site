@@ -49,7 +49,7 @@ public class SongController {
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/download/{id}")
     public ResponseEntity<Resource> getSong(@PathVariable Long id){
 
         Path path = Paths.get(pathName);
@@ -82,6 +82,24 @@ public class SongController {
             }
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getSongById(@PathVariable Long id){
+        Optional<Song> songOptional = songService.findById(id);
+        if(songOptional.isPresent() && !songOptional.get().getProtectionType().getName().equals("PRIVATE")){
+            return new ResponseEntity<>(songOptional.get(), HttpStatus.OK);
+        }
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            Optional<Song> songOptionalForUser = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
+
+            if(songOptionalForUser.isPresent()){
+                return new ResponseEntity<>(songOptionalForUser.get(), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/random")

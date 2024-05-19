@@ -13,7 +13,7 @@
     <link rel="stylesheet" th:href="@{/public/main.css}"/>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg">
+<nav class="navbar navbar-expand">
     <div class="container-fluid">
         <div th:if="${loggedIn}" class="collapse navbar-collapse profile_div">
             <a class="justify-content profile_div" th:href="@{'/profile'}">
@@ -42,14 +42,14 @@
         </div>
     </div>
 </nav>
-<div class="container container-fluid" style="padding-top: 70px;">
+<div class="container container-fluid" style="padding-top: 70px; padding-bottom: 70px">
     <div class="row">
         <div class="col">
             <h1>Recommended songs:</h1>
             <br>
             <div th:each="song: ${songs}">
                 <div class="container mt-5 mb-5 d-flex justify-content-between align-items-center rounded">
-                    <img width="50px" height="50px" th:src="@{'/images/' + ${song.getImage()}}" alt="User's Profile Picture" class="profile">
+                    <button class="custom-button" th:onclick="@{'playMusic(' + ${song.getId()} + ')'}"><img width="50px" height="50px" th:src="@{'/images/' + ${song.getImage()}}" alt="User's Profile Picture" class="profile"></button>
                     <div class="d-flex align-items-center">
                         <h2 th:text="${song.getName()}" class="text-white"></h2>
                     </div>
@@ -57,6 +57,12 @@
             </div>
         </div>
     </div>
+</div>
+<div id="music-player">
+    <audio id="audio-player" controls>
+        <source id="audio-source" src="" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
 </div>
 </body>
 </html>

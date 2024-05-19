@@ -27,7 +27,7 @@ public class AuthConfig  {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/public/**").permitAll();
-                    registry.requestMatchers("/register", "/music/**", "/album/**", "/home", "/images/**").permitAll();
+                    registry.requestMatchers("/register", "/album/**", "/home", "/images/**", "songs/**").permitAll();
                     registry.anyRequest().authenticated();
                 })
                 .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer

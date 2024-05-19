@@ -1,6 +1,5 @@
 package com.musicUpload.endpoints.endpointControllers;
 
-import com.musicUpload.databaseHandler.models.albums.Album;
 import com.musicUpload.databaseHandler.models.albums.AlbumService;
 import com.musicUpload.databaseHandler.models.songs.Song;
 import com.musicUpload.databaseHandler.models.songs.SongService;

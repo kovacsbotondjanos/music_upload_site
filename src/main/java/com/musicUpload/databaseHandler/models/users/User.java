@@ -1,5 +1,7 @@
 package com.musicUpload.databaseHandler.models.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.google.gson.annotations.Expose;
 import com.musicUpload.databaseHandler.models.albums.Album;
 import com.musicUpload.databaseHandler.models.auth.Auth;
@@ -15,7 +17,7 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "USERS")
-@ToString(exclude = {"followers", "followedUsers"})
+@ToString(exclude = {"followers", "followedUsers", "albums", "songs"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -25,14 +27,17 @@ public class User {
     @Expose
     private String email;
     @Expose
+    @JsonIgnore
     private String password;
     @Expose
     private String username;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Album> albums = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Song> songs = new ArrayList<>();
 
     @ManyToOne
@@ -45,9 +50,11 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "followed_user_id")
     )
+    @JsonIgnore
     private List<User> followedUsers = new ArrayList<>();
 
     @ManyToMany(mappedBy = "followedUsers")
+    @JsonIgnore
     private List<User> followers = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)

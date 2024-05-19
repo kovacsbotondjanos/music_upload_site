@@ -1,5 +1,6 @@
 package com.musicUpload.databaseHandler.models.auth;
 
+import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

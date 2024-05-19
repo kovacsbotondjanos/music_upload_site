@@ -1,5 +1,7 @@
 package com.musicUpload.databaseHandler.models.albums;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.musicUpload.databaseHandler.models.protectionType.ProtectionType;
 import com.musicUpload.databaseHandler.models.songs.Song;
 import com.musicUpload.databaseHandler.models.users.User;
@@ -37,6 +39,7 @@ public class Album {
             joinColumns = @JoinColumn(name = "album_id"),
             inverseJoinColumns = @JoinColumn(name = "song_id")
     )
+    @JsonIgnore
     private List<Song> songs = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)

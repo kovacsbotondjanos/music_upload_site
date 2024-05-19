@@ -1,5 +1,6 @@
 package com.musicUpload.databaseHandler.models.songs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.musicUpload.databaseHandler.models.albums.Album;
 import com.musicUpload.databaseHandler.models.protectionType.ProtectionType;
 import com.musicUpload.databaseHandler.models.users.User;
@@ -33,6 +34,7 @@ public class Song {
     private User user;
 
     @ManyToMany(mappedBy = "songs")
+    @JsonIgnore
     private List<Album> albums = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)

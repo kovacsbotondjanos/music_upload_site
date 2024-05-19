@@ -1,12 +1,19 @@
 package com.musicUpload.databaseHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.musicUpload.databaseHandler.models.auth.Auth;
+import com.musicUpload.databaseHandler.models.protectionType.ProtectionType;
 import com.musicUpload.databaseHandler.models.users.User;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -44,6 +51,25 @@ public class UserFactory {
         IntStream.range(0, number).parallel().forEachOrdered(__ -> users.add(createUser(auths)));
 
         return users;
+    }
+
+    public Optional<User> createAdminFromConfigFile(){
+        Optional<User> admin;
+        Gson gson = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .create();
+        ClassLoader classLoader = getClass().getClassLoader();
+        try (InputStream inputStream = classLoader.getResourceAsStream("adminConfig.json");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            admin = Optional.of(gson.fromJson(reader, User.class));
+            admin.get().setProfilePicture(imageFactory.getRandomImage());
+            return admin;
+        }
+        catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+
+        return Optional.empty();
     }
 
     private User createUser(List<Auth> auths){

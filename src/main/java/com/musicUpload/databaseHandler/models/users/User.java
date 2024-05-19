@@ -1,5 +1,6 @@
 package com.musicUpload.databaseHandler.models.users;
 
+import com.google.gson.annotations.Expose;
 import com.musicUpload.databaseHandler.models.albums.Album;
 import com.musicUpload.databaseHandler.models.auth.Auth;
 import com.musicUpload.databaseHandler.models.songs.Song;
@@ -21,9 +22,11 @@ public class User {
     private Long id;
 
     private String profilePicture;
-//    private String role;
+    @Expose
     private String email;
+    @Expose
     private String password;
+    @Expose
     private String username;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

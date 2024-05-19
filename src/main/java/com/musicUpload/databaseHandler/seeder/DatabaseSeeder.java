@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DatabaseSeeder {
@@ -52,7 +53,7 @@ public class DatabaseSeeder {
         this.protectionTypeFactory = protectionTypeFactory;
     }
 
-    public void seedDatabaseIfEmpty(){
+    public void seedDatabase(){
         List<Auth> auths = authFactory.createAuthorities();
         auths.stream().parallel().forEach(authService::save);
 
@@ -70,5 +71,22 @@ public class DatabaseSeeder {
 
         List<Album> albums = albumFactory.createAlbums(10, users, songs, protectionTypes);
         albums.stream().parallel().forEach(albumService::saveAlbum);
+    }
+
+    public void seedDatabaseIfEmpty(){
+        if(userService.getUsers().isEmpty()){
+            List<Auth> auths = authFactory.createAuthorities();
+            auths.stream().parallel().forEach(authService::save);
+
+            List<ProtectionType> protectionTypes = protectionTypeFactory.generateProtectionTypes();
+            protectionTypes.stream().parallel().forEach(protectionTypeService::save);
+
+            Optional<User> user = userFactory.createAdminFromConfigFile();
+            user.ifPresent(value -> {
+                Optional<Auth> auth = auths.stream().filter(a -> a.getName().equals("ADMIN")).findAny();
+                auth.ifPresent(value::setAuthority);
+                userService.saveUser(user.get());
+            });
+        }
     }
 }

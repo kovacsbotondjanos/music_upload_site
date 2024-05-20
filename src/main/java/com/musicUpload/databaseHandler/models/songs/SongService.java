@@ -30,4 +30,8 @@ public class SongService {
     public List<Song> getRandomSongs(){
         return songRepository.findRandomSongs();
     }
+
+    public Optional<Song> findByNameHashed(String name){
+        return songRepository.findByNameHashed(name);
+    }
 }

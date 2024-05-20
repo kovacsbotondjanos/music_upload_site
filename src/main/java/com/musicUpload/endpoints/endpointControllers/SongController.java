@@ -32,7 +32,6 @@ public class SongController {
     private final AlbumService albumService;
     @Autowired
     private final UserService userService;
-    private final String pathName = "music\\";
 
     public SongController(SongService songService, AlbumService albumService, UserService userService) {
         this.songService = songService;
@@ -47,41 +46,6 @@ public class SongController {
             return new ResponseEntity<>(userDetails.getSongs(), HttpStatus.OK);
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-    }
-
-    @GetMapping("/download/{id}")
-    public ResponseEntity<Resource> getSong(@PathVariable Long id){
-
-        Path path = Paths.get(pathName);
-
-        Optional<Song> songOptional = songService.findById(id);
-        if(songOptional.isPresent() && !songOptional.get().getProtectionType().getName().equals("PRIVATE")){
-            try{
-                Path imagePath = path.resolve(songOptional.get().getName());
-                Resource resource = new UrlResource(imagePath.toUri());
-                return ResponseEntity.ok().body(resource);
-            }
-            catch (IOException e){
-                return ResponseEntity.notFound().build();
-            }
-        }
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            Optional<Song> songOptionalForUser = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
-
-            if(songOptionalForUser.isPresent()){
-                try{
-                    Path imagePath = path.resolve(songOptionalForUser.get().getName());
-                    Resource resource = new UrlResource(imagePath.toUri());
-                    return ResponseEntity.ok().body(resource);
-                }
-                catch (IOException e){
-                    return ResponseEntity.notFound().build();
-                }
-            }
-        }
-        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}")

@@ -7,6 +7,7 @@ import com.musicUpload.dataHandler.details.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -59,7 +60,14 @@ public class ResourceController {
             try{
                 Path imagePath = path.resolve(songOptional.get().getNameHashed());
                 Resource resource = new UrlResource(imagePath.toUri());
-                return ResponseEntity.ok().body(resource);
+
+                if (resource.exists()) {
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.parseMediaType("audio/mpeg"))
+                            .body(resource);
+                } else {
+                    return ResponseEntity.notFound().build();
+                }
             }
             catch (IOException e){
                 return ResponseEntity.notFound().build();

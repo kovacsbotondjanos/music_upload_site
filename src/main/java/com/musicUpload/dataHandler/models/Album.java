@@ -29,7 +29,7 @@ public class Album {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "song_album",
             joinColumns = @JoinColumn(name = "album_id"),

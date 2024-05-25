@@ -5,8 +5,6 @@ import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -55,21 +53,21 @@ public class UserService implements UserDetailsService {
     public User registerUser(User user) {
 
         if(user.getEmail() == null || user.getPassword() == null || user.getUsername() == null){
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("Please fill out all the fields");
         }
 
-        if(user.getPassword().length() <= 8){
-            throw new IllegalArgumentException("Email already exists");
+        if(user.getPassword().length() < 8){
+            throw new IllegalArgumentException("Password is in wrong format");
         }
 
         if(user.getUsername().isEmpty()){
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("Please fill the email field with valid data");
         }
 
         Pattern p = Pattern.compile(ePattern);
         Matcher m = p.matcher(user.getEmail());
         if(!m.matches()){
-            throw new IllegalArgumentException("Email already exists");
+            throw new IllegalArgumentException("Please fill the email field with valid data");
         }
 
         String image = imageFactory.getRandomImage();

@@ -35,7 +35,7 @@ public class ProtectionTypeFactory {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
                 TypeToken<List<ProtectionType>> token = new TypeToken<>() {};
                 protectionTypes = gson.fromJson(reader, token.getType());
-                protectionTypes.forEach(protectionTypeService::save);
+                protectionTypes.stream().parallel().forEach(protectionTypeService::save);
                 return protectionTypes;
             }
         }

@@ -1,4 +1,4 @@
-package com.musicUpload.multipartFileConfig;
+package com.musicUpload.config.multipartFileConfig;
 
 import jakarta.servlet.MultipartConfigElement;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;

@@ -48,7 +48,7 @@ public class DatabaseSeeder {
 
         users = userFactory.createFollow(users);
 
-        List<Song> songs = songFactory.generateSongs(50, users, protectionTypes);
+        List<Song> songs = songFactory.generateSongs(40, users, protectionTypes);
 
         albumFactory.createAlbums(20, users, songs, protectionTypes);
     }

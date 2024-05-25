@@ -35,7 +35,7 @@ public class AuthFactory {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
                 TypeToken<List<Auth>> token = new TypeToken<>() {};
                 auths = gson.fromJson(reader, token.getType());
-                auths.forEach(authService::save);
+                auths.stream().parallel().forEach(authService::save);
                 return auths;
             }
         }

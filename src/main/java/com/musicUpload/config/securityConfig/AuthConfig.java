@@ -1,6 +1,6 @@
 package com.musicUpload.config.securityConfig;
 
-import com.musicUpload.databaseHandler.services.UserService;
+import com.musicUpload.dataHandler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

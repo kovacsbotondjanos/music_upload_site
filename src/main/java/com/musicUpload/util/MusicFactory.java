@@ -1,5 +1,6 @@
 package com.musicUpload.util;
 
+import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -16,6 +17,7 @@ import java.util.Random;
 import java.util.UUID;
 
 @Service
+@Data
 public class MusicFactory {
     private final String dirName = System.getProperty("user.dir") + "//music";
     private final int durationInSeconds = 60;
@@ -32,6 +34,13 @@ public class MusicFactory {
         }
         catch (IOException ioe){
             System.err.println(ioe.getMessage());
+        }
+    }
+
+    public void deleteFile(String fileName){
+        File f = new File(dirName + "//" + fileName);
+        if(f.delete()){
+            System.out.println(f.getName() + " deleted");
         }
     }
 

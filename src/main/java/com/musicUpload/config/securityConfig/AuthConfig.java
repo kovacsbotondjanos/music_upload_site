@@ -38,10 +38,12 @@ public class AuthConfig  {
                 })
                 .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer
                         .loginProcessingUrl("/login")
-                        .successHandler(new AuthSuccessHandler())
-                        .failureHandler(new AuthFailureHandler())
+                        .successHandler(new LoginSuccessHandler())
+                        .failureHandler(new LoginFailureHandler())
                         .permitAll())
-                .logout(LogoutConfigurer::permitAll)
+                .logout(LogoutConfigurer -> LogoutConfigurer
+                        .logoutSuccessHandler(new LogoutSuccessHandler())
+                        .permitAll())
                 //TODO: sessionmanager
                 .build();
     }

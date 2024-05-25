@@ -1,5 +1,6 @@
 package com.musicUpload.controllers;
 
+import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.services.UserService;
@@ -25,7 +26,8 @@ public class UserController {
     public ResponseEntity<?> getCurrUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            return new ResponseEntity<>(userDetails, HttpStatus.OK);
+            UserDTO user = userService.findUserById(userDetails.getId());
+            return new ResponseEntity<>(user, HttpStatus.OK);
         }
         return new ResponseEntity<>("unauthenticated", HttpStatus.UNAUTHORIZED);
     }

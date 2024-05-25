@@ -1,5 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
+import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -90,5 +91,11 @@ public class UserService implements UserDetailsService {
 
     public List<User> getUsers(){
         return userRepository.findAll();
+    }
+
+    public UserDTO findUserById(Long id){
+        return userRepository.findById(id)
+                .map(UserDTO::new)
+                .orElseThrow(IllegalArgumentException::new);
     }
 }

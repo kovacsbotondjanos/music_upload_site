@@ -1,5 +1,7 @@
 package com.musicUpload.controllers;
 
+import com.musicUpload.dataHandler.DTOs.AlbumDTO;
+import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.models.Song;
 import com.musicUpload.dataHandler.services.SongService;
@@ -38,7 +40,7 @@ public class SongController {
     public ResponseEntity<?> getSongs(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            return new ResponseEntity<>(userDetails.getSongs(), HttpStatus.OK);
+            return new ResponseEntity<>(userDetails.getSongs().stream().map(SongDTO::new).toList(), HttpStatus.OK);
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }
@@ -47,7 +49,7 @@ public class SongController {
     public ResponseEntity<?> getSongById(@PathVariable Long id){
         Optional<Song> songOptional = songService.findById(id);
         if(songOptional.isPresent() && !songOptional.get().getProtectionType().getName().equals("PRIVATE")){
-            return new ResponseEntity<>(songOptional.get(), HttpStatus.OK);
+            return new ResponseEntity<>(SongDTO.of(songOptional.get()), HttpStatus.OK);
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -55,7 +57,7 @@ public class SongController {
             Optional<Song> songOptionalForUser = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
 
             if(songOptionalForUser.isPresent()){
-                return new ResponseEntity<>(songOptionalForUser.get(), HttpStatus.OK);
+                return new ResponseEntity<>(SongDTO.of(songOptionalForUser.get()), HttpStatus.OK);
             }
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
@@ -64,7 +66,7 @@ public class SongController {
     @GetMapping("/random")
     public ResponseEntity<?> getRandomSongs(){
         List<Song> songs = songService.getRandomSongs();
-        return new ResponseEntity<>(songs, HttpStatus.OK);
+        return new ResponseEntity<>(songs.stream().map(SongDTO::new).toList(), HttpStatus.OK);
     }
 
     @PostMapping("/create")
@@ -82,6 +84,7 @@ public class SongController {
                     song,
                     userDetails.getId()
                     ));
+            return ResponseEntity.ok("song created successfully");
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }
@@ -103,6 +106,7 @@ public class SongController {
                             name,
                             image
                     )));
+            return ResponseEntity.ok("song edited successfully");
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }
@@ -117,7 +121,7 @@ public class SongController {
 
                 new Thread(() -> songService.deleteSong(songOptional.get())).start();
 
-                return new ResponseEntity<>(userDetails.getAlbums(), HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.NO_CONTENT);
             }
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);

@@ -1,5 +1,6 @@
 package com.musicUpload.controllers;
 
+import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.models.Album;
 import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.SongService;
@@ -36,7 +37,7 @@ public class AlbumController {
     public ResponseEntity<?> getAlbums(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            return new ResponseEntity<>(userDetails.getAlbums(), HttpStatus.OK);
+            return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.OK);
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }
@@ -48,12 +49,12 @@ public class AlbumController {
             Optional<Album> albumOptional = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny();
 
             if(albumOptional.isPresent()){
-                return new ResponseEntity<>(albumOptional.get(), HttpStatus.OK);
+                return new ResponseEntity<>(AlbumDTO.of(albumOptional.get()), HttpStatus.OK);
             }
             else{
                 Optional<Album> albumOptional2 = albumService.findById(id);
                 if(albumOptional2.isPresent() && !albumOptional2.get().getProtectionType().getName().equals("PRIVATE")){
-                    return new ResponseEntity<>(albumOptional2.get(), HttpStatus.OK);
+                    return new ResponseEntity<>(AlbumDTO.of(albumOptional2.get()), HttpStatus.OK);
                 }
                 return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
             }
@@ -67,7 +68,7 @@ public class AlbumController {
                                          @RequestParam(name = "image", required = false) MultipartFile image){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-
+            //TODO: create a function for this in the AlbumService
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }
@@ -80,7 +81,7 @@ public class AlbumController {
                                         @RequestParam(name = "image", required = false) MultipartFile image){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-
+            //TODO: create a function for this in the AlbumService
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }
@@ -97,7 +98,7 @@ public class AlbumController {
 
                 new Thread(() -> albumService.deleteAlbum(albumOptional.get())).start();
 
-                return new ResponseEntity<>(userDetails.getAlbums(), HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.NO_CONTENT);
             }
             else{
                 return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);

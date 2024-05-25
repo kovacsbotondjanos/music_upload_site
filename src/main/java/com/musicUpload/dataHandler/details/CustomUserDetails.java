@@ -1,5 +1,6 @@
 package com.musicUpload.dataHandler.details;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.musicUpload.dataHandler.models.Album;
 import com.musicUpload.dataHandler.models.Song;
 import lombok.Data;
@@ -13,10 +14,13 @@ import java.util.List;
 public class CustomUserDetails implements UserDetails {
     private final Long id;
     private final String username;
+    @JsonIgnore
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
     private final String profilePicture;
+    @JsonIgnore
     private List<Song> songs;
+    @JsonIgnore
     private List<Album> albums;
     private boolean accountNonLocked;
     private boolean accountNonExpired;

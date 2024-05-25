@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
 @CrossOrigin
@@ -35,6 +37,6 @@ public class UserController {
     @PostMapping("/add")
     public ResponseEntity<?> createUser(@ModelAttribute User user){
         userService.registerUser(user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return new ResponseEntity<>("successfully created user", HttpStatus.CREATED);
     }
 }

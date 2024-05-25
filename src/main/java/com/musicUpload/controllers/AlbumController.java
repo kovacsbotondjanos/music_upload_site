@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -68,7 +69,10 @@ public class AlbumController {
                                          @RequestParam(name = "image", required = false) MultipartFile image){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            //TODO: create a function for this in the AlbumService
+            albumService.saveAlbum(protectionType,
+                    name,
+                    image);
+            return ResponseEntity.ok("successfully created album");
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }
@@ -76,12 +80,22 @@ public class AlbumController {
     @PatchMapping("/{id}")
     public ResponseEntity<?> patchAlbum(@PathVariable Long id,
                                         @RequestParam(name = "protection_type", required = false) String protectionType,
-                                        @RequestParam(name = "song_id", required = false) Long songId,
+                                        @RequestParam(name = "song_id", required = false) List<Long> songId,
                                         @RequestParam(name = "name", required = false) String name,
                                         @RequestParam(name = "image", required = false) MultipartFile image){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            //TODO: create a function for this in the AlbumService
+            Optional<Album> albumOptional = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny();
+            albumOptional.ifPresent(album ->
+                    albumService.patchAlbum(
+                            album,
+                            protectionType,
+                            songId,
+                            name,
+                            image
+                    )
+            );
+            return ResponseEntity.ok("successfully edited album");
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
     }

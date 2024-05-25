@@ -109,7 +109,7 @@ public class SongService {
         return songRepository.findByNameHashed(name);
     }
 
-    public Song updateSong(Song song,
+    public void updateSong(Song song,
                            String protectionType,
                            String name,
                            MultipartFile image){
@@ -137,6 +137,7 @@ public class SongService {
                 throw new IllegalArgumentException();
             }
         }
-        return song;
+
+        songRepository.save(song);
     }
 }

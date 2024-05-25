@@ -98,4 +98,11 @@ public class UserService implements UserDetailsService {
                 .map(UserDTO::new)
                 .orElseThrow(IllegalArgumentException::new);
     }
+
+    public List<UserDTO> getUsers(User user){
+        if(user.getAuthority().getName().equals("ADMIN")){
+            return getUsers().stream().map(UserDTO::new).toList();
+        }
+        return List.of();
+    }
 }

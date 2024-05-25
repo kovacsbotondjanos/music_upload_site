@@ -100,12 +100,12 @@ public class SongController {
             Optional<Song> songOptional = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
             //TODO: make these parallel too
             songOptional.ifPresent(song ->
-                    userDetails.addSong(songService.updateSong(
+                    songService.updateSong(
                             song,
                             protectionType,
                             name,
                             image
-                    )));
+                    ));
             return ResponseEntity.ok("song edited successfully");
         }
         return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);

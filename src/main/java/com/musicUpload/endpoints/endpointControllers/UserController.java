@@ -1,21 +1,22 @@
 package com.musicUpload.endpoints.endpointControllers;
 
-import com.musicUpload.databaseHandler.models.users.User;
-import com.musicUpload.databaseHandler.models.users.UserService;
+import com.musicUpload.databaseHandler.details.CustomUserDetails;
+import com.musicUpload.databaseHandler.models.User;
+import com.musicUpload.databaseHandler.services.UserService;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/users")
+@CrossOrigin
 public class UserController {
     @Autowired
     private final ImageFactory imageFactory;
@@ -28,9 +29,17 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping
+    public ResponseEntity<?> getCurrUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            return new ResponseEntity<>(userDetails, HttpStatus.OK);
+        }
+        return new ResponseEntity<>("unauthenticated", HttpStatus.UNAUTHORIZED);
+    }
+
     @PostMapping("/add")
     public ResponseEntity<?> createUser(@ModelAttribute User user){
-
         if(user.getEmail() == null || user.getPassword() == null || user.getUsername() == null){
             return new ResponseEntity<>("Unable to create user, please provide data for all fields", HttpStatus.NOT_ACCEPTABLE);
         }

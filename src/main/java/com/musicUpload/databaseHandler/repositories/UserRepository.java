@@ -1,5 +1,6 @@
-package com.musicUpload.databaseHandler.models.users;
+package com.musicUpload.databaseHandler.repositories;
 
+import com.musicUpload.databaseHandler.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,5 +1,7 @@
-package com.musicUpload.databaseHandler.models.songs;
+package com.musicUpload.databaseHandler.services;
 
+import com.musicUpload.databaseHandler.models.Song;
+import com.musicUpload.databaseHandler.repositories.SongRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

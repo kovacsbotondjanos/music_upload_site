@@ -1,9 +1,6 @@
-package com.musicUpload.databaseHandler.models.songs;
+package com.musicUpload.databaseHandler.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.musicUpload.databaseHandler.models.albums.Album;
-import com.musicUpload.databaseHandler.models.protectionType.ProtectionType;
-import com.musicUpload.databaseHandler.models.users.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -14,16 +11,15 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "SONGS")
-@ToString(exclude = {"user", "albums"})
-public class Song {
+@Table(name = "ALBUMS")
+@ToString(exclude = {"user", "songs"})
+public class Album {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String image;
     private String name;
-    private String nameHashed;
 
     @ManyToOne
     @JoinColumn(name = "protection_id")
@@ -33,9 +29,14 @@ public class Song {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany(mappedBy = "songs")
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "song_album",
+            joinColumns = @JoinColumn(name = "album_id"),
+            inverseJoinColumns = @JoinColumn(name = "song_id")
+    )
     @JsonIgnore
-    private List<Album> albums = new ArrayList<>();
+    private List<Song> songs = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")

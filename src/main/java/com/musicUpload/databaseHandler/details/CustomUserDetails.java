@@ -1,7 +1,7 @@
-package com.musicUpload.databaseHandler.models.users;
+package com.musicUpload.databaseHandler.details;
 
-import com.musicUpload.databaseHandler.models.albums.Album;
-import com.musicUpload.databaseHandler.models.songs.Song;
+import com.musicUpload.databaseHandler.models.Album;
+import com.musicUpload.databaseHandler.models.Song;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

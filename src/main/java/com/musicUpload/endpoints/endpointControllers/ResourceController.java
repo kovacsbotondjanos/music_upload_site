@@ -1,15 +1,16 @@
 package com.musicUpload.endpoints.endpointControllers;
 
 
-import com.musicUpload.databaseHandler.models.songs.Song;
-import com.musicUpload.databaseHandler.models.songs.SongService;
-import com.musicUpload.databaseHandler.models.users.CustomUserDetails;
+import com.musicUpload.databaseHandler.models.Song;
+import com.musicUpload.databaseHandler.services.SongService;
+import com.musicUpload.databaseHandler.details.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,7 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin
 public class ResourceController {
     @Autowired
     private final SongService songService;

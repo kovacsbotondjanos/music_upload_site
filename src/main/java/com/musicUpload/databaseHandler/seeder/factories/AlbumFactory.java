@@ -1,10 +1,10 @@
 package com.musicUpload.databaseHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
-import com.musicUpload.databaseHandler.models.albums.Album;
-import com.musicUpload.databaseHandler.models.protectionType.ProtectionType;
-import com.musicUpload.databaseHandler.models.songs.Song;
-import com.musicUpload.databaseHandler.models.users.User;
+import com.musicUpload.databaseHandler.models.Album;
+import com.musicUpload.databaseHandler.models.ProtectionType;
+import com.musicUpload.databaseHandler.models.Song;
+import com.musicUpload.databaseHandler.models.User;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

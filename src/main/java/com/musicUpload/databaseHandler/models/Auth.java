@@ -1,9 +1,7 @@
-package com.musicUpload.databaseHandler.models.auth;
+package com.musicUpload.databaseHandler.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.google.gson.annotations.Expose;
-import com.musicUpload.databaseHandler.models.users.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;

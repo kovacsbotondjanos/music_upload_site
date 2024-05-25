@@ -1,7 +1,8 @@
-package com.musicUpload.databaseHandler.models.users;
+package com.musicUpload.databaseHandler.services;
 
-import com.musicUpload.databaseHandler.models.albums.AlbumService;
-import com.musicUpload.databaseHandler.models.songs.SongService;
+import com.musicUpload.databaseHandler.details.CustomUserDetails;
+import com.musicUpload.databaseHandler.models.User;
+import com.musicUpload.databaseHandler.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,10 +1,10 @@
 package com.musicUpload.endpoints.endpointControllers;
 
-import com.musicUpload.databaseHandler.models.albums.Album;
-import com.musicUpload.databaseHandler.models.albums.AlbumService;
-import com.musicUpload.databaseHandler.models.songs.SongService;
-import com.musicUpload.databaseHandler.models.users.CustomUserDetails;
-import com.musicUpload.databaseHandler.models.users.UserService;
+import com.musicUpload.databaseHandler.models.Album;
+import com.musicUpload.databaseHandler.services.AlbumService;
+import com.musicUpload.databaseHandler.services.SongService;
+import com.musicUpload.databaseHandler.details.CustomUserDetails;
+import com.musicUpload.databaseHandler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +17,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/albums")
+@CrossOrigin
 public class AlbumController {
     @Autowired
     private final SongService songService;

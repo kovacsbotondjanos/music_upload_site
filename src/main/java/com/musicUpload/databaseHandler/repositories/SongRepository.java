@@ -1,5 +1,6 @@
-package com.musicUpload.databaseHandler.models.songs;
+package com.musicUpload.databaseHandler.repositories;
 
+import com.musicUpload.databaseHandler.models.Song;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

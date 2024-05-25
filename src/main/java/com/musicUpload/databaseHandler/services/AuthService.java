@@ -1,6 +1,7 @@
-package com.musicUpload.databaseHandler.models.auth;
+package com.musicUpload.databaseHandler.services;
 
-import lombok.ToString;
+import com.musicUpload.databaseHandler.models.Auth;
+import com.musicUpload.databaseHandler.repositories.AuthRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

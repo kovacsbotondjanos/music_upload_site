@@ -1,15 +1,15 @@
 package com.musicUpload.databaseHandler.seeder;
 
-import com.musicUpload.databaseHandler.models.albums.Album;
-import com.musicUpload.databaseHandler.models.albums.AlbumService;
-import com.musicUpload.databaseHandler.models.auth.Auth;
-import com.musicUpload.databaseHandler.models.auth.AuthService;
-import com.musicUpload.databaseHandler.models.protectionType.ProtectionType;
-import com.musicUpload.databaseHandler.models.protectionType.ProtectionTypeService;
-import com.musicUpload.databaseHandler.models.songs.Song;
-import com.musicUpload.databaseHandler.models.songs.SongService;
-import com.musicUpload.databaseHandler.models.users.User;
-import com.musicUpload.databaseHandler.models.users.UserService;
+import com.musicUpload.databaseHandler.models.Album;
+import com.musicUpload.databaseHandler.services.AlbumService;
+import com.musicUpload.databaseHandler.models.Auth;
+import com.musicUpload.databaseHandler.services.AuthService;
+import com.musicUpload.databaseHandler.models.ProtectionType;
+import com.musicUpload.databaseHandler.services.ProtectionTypeService;
+import com.musicUpload.databaseHandler.models.Song;
+import com.musicUpload.databaseHandler.services.SongService;
+import com.musicUpload.databaseHandler.models.User;
+import com.musicUpload.databaseHandler.services.UserService;
 import com.musicUpload.databaseHandler.seeder.factories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

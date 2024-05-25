@@ -3,9 +3,7 @@ package com.musicUpload.databaseHandler.seeder.factories;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.musicUpload.databaseHandler.models.auth.Auth;
-import com.musicUpload.databaseHandler.models.auth.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.musicUpload.databaseHandler.models.Auth;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;

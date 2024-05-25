@@ -1,8 +1,8 @@
 package com.musicUpload.endpoints;
 
-import com.musicUpload.databaseHandler.models.songs.Song;
-import com.musicUpload.databaseHandler.models.songs.SongService;
-import com.musicUpload.databaseHandler.models.users.CustomUserDetails;
+import com.musicUpload.databaseHandler.models.Song;
+import com.musicUpload.databaseHandler.services.SongService;
+import com.musicUpload.databaseHandler.details.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -51,5 +51,10 @@ public class UserInterfaceController {
             return "user";
         }
         return "unauthenticated";
+    }
+
+    @GetMapping("/login")
+    public String auth(){
+        return "login";
     }
 }

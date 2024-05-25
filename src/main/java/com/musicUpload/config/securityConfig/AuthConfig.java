@@ -29,7 +29,6 @@ public class AuthConfig  {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-//                .csrf(AbstractHttpConfigurer::disable)
                 .cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests(registry -> {
@@ -38,7 +37,6 @@ public class AuthConfig  {
                     registry.anyRequest().authenticated();
                 })
                 .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer
-//                        .loginPage("/login")
                         .loginProcessingUrl("/login")
                         .successHandler(new AuthSuccessHandler())
                         .failureHandler(new AuthFailureHandler())

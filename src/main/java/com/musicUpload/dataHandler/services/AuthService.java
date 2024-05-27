@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -22,5 +23,9 @@ public class AuthService {
 
     public List<Auth> getAllPossibleAuth(){
         return authRepository.findAll();
+    }
+
+    public Optional<Auth> getByName(String name){
+        return authRepository.findByName(name);
     }
 }

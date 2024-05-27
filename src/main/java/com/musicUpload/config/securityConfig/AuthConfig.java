@@ -33,7 +33,7 @@ public class AuthConfig  {
                 .csrf().disable()
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/public/**").permitAll();
-                    registry.requestMatchers("/register", "/album/**", "/home", "/images/**", "/music/**", "/users", "/songs/**", "/login").permitAll();
+                    registry.requestMatchers("/users/add", "/album/**", "/home", "/images/**", "/music/**", "/users", "/songs/**", "/login").permitAll();
                     registry.anyRequest().authenticated();
                 })
                 .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer

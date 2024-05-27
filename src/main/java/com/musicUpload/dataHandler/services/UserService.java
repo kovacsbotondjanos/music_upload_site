@@ -2,8 +2,10 @@ package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.models.Auth;
 import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +25,8 @@ import java.util.regex.Pattern;
 public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AuthService authService;
     @Autowired
     private SongService songService;
     @Autowired
@@ -54,32 +58,41 @@ public class UserService implements UserDetailsService {
     public User registerUser(User user) {
 
         if(user.getEmail() == null || user.getPassword() == null || user.getUsername() == null){
-            throw new IllegalArgumentException("Please fill out all the fields");
+            throw new EmptyFieldException("Please fill out all the fields");
         }
 
         if(user.getPassword().length() < 8){
-            throw new IllegalArgumentException("Password is in wrong format");
+            throw new PasswordInWrongFormatException("Password is in wrong format");
         }
 
         if(user.getUsername().isEmpty()){
-            throw new IllegalArgumentException("Please fill the email field with valid data");
+            throw new NameInWrongFormatException("Please fill the name field with valid data");
         }
 
         Pattern p = Pattern.compile(ePattern);
         Matcher m = p.matcher(user.getEmail());
         if(!m.matches()){
-            throw new IllegalArgumentException("Please fill the email field with valid data");
+            throw new EmailInWrongFormatException("Please fill the email field with valid data");
         }
 
         String image = imageFactory.getRandomImage();
         user.setProfilePicture(image);
 
+        //TODO: This will have to change in the future, bc it can be unsafe
+        if(user.getAuthority() == null){
+            Auth auth = authService.getByName("USER")
+                            .orElseThrow(IllegalArgumentException::new);
+            user.setAuthority(auth);
+        }
+
         if(userRepository.findByUsername(user.getUsername()).isPresent()){
-            throw new IllegalArgumentException("Username already exists");
+            throw new NameInWrongFormatException("Username already exists");
         }
+
         if(userRepository.findByEmail(user.getEmail()).isPresent()){
-            throw new IllegalArgumentException("Email already exists");
+            throw new EmailInWrongFormatException("Email already exists");
         }
+
         user.setPassword(encoder.encode(user.getPassword()));
 
         return userRepository.save(user);
@@ -96,13 +109,6 @@ public class UserService implements UserDetailsService {
     public UserDTO findUserById(Long id){
         return userRepository.findById(id)
                 .map(UserDTO::new)
-                .orElseThrow(IllegalArgumentException::new);
-    }
-
-    public List<UserDTO> getUsers(User user){
-        if(user.getAuthority().getName().equals("ADMIN")){
-            return getUsers().stream().map(UserDTO::new).toList();
-        }
-        return List.of();
+                .orElseThrow(UserNotFoundException::new);
     }
 }

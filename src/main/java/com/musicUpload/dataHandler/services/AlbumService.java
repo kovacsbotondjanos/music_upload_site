@@ -6,11 +6,14 @@ import com.musicUpload.dataHandler.models.Album;
 import com.musicUpload.dataHandler.models.ProtectionType;
 import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
+import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.FileIsInWrongFormatException;
 import com.musicUpload.exceptions.ImageCannotBeSavedException;
 import com.musicUpload.exceptions.UnauthenticatedException;
+import com.musicUpload.exceptions.UserNotFoundException;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,25 +28,30 @@ import java.util.UUID;
 @Service
 public class AlbumService {
     private final AlbumRepository albumRepository;
+    private final UserRepository userRepository;
     private final ProtectionTypeService protectionTypeService;
     private final SongService songService;
     private final ImageFactory imageFactory;
 
     @Autowired
-    public AlbumService(AlbumRepository albumRepository,
+    public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
                         ProtectionTypeService protectionTypeService,
                         SongService songService,
                         ImageFactory imageFactory) {
         this.albumRepository = albumRepository;
+        this.userRepository = userRepository;
         this.protectionTypeService = protectionTypeService;
         this.songService = songService;
         this.imageFactory = imageFactory;
     }
 
-    public Album saveAlbum(User user,
-                              String protectionType,
-                              String name,
-                              MultipartFile image){
+    public void saveAlbum(CustomUserDetails userDetails,
+                           String protectionType,
+                           String name,
+                           MultipartFile image){
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
 
         if (protectionType == null || name == null) {
             throw new IllegalArgumentException();
@@ -51,9 +59,13 @@ public class AlbumService {
 
         Album album = new Album();
 
-        Optional<ProtectionType> protectionOpt = protectionTypeService.getProtectionTypeByName(protectionType);
-        album.setProtectionType(protectionOpt
-                .orElseThrow(IllegalArgumentException::new));
+        ProtectionType protection = protectionTypeService.getProtectionTypeByName(protectionType)
+                .orElseThrow(IllegalArgumentException::new);
+
+        album.setProtectionType(protection);
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(UserNotFoundException::new);
 
         album.setUser(user);
 
@@ -74,7 +86,8 @@ public class AlbumService {
             }
         }
 
-        return albumRepository.save(album);
+        Album a = albumRepository.save(album);
+        userDetails.getAlbums().add(a);
     }
 
     public Album saveAlbum(Album album){

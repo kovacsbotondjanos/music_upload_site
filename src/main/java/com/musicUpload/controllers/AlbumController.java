@@ -50,17 +50,11 @@ public class AlbumController {
                                               @RequestParam(name = "protection_type") String protectionType,
                                               @RequestParam(name = "name") String name,
                                               @RequestParam(name = "image", required = false) MultipartFile image){
-        //TODO: make this class slimmer, remove buisness logic from here
-        if(userDetails == null){
-            throw new UnauthenticatedException();
-        }
-        Album a = albumService.saveAlbum(
-                    userService.findById(userDetails.getId())
-                            .orElseThrow(UserNotFoundException::new),
-                    protectionType,
-                    name,
-                    image);
-        userDetails.getAlbums().add(a);
+        albumService.saveAlbum(
+                     userDetails,
+                     protectionType,
+                     name,
+                     image);
         return new ResponseEntity<>("successfully created", HttpStatus.CREATED);
     }
 

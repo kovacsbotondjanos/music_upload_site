@@ -6,6 +6,8 @@ import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.services.UserService;
+import com.musicUpload.exceptions.UnauthenticatedException;
+import com.musicUpload.exceptions.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,11 +50,17 @@ public class AlbumController {
                                               @RequestParam(name = "protection_type") String protectionType,
                                               @RequestParam(name = "name") String name,
                                               @RequestParam(name = "image", required = false) MultipartFile image){
-        albumService.saveAlbum(
-                    userDetails,
+        //TODO: make this class slimmer, remove buisness logic from here
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+        Album a = albumService.saveAlbum(
+                    userService.findById(userDetails.getId())
+                            .orElseThrow(UserNotFoundException::new),
                     protectionType,
                     name,
                     image);
+        userDetails.getAlbums().add(a);
         return new ResponseEntity<>("successfully created", HttpStatus.CREATED);
     }
 
@@ -63,24 +71,25 @@ public class AlbumController {
                                              @RequestParam(name = "song_id", required = false) List<Long> songId,
                                              @RequestParam(name = "name", required = false) String name,
                                              @RequestParam(name = "image", required = false) MultipartFile image){
-            albumService.patchAlbum(
-                    userDetails,
-                    id,
-                    protectionType,
-                    songId,
-                    name,
-                    image
-            );
-            return ResponseEntity.ok("successfully edited album");
+        //TODO: fix the issue and make this parallel too
+        albumService.patchAlbum(
+                userDetails,
+                id,
+                protectionType,
+                songId,
+                name,
+                image
+        );
+        return ResponseEntity.ok("successfully edited album");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                                          @PathVariable Long id){
-            new Thread(() -> {
-                Album album = albumService.deleteAlbum(userDetails, id);
-                userDetails.getAlbums().remove(album);
-            }).start();
-            return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.NO_CONTENT);
+        new Thread(() -> {
+            Album album = albumService.deleteAlbum(userDetails, id);
+            userDetails.getAlbums().remove(album);
+        }).start();
+        return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.NO_CONTENT);
     }
 }

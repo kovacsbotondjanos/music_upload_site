@@ -94,7 +94,6 @@ public class UserService implements UserDetailsService {
         }
 
         user.setPassword(encoder.encode(user.getPassword()));
-        System.out.println(user);
         return userRepository.save(user);
     }
 
@@ -106,13 +105,16 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public UserDTO findUserById(CustomUserDetails userDetails){
+    public UserDTO findById(CustomUserDetails userDetails){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
 
-        return userRepository.findById(userDetails.getId())
-                .map(UserDTO::new)
+        return findById(userDetails.getId()).map(UserDTO::new)
                 .orElseThrow(UserNotFoundException::new);
+    }
+
+    public Optional<User> findById(Long id){
+        return userRepository.findById(id);
     }
 }

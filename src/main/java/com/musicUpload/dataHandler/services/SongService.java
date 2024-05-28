@@ -7,6 +7,7 @@ import com.musicUpload.dataHandler.models.Song;
 import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.exceptions.FileIsInWrongFormatException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
@@ -71,7 +72,7 @@ public class SongService {
         if(image != null && !image.isEmpty()){
             try{
                 if(!Objects.requireNonNull(image.getContentType()).contains("image")){
-                    throw new IllegalArgumentException();
+                    throw new FileIsInWrongFormatException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".jpg";
                 image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
@@ -79,9 +80,7 @@ public class SongService {
                 song.setImage(hashedFileName);
             }
             catch (IOException ioException){
-                //TODO: create a custom exception here
-                System.out.println(ioException);
-                throw new IllegalArgumentException();
+                throw new FileIsInWrongFormatException();
             }
         }
 

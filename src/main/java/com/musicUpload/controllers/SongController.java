@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/songs")
+@RequestMapping("api/v1/songs")
 @CrossOrigin
 public class SongController {
     private final SongService songService;

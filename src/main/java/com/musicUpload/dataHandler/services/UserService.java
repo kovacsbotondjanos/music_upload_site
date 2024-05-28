@@ -2,7 +2,6 @@ package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.Album;
 import com.musicUpload.dataHandler.models.Auth;
 import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -95,7 +94,7 @@ public class UserService implements UserDetailsService {
         }
 
         user.setPassword(encoder.encode(user.getPassword()));
-
+        System.out.println(user);
         return userRepository.save(user);
     }
 
@@ -107,8 +106,12 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public UserDTO findUserById(Long id){
-        return userRepository.findById(id)
+    public UserDTO findUserById(CustomUserDetails userDetails){
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+
+        return userRepository.findById(userDetails.getId())
                 .map(UserDTO::new)
                 .orElseThrow(UserNotFoundException::new);
     }

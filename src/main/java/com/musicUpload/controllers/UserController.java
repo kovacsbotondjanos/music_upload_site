@@ -8,11 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("api/v1/users")
 @CrossOrigin
 public class UserController {
     private final UserService userService;
@@ -23,17 +24,12 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getCurrUser(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            UserDTO user = userService.findUserById(userDetails.getId());
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        }
-        return new ResponseEntity<>("unauthenticated", HttpStatus.UNAUTHORIZED);
+    public UserDTO getCurrUser(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return userService.findUserById(userDetails);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> createUser(@ModelAttribute User user){
+    public ResponseEntity<String> createUser(@ModelAttribute User user){
         userService.registerUser(user);
         return new ResponseEntity<>("successfully created user", HttpStatus.CREATED);
     }

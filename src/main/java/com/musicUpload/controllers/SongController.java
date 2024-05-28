@@ -1,6 +1,5 @@
 package com.musicUpload.controllers;
 
-import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.models.Song;
@@ -9,15 +8,12 @@ import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/songs")
@@ -37,93 +33,63 @@ public class SongController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getSongs(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            return new ResponseEntity<>(userDetails.getSongs().stream().map(SongDTO::new).toList(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+    public List<SongDTO> getSongs(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return songService.getSongs(userDetails);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getSongById(@PathVariable Long id){
-        Optional<Song> songOptional = songService.findById(id);
-        if(songOptional.isPresent() && !songOptional.get().getProtectionType().getName().equals("PRIVATE")){
-            return new ResponseEntity<>(SongDTO.of(songOptional.get()), HttpStatus.OK);
-        }
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            Optional<Song> songOptionalForUser = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
-
-            if(songOptionalForUser.isPresent()){
-                return new ResponseEntity<>(SongDTO.of(songOptionalForUser.get()), HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+    public SongDTO getSongById(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                         @PathVariable Long id){
+        return songService.findById(userDetails, id);
     }
 
     @GetMapping("/random")
-    public ResponseEntity<?> getRandomSongs(){
-        List<Song> songs = songService.getRandomSongs();
-        return new ResponseEntity<>(songs.stream().map(SongDTO::new).toList(), HttpStatus.OK);
+    public List<SongDTO> getRandomSongs(){
+        return songService.getRandomSongs();
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createSong(@RequestParam(name = "protection_type") String protectionType,
+    public ResponseEntity<String> createSong(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                        @RequestParam(name = "protection_type") String protectionType,
                                         @RequestParam(name = "name") String name,
                                         @RequestParam(name = "image", required = false) MultipartFile image,
                                         @RequestParam(name = "song") MultipartFile song){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            //TODO: make these parallel too
-            userDetails.addSong(songService.saveSong(
-                    protectionType,
-                    name,
-                    image,
-                    song,
-                    userDetails.getId()
-                    ));
-            return ResponseEntity.ok("song created successfully");
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+        //TODO: make these parallel too
+        new Thread(() -> userDetails.addSong(songService.saveSong(
+            userDetails,
+            protectionType,
+            name,
+            image,
+            song,
+            userDetails.getId()
+        ))).start();
+        return ResponseEntity.ok("song created successfully");
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchSong(@PathVariable Long id,
+    public ResponseEntity<String> patchSong(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                       @PathVariable Long id,
                                        @RequestParam(name = "protection_type", required = false) String protectionType,
                                        @RequestParam(name = "name", required = false) String name,
                                        @RequestParam(name = "image", required = false) MultipartFile image){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-
-            Optional<Song> songOptional = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
-            //TODO: make these parallel too
-            songOptional.ifPresent(song ->
-                    songService.updateSong(
-                            song,
-                            protectionType,
-                            name,
-                            image
-                    ));
-            return ResponseEntity.ok("song edited successfully");
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+        new Thread(() -> songService.updateSong(
+            userDetails,
+            id,
+            protectionType,
+            name,
+            image
+        )).start();
+        return ResponseEntity.ok("song edited successfully");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteSong(@PathVariable Long id){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            Optional<Song> songOptional = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
-            if(songOptional.isPresent()){
-                userDetails.getSongs().remove(songOptional.get());
+    public ResponseEntity<String> deleteSong(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                             @PathVariable Long id){
 
-                new Thread(() -> songService.deleteSong(songOptional.get())).start();
-
-                return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.NO_CONTENT);
-            }
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+        new Thread(() -> {
+            Song song = songService.deleteSong(userDetails, id);
+            userDetails.getSongs().remove(song);
+        }).start();
+        return ResponseEntity.ok("song deleted successfully");
     }
 }

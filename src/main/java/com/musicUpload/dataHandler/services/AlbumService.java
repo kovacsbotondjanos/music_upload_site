@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -59,7 +60,7 @@ public class AlbumService {
                         throw new FileIsInWrongFormatException();
                     }
                     String hashedFileName = UUID.randomUUID() + ".jpg";
-                    image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
+                    image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
                     imageFactory.deleteFile(album.getImage());
                     album.setImage(hashedFileName);
                 }
@@ -128,7 +129,7 @@ public class AlbumService {
                         throw new FileIsInWrongFormatException();
                     }
                     String hashedFileName = UUID.randomUUID() + ".jpg";
-                    image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
+                    image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
                     imageFactory.deleteFile(album.getImage());
                     album.setImage(hashedFileName);
                 }

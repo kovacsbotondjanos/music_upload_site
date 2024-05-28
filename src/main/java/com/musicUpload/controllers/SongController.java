@@ -48,21 +48,20 @@ public class SongController {
         return songService.getRandomSongs();
     }
 
-    @PostMapping("/create")
+    @PostMapping("/add")
     public ResponseEntity<String> createSong(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                        @RequestParam(name = "protection_type") String protectionType,
-                                        @RequestParam(name = "name") String name,
-                                        @RequestParam(name = "image", required = false) MultipartFile image,
-                                        @RequestParam(name = "song") MultipartFile song){
+                                             @RequestParam(name = "protection_type") String protectionType,
+                                             @RequestParam(name = "name") String name,
+                                             @RequestParam(name = "image", required = false) MultipartFile image,
+                                             @RequestParam(name = "song") MultipartFile song){
         //TODO: make these parallel too
-        new Thread(() -> userDetails.addSong(songService.saveSong(
+        userDetails.addSong(songService.saveSong(
             userDetails,
             protectionType,
             name,
             image,
-            song,
-            userDetails.getId()
-        ))).start();
+            song
+        ));
         return ResponseEntity.ok("song created successfully");
     }
 
@@ -72,13 +71,13 @@ public class SongController {
                                        @RequestParam(name = "protection_type", required = false) String protectionType,
                                        @RequestParam(name = "name", required = false) String name,
                                        @RequestParam(name = "image", required = false) MultipartFile image){
-        new Thread(() -> songService.updateSong(
+        songService.updateSong(
             userDetails,
             id,
             protectionType,
             name,
             image
-        )).start();
+        );
         return ResponseEntity.ok("song edited successfully");
     }
 

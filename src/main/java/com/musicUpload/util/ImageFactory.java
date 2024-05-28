@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -15,10 +16,10 @@ import java.util.UUID;
 @Data
 @Service
 public class ImageFactory {
-    private final String dirName = System.getProperty("user.dir") + "//images";
+    private final String dirName = System.getProperty("user.dir") + FileSystems.getDefault().getSeparator() + "images";
 
     public void deleteFile(String fileName){
-        File f = new File(dirName + "//" + fileName);
+        File f = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
         if(f.delete()){
             System.out.println(f.getName() + " deleted");
         }
@@ -43,7 +44,7 @@ public class ImageFactory {
         }
 
         String fileName = UUID.randomUUID() + ".jpg";
-        File outputFile = new File(dirName + "//" + fileName);
+        File outputFile = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
         ImageIO.write(bufferedImage, "jpg", outputFile);
         return fileName;
     }

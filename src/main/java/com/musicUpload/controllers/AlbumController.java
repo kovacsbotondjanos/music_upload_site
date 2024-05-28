@@ -43,11 +43,11 @@ public class AlbumController {
         return albumService.findById(id, userDetails);
     }
 
-    @PostMapping("/create")
+    @PostMapping("/add")
     public ResponseEntity<String> createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                         @RequestParam(name = "protection_type") String protectionType,
-                                         @RequestParam(name = "name") String name,
-                                         @RequestParam(name = "image", required = false) MultipartFile image){
+                                              @RequestParam(name = "protection_type") String protectionType,
+                                              @RequestParam(name = "name") String name,
+                                              @RequestParam(name = "image", required = false) MultipartFile image){
         albumService.saveAlbum(
                     userDetails,
                     protectionType,

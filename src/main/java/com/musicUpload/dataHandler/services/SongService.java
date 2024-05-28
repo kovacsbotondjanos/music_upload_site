@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,49 +47,51 @@ public class SongService {
                          String protectionType,
                          String name,
                          MultipartFile image,
-                         MultipartFile songFile,
-                         Long userId){
+                         MultipartFile songFile){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
 
-        User user = userRepository.findById(userId)
+        if(name == null || protectionType == null || songFile == null){
+            throw new IllegalArgumentException();
+        }
+
+        User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(IllegalArgumentException::new);
 
         Song song = new Song();
         song.setUser(user);
+
         ProtectionType protection = protectionTypeService.getProtectionTypeByName(protectionType)
                 .orElseThrow(IllegalAccessError::new);
         song.setProtectionType(protection);
 
-        if(name == null){
-            throw new IllegalArgumentException();
-        }
         song.setName(name);
 
-        if(image != null && image.isEmpty()){
+        if(image != null && !image.isEmpty()){
             try{
                 if(!Objects.requireNonNull(image.getContentType()).contains("image")){
                     throw new IllegalArgumentException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
+                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
                 imageFactory.deleteFile(song.getImage());
                 song.setImage(hashedFileName);
             }
             catch (IOException ioException){
                 //TODO: create a custom exception here
+                System.out.println(ioException);
                 throw new IllegalArgumentException();
             }
         }
 
-        if(songFile != null && songFile.isEmpty()) {
+        if(!songFile.isEmpty()) {
             try {
-                if (!Objects.requireNonNull(songFile.getContentType()).contains("image")) {
+                if (!Objects.requireNonNull(songFile.getContentType()).contains("audio")) {
                     throw new IllegalArgumentException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".mp3";
-                songFile.transferTo(new File(musicFactory.getDirName() + "//" + hashedFileName));
+                songFile.transferTo(new File(musicFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
                 musicFactory.deleteFile(song.getNameHashed());
                 song.setNameHashed(hashedFileName);
             } catch (IOException ioException) {
@@ -96,6 +99,7 @@ public class SongService {
                 throw new IllegalArgumentException();
             }
         }
+
         return saveSong(song);
     }
 
@@ -170,7 +174,7 @@ public class SongService {
                     throw new IllegalArgumentException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
+                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
                 imageFactory.deleteFile(song.getImage());
                 song.setImage(hashedFileName);
             }

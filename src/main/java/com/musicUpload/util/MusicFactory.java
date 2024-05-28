@@ -10,6 +10,7 @@ import javax.sound.sampled.AudioSystem;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,7 +20,7 @@ import java.util.UUID;
 @Service
 @Data
 public class MusicFactory {
-    private final String dirName = System.getProperty("user.dir") + "//music";
+    private final String dirName = System.getProperty("user.dir") + FileSystems.getDefault().getSeparator() + "music";
     private final int durationInSeconds = 60;
     private final int sampleRate = 44100;
     private final int numChannels = 2;
@@ -38,7 +39,7 @@ public class MusicFactory {
     }
 
     public void deleteFile(String fileName){
-        File f = new File(dirName + "//" + fileName);
+        File f = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
         if(f.delete()){
             System.out.println(f.getName() + " deleted");
         }
@@ -56,7 +57,7 @@ public class MusicFactory {
             AudioInputStream audioInputStream = new AudioInputStream(bais, format, audioData.length / format.getFrameSize());
 
             String fileName = UUID.randomUUID() + ".mp3";
-            Path outputFile = Paths.get(dirName + "//" + fileName);
+            Path outputFile = Paths.get(dirName + FileSystems.getDefault().getSeparator() + fileName);
 
             AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, outputFile.toFile());
             return fileName;

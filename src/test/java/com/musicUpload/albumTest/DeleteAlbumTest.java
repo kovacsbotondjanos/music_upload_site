@@ -2,7 +2,6 @@ package com.musicUpload.albumTest;
 
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.Album;
-import com.musicUpload.dataHandler.models.Auth;
 import com.musicUpload.dataHandler.models.ProtectionType;
 import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
@@ -89,26 +88,14 @@ public class DeleteAlbumTest {
 
     @Test
     void canDeleteOtherUsersAlbum(){
-        CustomUserDetails userDetails = new CustomUserDetails(1L,
-                "user1",
-                "",
-                List.of(),
-                "",
-                List.of(),
-                List.of(albums.get(0)));
+        userDetails.setAlbums(List.of(albums.get(0)));
         assertThrows(UnauthenticatedException.class,
                 () -> albumService.deleteAlbum(userDetails, 2L));
     }
 
     @Test
     void canDeleteOwnAlbumWithAuth(){
-        CustomUserDetails userDetails = new CustomUserDetails(1L,
-                "user1",
-                "",
-                List.of(),
-                "",
-                List.of(),
-                new ArrayList<>(List.of(albums.get(0))));
+        userDetails.setAlbums(new ArrayList<>(List.of(albums.get(0))));
         Album a = albumService.deleteAlbum(userDetails, 1L);
         assertEquals(albums.get(0), a);
         assertFalse(userDetails.getAlbums().contains(a));

@@ -69,15 +69,6 @@ public class FindUserByIdTest {
     @Test
     void findNonExistingUser(){
         //Given
-        CustomUserDetails userDetails = new CustomUserDetails(
-                1L,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
         given(userRepository.findById(1L))
                 .willReturn(Optional.empty());
         //Then

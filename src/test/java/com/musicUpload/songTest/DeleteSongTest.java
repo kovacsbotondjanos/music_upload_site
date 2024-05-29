@@ -35,6 +35,13 @@ public class DeleteSongTest {
     private SongService songService;
     private List<Song> songs;
     private ProtectionType protectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
+    CustomUserDetails userDetails = new CustomUserDetails(1L,
+            "user1",
+            "",
+            List.of(),
+            "",
+            List.of(),
+            List.of());
 
     @BeforeEach
     void onSetUp(){
@@ -82,26 +89,14 @@ public class DeleteSongTest {
 
     @Test
     void canDeleteOtherUserSongWithAuth(){
-        CustomUserDetails userDetails = new CustomUserDetails(1L,
-                "user1",
-                "",
-                List.of(),
-                "",
-                List.of(songs.get(0)),
-                List.of());
+        userDetails.setSongs(List.of(songs.get(0)));
         assertThrows(UnauthenticatedException.class,
                 () -> songService.deleteSong(userDetails, 2L));
     }
 
     @Test
     void canDeleteOwnSongWithAuth(){
-        CustomUserDetails userDetails = new CustomUserDetails(1L,
-                "user1",
-                "",
-                List.of(),
-                "",
-                new ArrayList<>(List.of(songs.get(0))),
-                List.of());
+        userDetails.setSongs(new ArrayList<>(List.of(songs.get(0))));
         Song s = songService.deleteSong(userDetails, 1L);
         assertEquals(songs.get(0), s);
         assertFalse(userDetails.getSongs().contains(s));

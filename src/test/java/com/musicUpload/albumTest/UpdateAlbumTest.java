@@ -48,6 +48,15 @@ public class UpdateAlbumTest {
             List.of(),
             List.of());
     private User user;
+    private Song song = new Song(1L,
+            "",
+            "foo",
+            "",
+            privateProtectionType,
+            new User(),
+            new ArrayList<>(),
+            new Date(),
+            new Date());
 
     @BeforeEach
     void onSetUp(){
@@ -113,15 +122,7 @@ public class UpdateAlbumTest {
 
     @Test
     void updateAlbumWithPrivateSongNotOwned(){
-        Song song = new Song(1L,
-                "",
-                "foo",
-                "",
-                privateProtectionType,
-                new User(),
-                new ArrayList<>(),
-                new Date(),
-                new Date());
+        song.setProtectionType(privateProtectionType);
         userDetails.setAlbums(List.of(album));
         albumService.patchAlbum(userDetails,
                 1L,
@@ -133,15 +134,7 @@ public class UpdateAlbumTest {
 
     @Test
     void updateAlbumWithPublicSongNotOwned(){
-        Song song = new Song(1L,
-                "",
-                "foo",
-                "",
-                publicProtectionType,
-                new User(),
-                new ArrayList<>(),
-                new Date(),
-                new Date());
+        song.setProtectionType(publicProtectionType);
         userDetails.setAlbums(List.of(album));
         given(songService.findById(1L))
                 .willReturn(Optional.of(song));
@@ -155,15 +148,7 @@ public class UpdateAlbumTest {
 
     @Test
     void updateAlbumWithPrivateSongOwned(){
-        Song song = new Song(1L,
-                "",
-                "foo",
-                "",
-                privateProtectionType,
-                new User(),
-                new ArrayList<>(),
-                new Date(),
-                new Date());
+        song.setProtectionType(privateProtectionType);
         userDetails.setAlbums(List.of(album));
         album.setUser(user);
         user.setAlbums(List.of(album));

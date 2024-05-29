@@ -7,6 +7,7 @@ import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,18 +24,19 @@ import java.util.regex.Pattern;
 
 @Service
 public class UserService implements UserDetailsService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private AuthService authService;
-    @Autowired
-    private SongService songService;
-    @Autowired
-    private AlbumService albumService;
-    @Autowired
-    private ImageFactory imageFactory;
+    private final UserRepository userRepository;
+    private final AuthService authService;
+    private final ImageFactory imageFactory;
+
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
+
+    @Autowired
+    public UserService(UserRepository userRepository, AuthService authService, ImageFactory imageFactory) {
+        this.userRepository = userRepository;
+        this.authService = authService;
+        this.imageFactory = imageFactory;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -75,8 +77,6 @@ public class UserService implements UserDetailsService {
             throw new EmailInWrongFormatException("Please fill the email field with valid data");
         }
 
-        String image = imageFactory.getRandomImage();
-        user.setProfilePicture(image);
 
         //TODO: This will have to change in the future, bc it can be unsafe
         if(user.getAuthority() == null){
@@ -93,7 +93,11 @@ public class UserService implements UserDetailsService {
             throw new EmailInWrongFormatException("Email already exists");
         }
 
+        String image = imageFactory.getRandomImage();
+        user.setProfilePicture(image);
+
         user.setPassword(encoder.encode(user.getPassword()));
+
         return userRepository.save(user);
     }
 
@@ -105,7 +109,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public UserDTO findById(CustomUserDetails userDetails){
+    public UserDTO findCurrUser(CustomUserDetails userDetails){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }

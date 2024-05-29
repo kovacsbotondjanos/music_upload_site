@@ -21,13 +21,11 @@ import java.util.List;
 @RequestMapping("api/v1/albums")
 @CrossOrigin
 public class AlbumController {
-    @Autowired
     private final SongService songService;
-    @Autowired
     private final AlbumService albumService;
-    @Autowired
     private final UserService userService;
 
+    @Autowired
     public AlbumController(SongService songService, AlbumService albumService, UserService userService) {
         this.songService = songService;
         this.albumService = albumService;

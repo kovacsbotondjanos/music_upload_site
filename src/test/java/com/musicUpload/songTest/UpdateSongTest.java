@@ -94,12 +94,11 @@ public class UpdateSongTest {
 
     @Test
     void updateNameTest(){
-        songService.updateSong(
-                userDetails,
-                1L,
-                null,
-                "bar",
-                null);
+        songService.updateSong(userDetails,
+                            1L,
+                            null,
+                            "bar",
+                            null);
 
         assertEquals("bar", song.getName());
     }
@@ -108,12 +107,11 @@ public class UpdateSongTest {
     void updateProtectionTest(){
         given(protectionTypeService.getProtectionTypeByName("PROTECTED"))
                 .willReturn(Optional.of(new ProtectionType(1L, "PROTECTED", null, null)));
-        songService.updateSong(
-                userDetails,
-                1L,
-                "PROTECTED",
-                null,
-                null);
+        songService.updateSong(userDetails,
+                            1L,
+                            "PROTECTED",
+                            null,
+                            null);
 
         assertEquals("PROTECTED", song.getProtectionType().getName());
     }

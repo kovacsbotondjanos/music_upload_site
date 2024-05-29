@@ -1,6 +1,5 @@
 package com.musicUpload.dataHandler.DTOs;
 
-import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.Album;
 import com.musicUpload.dataHandler.models.Song;
 import com.musicUpload.dataHandler.models.User;

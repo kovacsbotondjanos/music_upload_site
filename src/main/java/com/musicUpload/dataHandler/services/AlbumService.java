@@ -13,7 +13,6 @@ import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.exceptions.UserNotFoundException;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -164,7 +163,8 @@ public class AlbumService {
             songIds.forEach(songId -> {
                 songService.findById(songId).ifPresent(song -> {
                     if(!song.getProtectionType().getName().equals("PRIVATE")
-                            || album.getUser().getSongs().equals(song)){
+                            || album.getUser().getSongs().stream()
+                            .anyMatch(s -> s.getId().equals(song.getId()))){
                         album.getSongs().add(song);
                     }
                 });

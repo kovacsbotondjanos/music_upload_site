@@ -41,6 +41,14 @@ public class FindByIdTest {
     private SongService songService;
     private Song song;
     private Long id;
+    private ProtectionType privateprotectionType = new ProtectionType(1L, "PRIVATE", List.of(), List.of());
+    private CustomUserDetails userDetails = new CustomUserDetails(1L,
+                                                                "user1",
+                                                                "pwd",
+                                                                List.of(),
+                                                                "",
+                                                                List.of(),
+                                                                List.of());
 
     @BeforeEach
     void onSetUp(){
@@ -65,12 +73,10 @@ public class FindByIdTest {
     @Test
     void canFindByIdPublicSongNoAuth(){
         //Given
-        given(songRepository.findById(1L))
+        given(songRepository.findById(id))
                 .willReturn(Optional.of(song));
-
         //When
         SongDTO actualSong = songService.findById(null, id);
-
         //Then
         assertEquals("foo", actualSong.getName());
     }
@@ -79,18 +85,9 @@ public class FindByIdTest {
     void canFindByIdNonExistingSongWithAuth(){
         //Given
         song.setId(2L);
-        CustomUserDetails userDetails = new CustomUserDetails(1L,
-                "user1",
-                "pwd",
-                new ArrayList<>(),
-                "",
-                List.of(song),
-                new ArrayList<>());
+        userDetails.setSongs(List.of(song));
         given(songRepository.findById(id))
                 .willReturn(Optional.empty());
-
-        //When
-
         //Then
         assertThrows(UnauthenticatedException.class,
                 () -> songService.findById(userDetails, id));
@@ -99,11 +96,9 @@ public class FindByIdTest {
     @Test
     void canFindByIdPrivateNoAuth(){
         //Given
-        song.setProtectionType(new ProtectionType(1L, "PRIVATE", new ArrayList<>(), new ArrayList<>()));
+        song.setProtectionType(privateprotectionType);
         given(songRepository.findById(id))
                 .willReturn(Optional.of(song));
-        //When
-
         //Then
         assertThrows(UnauthenticatedException.class,
                 () -> songService.findById(null, id));
@@ -112,17 +107,10 @@ public class FindByIdTest {
     @Test
     void canFindByIdPrivateWithUser(){
         //Given
-        song.setProtectionType(new ProtectionType(1L, "PRIVATE", new ArrayList<>(), new ArrayList<>()));
-        CustomUserDetails userDetails = new CustomUserDetails(1L,
-                "user1",
-                "pwd",
-                new ArrayList<>(),
-                "",
-                List.of(song),
-                new ArrayList<>());
+        song.setProtectionType(privateprotectionType);
+        userDetails.setSongs(List.of(song));
         given(songRepository.findById(id))
                 .willReturn(Optional.of(song));
-
         //When
         SongDTO s = songService.findById(userDetails, id);
         //Then

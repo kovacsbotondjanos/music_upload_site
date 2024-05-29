@@ -25,11 +25,11 @@ import java.util.Optional;
 @RestController
 @CrossOrigin
 public class ResourceController {
-    @Autowired
-    private final SongService songService;
     private final String imagePathName = "images\\";
     private final String musicPathName = "music\\";
+    private final SongService songService;
 
+    @Autowired
     public ResourceController(SongService songService) {
         this.songService = songService;
     }

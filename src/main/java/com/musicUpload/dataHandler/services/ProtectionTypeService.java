@@ -10,9 +10,9 @@ import java.util.Optional;
 
 @Service
 public class ProtectionTypeService {
-    @Autowired
     private final ProtectionTypeRepository protectionTypeRepository;
 
+    @Autowired
     public ProtectionTypeService(ProtectionTypeRepository protectionTypeRepository) {
         this.protectionTypeRepository = protectionTypeRepository;
     }

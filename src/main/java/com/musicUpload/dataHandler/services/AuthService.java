@@ -10,9 +10,9 @@ import java.util.Optional;
 
 @Service
 public class AuthService {
-    @Autowired
     private final AuthRepository authRepository;
 
+    @Autowired
     public AuthService(AuthRepository authRepository) {
         this.authRepository = authRepository;
     }

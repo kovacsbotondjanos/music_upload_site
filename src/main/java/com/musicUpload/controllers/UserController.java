@@ -23,7 +23,7 @@ public class UserController {
 
     @GetMapping
     public UserDTO getCurrUser(@AuthenticationPrincipal CustomUserDetails userDetails){
-        return userService.findById(userDetails);
+        return userService.findCurrUser(userDetails);
     }
 
     @PostMapping("/add")

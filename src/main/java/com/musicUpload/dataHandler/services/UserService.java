@@ -2,9 +2,12 @@ package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.models.Auth;
 import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,16 +24,19 @@ import java.util.regex.Pattern;
 
 @Service
 public class UserService implements UserDetailsService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private SongService songService;
-    @Autowired
-    private AlbumService albumService;
-    @Autowired
-    private ImageFactory imageFactory;
+    private final UserRepository userRepository;
+    private final AuthService authService;
+    private final ImageFactory imageFactory;
+
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
+
+    @Autowired
+    public UserService(UserRepository userRepository, AuthService authService, ImageFactory imageFactory) {
+        this.userRepository = userRepository;
+        this.authService = authService;
+        this.imageFactory = imageFactory;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -54,32 +60,42 @@ public class UserService implements UserDetailsService {
     public User registerUser(User user) {
 
         if(user.getEmail() == null || user.getPassword() == null || user.getUsername() == null){
-            throw new IllegalArgumentException("Please fill out all the fields");
+            throw new EmptyFieldException("Please fill out all the fields");
         }
 
         if(user.getPassword().length() < 8){
-            throw new IllegalArgumentException("Password is in wrong format");
+            throw new PasswordInWrongFormatException("Password is in wrong format");
         }
 
         if(user.getUsername().isEmpty()){
-            throw new IllegalArgumentException("Please fill the email field with valid data");
+            throw new NameInWrongFormatException("Please fill the name field with valid data");
         }
 
         Pattern p = Pattern.compile(ePattern);
         Matcher m = p.matcher(user.getEmail());
         if(!m.matches()){
-            throw new IllegalArgumentException("Please fill the email field with valid data");
+            throw new EmailInWrongFormatException("Please fill the email field with valid data");
+        }
+
+
+        //TODO: This will have to change in the future, bc it can be unsafe
+        if(user.getAuthority() == null){
+            Auth auth = authService.getByName("USER")
+                            .orElseThrow(IllegalArgumentException::new);
+            user.setAuthority(auth);
+        }
+
+        if(userRepository.findByUsername(user.getUsername()).isPresent()){
+            throw new NameInWrongFormatException("Username already exists");
+        }
+
+        if(userRepository.findByEmail(user.getEmail()).isPresent()){
+            throw new EmailInWrongFormatException("Email already exists");
         }
 
         String image = imageFactory.getRandomImage();
         user.setProfilePicture(image);
 
-        if(userRepository.findByUsername(user.getUsername()).isPresent()){
-            throw new IllegalArgumentException("Username already exists");
-        }
-        if(userRepository.findByEmail(user.getEmail()).isPresent()){
-            throw new IllegalArgumentException("Email already exists");
-        }
         user.setPassword(encoder.encode(user.getPassword()));
 
         return userRepository.save(user);
@@ -93,16 +109,16 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public UserDTO findUserById(Long id){
-        return userRepository.findById(id)
-                .map(UserDTO::new)
-                .orElseThrow(IllegalArgumentException::new);
+    public UserDTO findCurrUser(CustomUserDetails userDetails){
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+
+        return findById(userDetails.getId()).map(UserDTO::new)
+                .orElseThrow(UserNotFoundException::new);
     }
 
-    public List<UserDTO> getUsers(User user){
-        if(user.getAuthority().getName().equals("ADMIN")){
-            return getUsers().stream().map(UserDTO::new).toList();
-        }
-        return List.of();
+    public Optional<User> findById(Long id){
+        return userRepository.findById(id);
     }
 }

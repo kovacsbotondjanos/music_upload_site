@@ -1,6 +1,7 @@
 package com.musicUpload.config.securityConfig;
 
 import com.musicUpload.dataHandler.services.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,7 +9,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -17,25 +17,34 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-public class AuthConfig  {
+public class AuthConfig {
 
     @Autowired
     private UserService userService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        //TODO: look into this securityFilterChain, bc i am sure it can be done better and more secure than this
         return httpSecurity
                 .cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/public/**").permitAll();
-                    registry.requestMatchers("/register", "/album/**", "/home", "/images/**", "/music/**", "/users", "/songs/**", "/login").permitAll();
+                    registry.requestMatchers(
+                            "api/v1/users",
+                            "api/v1/album/**",
+                            "/images/**",
+                            "music/**",
+                            "api/v1/songs/**",
+                            "/login")
+                            .permitAll();
                     registry.anyRequest().authenticated();
                 })
+                //TODO: maybe this formLogin is not necessary, but i want to keep the success and failure handlers
                 .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer
                         .loginProcessingUrl("/login")
                         .successHandler(new LoginSuccessHandler())
@@ -44,6 +53,10 @@ public class AuthConfig  {
                 .logout(LogoutConfigurer -> LogoutConfigurer
                         .logoutSuccessHandler(new LogoutSuccessHandler())
                         .permitAll())
+                .httpBasic()
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "unauthenticated");
+                }).and()
                 //TODO: sessionmanager
                 .build();
     }
@@ -53,7 +66,7 @@ public class AuthConfig  {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // Allow your frontend origin
+        config.setAllowedOriginPatterns(Collections.singletonList("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);

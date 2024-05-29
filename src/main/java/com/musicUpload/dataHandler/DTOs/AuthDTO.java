@@ -12,4 +12,8 @@ public class AuthDTO {
         this.id = auth.getId();
         this.name = auth.getName();
     }
+
+    public static AuthDTO of(Auth auth){
+        return new AuthDTO(auth);
+    }
 }

@@ -32,12 +32,11 @@ public class CustomUserDetails implements UserDetails {
         this.id = id;
         this.username = username;
         this.password = password;
-        //TODO: create other authorities than ADMIN and USER
         this.authorities = authorities;
         this.profilePicture = profilePicture;
         this.songs = songs;
         this.albums = albums;
-        //TODO: create these functionalities in the future
+        //TODO: implement these functionalities in the future
         this.accountNonLocked = true;
         this.accountNonExpired = true;
         this.credentialsNonExpired = true;

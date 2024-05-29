@@ -6,28 +6,26 @@ import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.services.UserService;
+import com.musicUpload.exceptions.UnauthenticatedException;
+import com.musicUpload.exceptions.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/albums")
+@RequestMapping("api/v1/albums")
 @CrossOrigin
 public class AlbumController {
-    @Autowired
     private final SongService songService;
-    @Autowired
     private final AlbumService albumService;
-    @Autowired
     private final UserService userService;
 
+    @Autowired
     public AlbumController(SongService songService, AlbumService albumService, UserService userService) {
         this.songService = songService;
         this.albumService = albumService;
@@ -35,89 +33,55 @@ public class AlbumController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAlbums(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+    public List<AlbumDTO> getAlbums(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return albumService.getAlbums(userDetails);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getAlbum(@PathVariable Long id){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            Optional<Album> albumOptional = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny();
-
-            if(albumOptional.isPresent()){
-                return new ResponseEntity<>(AlbumDTO.of(albumOptional.get()), HttpStatus.OK);
-            }
-            else{
-                Optional<Album> albumOptional2 = albumService.findById(id);
-                if(albumOptional2.isPresent() && !albumOptional2.get().getProtectionType().getName().equals("PRIVATE")){
-                    return new ResponseEntity<>(AlbumDTO.of(albumOptional2.get()), HttpStatus.OK);
-                }
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+    public AlbumDTO getAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+                             @PathVariable Long id){
+        return albumService.findById(id, userDetails);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createAlbum(@RequestParam(name = "protection_type") String protectionType,
-                                         @RequestParam(name = "name") String name,
-                                         @RequestParam(name = "image", required = false) MultipartFile image){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            albumService.saveAlbum(protectionType,
-                    name,
-                    image);
-            return ResponseEntity.ok("successfully created album");
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+    @PostMapping("/add")
+    public ResponseEntity<String> createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                              @RequestParam(name = "protection_type") String protectionType,
+                                              @RequestParam(name = "name") String name,
+                                              @RequestParam(name = "image", required = false) MultipartFile image){
+        albumService.saveAlbum(
+                     userDetails,
+                     protectionType,
+                     name,
+                     image);
+        return new ResponseEntity<>("successfully created", HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchAlbum(@PathVariable Long id,
-                                        @RequestParam(name = "protection_type", required = false) String protectionType,
-                                        @RequestParam(name = "song_id", required = false) List<Long> songId,
-                                        @RequestParam(name = "name", required = false) String name,
-                                        @RequestParam(name = "image", required = false) MultipartFile image){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            Optional<Album> albumOptional = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny();
-            albumOptional.ifPresent(album ->
-                    albumService.patchAlbum(
-                            album,
-                            protectionType,
-                            songId,
-                            name,
-                            image
-                    )
-            );
-            return ResponseEntity.ok("successfully edited album");
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<String> patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                             @PathVariable Long id,
+                                             @RequestParam(name = "protection_type", required = false) String protectionType,
+                                             @RequestParam(name = "song_id", required = false) List<Long> songId,
+                                             @RequestParam(name = "name", required = false) String name,
+                                             @RequestParam(name = "image", required = false) MultipartFile image){
+        //TODO: fix the issue and make this parallel too
+        albumService.patchAlbum(
+                userDetails,
+                id,
+                protectionType,
+                songId,
+                name,
+                image
+        );
+        return ResponseEntity.ok("successfully edited album");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAlbum(@PathVariable Long id){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-
-            Optional<Album> albumOptional = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny();
-
-            if(albumOptional.isPresent()){
-                userDetails.getAlbums().remove(albumOptional.get());
-
-                new Thread(() -> albumService.deleteAlbum(albumOptional.get())).start();
-
-                return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.NO_CONTENT);
-            }
-            else{
-                return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
-            }
-        }
-        return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<?> deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                         @PathVariable Long id){
+        new Thread(() -> {
+            Album album = albumService.deleteAlbum(userDetails, id);
+            userDetails.getAlbums().remove(album);
+        }).start();
+        return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.NO_CONTENT);
     }
 }

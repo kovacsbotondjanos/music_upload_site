@@ -1,6 +1,5 @@
 package com.musicUpload.dataHandler.DTOs;
 
-import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.Album;
 import com.musicUpload.dataHandler.models.Song;
 import com.musicUpload.dataHandler.models.User;
@@ -33,5 +32,9 @@ public class UserDTO {
         this.followers = user.getFollowers().stream().map(User::getId).toList();
         this.followedUsers = user.getFollowedUsers().stream().map(User::getId).toList();
         this.createdAt = user.getCreatedAt();
+    }
+
+    public static UserDTO of(User user){
+        return new UserDTO(user);
     }
 }

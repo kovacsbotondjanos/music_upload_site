@@ -10,6 +10,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,11 +26,11 @@ import java.util.Optional;
 @RestController
 @CrossOrigin
 public class ResourceController {
-    @Autowired
-    private final SongService songService;
     private final String imagePathName = "images\\";
     private final String musicPathName = "music\\";
+    private final SongService songService;
 
+    @Autowired
     public ResourceController(SongService songService) {
         this.songService = songService;
     }
@@ -51,7 +52,7 @@ public class ResourceController {
     }
 
     @GetMapping("/music/{nameHashed}")
-    public ResponseEntity<Resource> getSong(@PathVariable String nameHashed){
+    public ResponseEntity<Resource> getSong(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String nameHashed){
 
         Path path = Paths.get(musicPathName);
 
@@ -74,15 +75,15 @@ public class ResourceController {
             }
         }
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            Optional<Song> songOptionalForUser = userDetails.getSongs().stream().filter(s -> s.getName().equals(nameHashed)).findAny();
-
+        if (userDetails != null) {
+            Optional<Song> songOptionalForUser = userDetails.getSongs().stream().filter(s -> s.getNameHashed().equals(nameHashed)).findAny();
             if(songOptionalForUser.isPresent()){
                 try{
                     Path imagePath = path.resolve(songOptionalForUser.get().getNameHashed());
                     Resource resource = new UrlResource(imagePath.toUri());
-                    return ResponseEntity.ok().body(resource);
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.parseMediaType("audio/mpeg"))
+                            .body(resource);
                 }
                 catch (IOException e){
                     return ResponseEntity.notFound().build();

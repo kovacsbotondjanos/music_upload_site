@@ -6,8 +6,6 @@ import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.services.UserService;
-import com.musicUpload.exceptions.UnauthenticatedException;
-import com.musicUpload.exceptions.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

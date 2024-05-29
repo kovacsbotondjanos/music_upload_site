@@ -2,7 +2,6 @@ package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.services.AlbumService;
-import com.musicUpload.dataHandler.models.Song;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.services.UserService;
@@ -84,7 +83,7 @@ public class SongController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSong(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @PathVariable Long id){
-            songService.deleteSong(userDetails, id);
+        songService.deleteSong(userDetails, id);
         return ResponseEntity.ok("song deleted successfully");
     }
 }

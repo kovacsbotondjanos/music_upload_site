@@ -2,10 +2,7 @@ package com.musicUpload.dataHandler.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +14,7 @@ import java.util.List;
 @ToString(exclude = {"user", "albums"})
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"protectionType", "user", "albums"})
 public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

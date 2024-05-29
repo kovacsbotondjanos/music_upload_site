@@ -7,7 +7,6 @@ import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

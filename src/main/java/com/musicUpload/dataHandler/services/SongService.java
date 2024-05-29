@@ -11,6 +11,7 @@ import com.musicUpload.exceptions.FileIsInWrongFormatException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,10 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class SongService {
@@ -123,17 +121,26 @@ public class SongService {
         throw new UnauthenticatedException();
     }
 
+    @Transactional
     public Song deleteSong(CustomUserDetails userDetails,
                            Long id){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
 
-        Song song = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny()
+        Song song = userDetails.getSongs().stream()
+                .filter(s -> s.getId().equals(id))
+                .findAny()
                 .orElseThrow(UnauthenticatedException::new);
+
         imageFactory.deleteFile(song.getImage());
+        System.out.println(song.equals(songRepository.findById(id).get()));
         songRepository.delete(song);
+        Optional<Song> s = songRepository.findById(id);
+        System.out.println(s);
+        s.ifPresent(value -> System.out.println(song.equals(value)));
         userDetails.getSongs().remove(song);
+
         return song;
     }
 

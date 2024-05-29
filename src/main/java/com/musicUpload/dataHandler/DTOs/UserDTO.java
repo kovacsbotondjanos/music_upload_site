@@ -34,4 +34,8 @@ public class UserDTO {
         this.followedUsers = user.getFollowedUsers().stream().map(User::getId).toList();
         this.createdAt = user.getCreatedAt();
     }
+
+    public static UserDTO of(User user){
+        return new UserDTO(user);
+    }
 }

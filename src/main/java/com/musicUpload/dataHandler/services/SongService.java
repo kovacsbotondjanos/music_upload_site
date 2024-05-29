@@ -102,19 +102,6 @@ public class SongService {
         return saveSong(song);
     }
 
-    public Song deleteSong(CustomUserDetails userDetails,
-                           Long id){
-        if(userDetails == null){
-            throw new UnauthenticatedException();
-        }
-
-        Song song = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny()
-                .orElseThrow(UnauthenticatedException::new);
-        imageFactory.deleteFile(song.getImage());
-        songRepository.delete(song);
-        return song;
-    }
-
     public Optional<Song> findById(Long id){
         return songRepository.findById(id);
     }
@@ -134,6 +121,20 @@ public class SongService {
             }
         }
         throw new UnauthenticatedException();
+    }
+
+    public Song deleteSong(CustomUserDetails userDetails,
+                           Long id){
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+
+        Song song = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny()
+                .orElseThrow(UnauthenticatedException::new);
+        imageFactory.deleteFile(song.getImage());
+        songRepository.delete(song);
+        userDetails.getSongs().remove(song);
+        return song;
     }
 
     public List<SongDTO> getRandomSongs(){

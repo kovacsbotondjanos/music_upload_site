@@ -12,4 +12,8 @@ public class ProtectionTypeDTO {
         this.id = protectionType.getId();
         this.name = protectionType.getName();
     }
+
+    public static ProtectionTypeDTO of(ProtectionType protectionType){
+        return new ProtectionTypeDTO(protectionType);
+    }
 }

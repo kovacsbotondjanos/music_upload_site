@@ -84,11 +84,7 @@ public class SongController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSong(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @PathVariable Long id){
-
-        new Thread(() -> {
-            Song song = songService.deleteSong(userDetails, id);
-            userDetails.getSongs().remove(song);
-        }).start();
+            songService.deleteSong(userDetails, id);
         return ResponseEntity.ok("song deleted successfully");
     }
 }

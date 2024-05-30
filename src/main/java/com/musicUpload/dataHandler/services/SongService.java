@@ -5,13 +5,14 @@ import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.ProtectionType;
 import com.musicUpload.dataHandler.models.Song;
 import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.FileIsInWrongFormatException;
 import com.musicUpload.exceptions.UnauthenticatedException;
+import com.musicUpload.exceptions.UserNotFoundException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,14 +26,16 @@ import java.util.*;
 public class SongService {
     private final SongRepository songRepository;
     private final UserRepository userRepository;
+    private final AlbumRepository albumRepository;
     private final ImageFactory imageFactory;
     private final MusicFactory musicFactory;
     private final ProtectionTypeService protectionTypeService;
 
     @Autowired
-    public SongService(SongRepository songRepository, UserRepository userRepository, ImageFactory imageFactory, MusicFactory songFactory, ProtectionTypeService protectionTypeService) {
+    public SongService(SongRepository songRepository, UserRepository userRepository, AlbumRepository albumRepository, ImageFactory imageFactory, MusicFactory songFactory, ProtectionTypeService protectionTypeService) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
+        this.albumRepository = albumRepository;
         this.imageFactory = imageFactory;
         this.musicFactory = songFactory;
         this.protectionTypeService = protectionTypeService;
@@ -81,6 +84,10 @@ public class SongService {
                 throw new FileIsInWrongFormatException();
             }
         }
+        else{
+            String img = imageFactory.getRandomImage();
+            song.setImage(img);
+        }
 
         if(!songFile.isEmpty()) {
             try {
@@ -121,24 +128,36 @@ public class SongService {
         throw new UnauthenticatedException();
     }
 
-    @Transactional
     public Song deleteSong(CustomUserDetails userDetails,
                            Long id){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
 
-        Song song = userDetails.getSongs().stream()
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(UserNotFoundException::new);
+
+        Song song = user.getSongs().stream()
                 .filter(s -> s.getId().equals(id))
                 .findAny()
                 .orElseThrow(UnauthenticatedException::new);
 
-        imageFactory.deleteFile(song.getImage());
-        System.out.println(song.equals(songRepository.findById(id).get()));
+        user.getSongs().remove(song);
+        userRepository.save(user);
+
+        ProtectionType protectionType = song.getProtectionType();
+        protectionType.getSongs().remove(song);
+        protectionTypeService.save(protectionType);
+
+        song.getAlbums().forEach(a -> {
+            a.getSongs().remove(song);
+            albumRepository.save(a);
+        });
+
         songRepository.delete(song);
-        Optional<Song> s = songRepository.findById(id);
-        System.out.println(s);
-        s.ifPresent(value -> System.out.println(song.equals(value)));
+        imageFactory.deleteFile(song.getImage());
+        musicFactory.deleteFile(song.getNameHashed());
+
         userDetails.getSongs().remove(song);
 
         return song;

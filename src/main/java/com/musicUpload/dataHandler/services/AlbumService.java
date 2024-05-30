@@ -12,6 +12,7 @@ import com.musicUpload.exceptions.ImageCannotBeSavedException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.exceptions.UserNotFoundException;
 import com.musicUpload.util.ImageFactory;
+import com.musicUpload.util.MusicFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -99,8 +100,26 @@ public class AlbumService {
             throw new UnauthenticatedException();
         }
 
-        Album album = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny()
+//        Album album = userDetails.getAlbums().stream()
+//                .filter(a -> a.getId().equals(id)).findAny()
+//                .orElseThrow(UnauthenticatedException::new);
+
+        User user = userRepository.findById(userDetails.getId())
+                        .orElseThrow(UserNotFoundException::new);
+
+        Album album = user.getAlbums().stream()
+                .filter(a -> a.getId().equals(id)).findAny()
                 .orElseThrow(UnauthenticatedException::new);
+
+
+        user.getAlbums().remove(album);
+        userRepository.save(user);
+
+        ProtectionType protectionType = album.getProtectionType();
+        protectionType.getAlbums().remove(album);
+        protectionTypeService.save(protectionType);
+
+        imageFactory.deleteFile(album.getImage());
 
         albumRepository.delete(album);
         userDetails.getAlbums().remove(album);

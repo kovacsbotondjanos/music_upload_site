@@ -32,7 +32,7 @@ public class Song {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany(mappedBy = "songs")
+    @ManyToMany(mappedBy = "songs", fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Album> albums = new ArrayList<>();
 

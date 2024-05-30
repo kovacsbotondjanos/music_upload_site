@@ -76,10 +76,7 @@ public class AlbumController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                                          @PathVariable Long id){
-        new Thread(() -> {
-            Album album = albumService.deleteAlbum(userDetails, id);
-            userDetails.getAlbums().remove(album);
-        }).start();
+        albumService.deleteAlbum(userDetails, id);
         return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.NO_CONTENT);
     }
 }

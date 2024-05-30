@@ -4,7 +4,7 @@ import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +39,8 @@ public class SongController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> createSong(@AuthenticationPrincipal CustomUserDetails userDetails,
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public void createSong(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @RequestParam(name = "protection_type") String protectionType,
                                              @RequestParam(name = "name") String name,
                                              @RequestParam(name = "image", required = false) MultipartFile image,
@@ -52,11 +53,11 @@ public class SongController {
             image,
             song
         ));
-        return ResponseEntity.ok("song created successfully");
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> patchSong(@AuthenticationPrincipal CustomUserDetails userDetails,
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void patchSong(@AuthenticationPrincipal CustomUserDetails userDetails,
                                        @PathVariable Long id,
                                        @RequestParam(name = "protection_type", required = false) String protectionType,
                                        @RequestParam(name = "name", required = false) String name,
@@ -68,13 +69,12 @@ public class SongController {
             name,
             image
         );
-        return ResponseEntity.ok("song edited successfully");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteSong(@AuthenticationPrincipal CustomUserDetails userDetails,
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deleteSong(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @PathVariable Long id){
         songService.deleteSong(userDetails, id);
-        return ResponseEntity.ok("song deleted successfully");
     }
 }

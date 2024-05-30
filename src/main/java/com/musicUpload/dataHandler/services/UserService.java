@@ -8,16 +8,19 @@ import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,6 +57,59 @@ public class UserService implements UserDetailsService {
         } else {
             throw new UsernameNotFoundException(username);
         }
+    }
+
+    public void patchUser(CustomUserDetails userDetails,
+                          String username,
+                          String email,
+                          String password,
+                          String oldPassword,
+                          MultipartFile image) {
+        //TODO: return something if these details doesnt match
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(UserNotFoundException::new);
+
+        if(username != null && !username.isEmpty()){
+            user.setUsername(username);
+        }
+
+        if(email != null){
+            Pattern p = Pattern.compile(ePattern);
+            Matcher m = p.matcher(user.getEmail());
+            if(!m.matches()){
+                throw new EmailInWrongFormatException();
+            }
+            user.setEmail(email);
+        }
+
+        if(password != null && oldPassword != null){
+            if(password.length() < 8 || !encoder.matches(oldPassword, userDetails.getPassword())) {
+                throw new PasswordInWrongFormatException();
+            }
+            user.setPassword(password);
+        }
+
+        if(image != null && !image.isEmpty()){
+            if(!Objects.requireNonNull(image.getContentType()).contains("image")){
+                throw  new FileIsInWrongFormatException();
+            }
+
+            try {
+                imageFactory.deleteFile(user.getProfilePicture());
+                String hashedFileName = UUID.randomUUID() + ".jpg";
+                image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
+                user.setProfilePicture(hashedFileName);
+            }
+            catch (IOException e){
+                System.err.println(e.getMessage());
+            }
+        }
+
+        User u = userRepository.save(user);
     }
 
     public User registerUser(User user) {

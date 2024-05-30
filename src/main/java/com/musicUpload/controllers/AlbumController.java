@@ -35,7 +35,8 @@ public class AlbumController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public void createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                                               @RequestParam(name = "protection_type") String protectionType,
                                               @RequestParam(name = "name") String name,
                                               @RequestParam(name = "image", required = false) MultipartFile image){
@@ -44,11 +45,11 @@ public class AlbumController {
                      protectionType,
                      name,
                      image);
-        return new ResponseEntity<>("successfully created", HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @PathVariable Long id,
                                              @RequestParam(name = "protection_type", required = false) String protectionType,
                                              @RequestParam(name = "song_id", required = false) List<Long> songId,
@@ -63,13 +64,12 @@ public class AlbumController {
                 name,
                 image
         );
-        return ResponseEntity.ok("successfully edited album");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                                          @PathVariable Long id){
         albumService.deleteAlbum(userDetails, id);
-        return new ResponseEntity<>(userDetails.getAlbums().stream().map(AlbumDTO::new).toList(), HttpStatus.NO_CONTENT);
     }
 }

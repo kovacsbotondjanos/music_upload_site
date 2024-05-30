@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -27,8 +28,25 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> createUser(@ModelAttribute User user){
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public void createUser(@ModelAttribute User user){
         userService.registerUser(user);
-        return new ResponseEntity<>("successfully created user", HttpStatus.CREATED);
     }
+
+    @PatchMapping
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void patchUser(@AuthenticationPrincipal CustomUserDetails userDetails,
+                          @RequestParam(name = "username", required = false) String username,
+                          @RequestParam(name = "email", required = false) String email,
+                          @RequestParam(name = "new_password", required = false) String password,
+                          @RequestParam(name = "old_password", required = false) String oldPassword,
+                          @RequestParam(name = "image", required = false)MultipartFile image){
+        userService.patchUser(userDetails,
+                              username,
+                              email,
+                              password,
+                              oldPassword,
+                              image);
+    }
+
 }

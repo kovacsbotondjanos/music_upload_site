@@ -1,11 +1,8 @@
 package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.services.UserService;
-import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,16 +16,10 @@ import java.util.List;
 @CrossOrigin
 public class SongController {
     private final SongService songService;
-    private final AlbumService albumService;
-    private final UserService userService;
-    private final ImageFactory imageFactory;
 
     @Autowired
-    public SongController(SongService songService, AlbumService albumService, UserService userService, ImageFactory imageFactory) {
+    public SongController(SongService songService) {
         this.songService = songService;
-        this.albumService = albumService;
-        this.userService = userService;
-        this.imageFactory = imageFactory;
     }
 
     @GetMapping

@@ -1,11 +1,8 @@
 package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
-import com.musicUpload.dataHandler.models.Album;
 import com.musicUpload.dataHandler.services.AlbumService;
-import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +16,11 @@ import java.util.List;
 @RequestMapping("api/v1/albums")
 @CrossOrigin
 public class AlbumController {
-    private final SongService songService;
     private final AlbumService albumService;
-    private final UserService userService;
 
     @Autowired
-    public AlbumController(SongService songService, AlbumService albumService, UserService userService) {
-        this.songService = songService;
+    public AlbumController(AlbumService albumService) {
         this.albumService = albumService;
-        this.userService = userService;
     }
 
     @GetMapping

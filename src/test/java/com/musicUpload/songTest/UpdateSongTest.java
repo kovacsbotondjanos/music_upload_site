@@ -4,8 +4,10 @@ import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.ProtectionType;
 import com.musicUpload.dataHandler.models.Song;
 import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.ProtectionTypeService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -31,6 +33,8 @@ public class UpdateSongTest {
     @Mock
     private UserRepository userRepository;
     @Mock
+    private AlbumRepository albumRepository;
+    @Mock
     private ImageFactory imageFactory;
     @Mock
     private MusicFactory songFactory;
@@ -47,6 +51,7 @@ public class UpdateSongTest {
         MockitoAnnotations.initMocks(this);
         songService = new SongService(songRepository,
                 userRepository,
+                albumRepository,
                 imageFactory,
                 songFactory,
                 protectionTypeService);

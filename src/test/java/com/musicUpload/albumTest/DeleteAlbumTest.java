@@ -19,8 +19,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
 
 public class DeleteAlbumTest {
     @Mock
@@ -88,15 +90,23 @@ public class DeleteAlbumTest {
 
     @Test
     void canDeleteOtherUsersAlbum(){
+        //Given
         userDetails.setAlbums(List.of(albums.get(0)));
+        given(userRepository.findById(1L))
+                .willReturn(Optional.of(new User(userDetails)));
+        //Then
         assertThrows(UnauthenticatedException.class,
                 () -> albumService.deleteAlbum(userDetails, 2L));
     }
 
     @Test
     void canDeleteOwnAlbumWithAuth(){
+        //Given
         userDetails.setAlbums(new ArrayList<>(List.of(albums.get(0))));
+        given(userRepository.findById(1L))
+                .willReturn(Optional.of(new User(userDetails)));
         Album a = albumService.deleteAlbum(userDetails, 1L);
+        //Then
         assertEquals(albums.get(0), a);
         assertFalse(userDetails.getAlbums().contains(a));
     }

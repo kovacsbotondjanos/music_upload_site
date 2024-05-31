@@ -8,14 +8,12 @@ import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -154,6 +152,15 @@ public class UserService implements UserDetailsService {
         user.setPassword(encoder.encode(user.getPassword()));
 
         return userRepository.save(user);
+    }
+
+    public void deleteUser(CustomUserDetails userDetails){
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(UserNotFoundException::new);
+        userRepository.delete(user);
     }
 
     public User saveUser(User user){

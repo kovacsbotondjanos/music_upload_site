@@ -9,21 +9,29 @@ import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.FileIsInWrongFormatException;
+import com.musicUpload.exceptions.ResourceNotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.exceptions.UserNotFoundException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Service
 public class SongService {
+    private final String musicPathName = "music\\";
     private final SongRepository songRepository;
     private final UserRepository userRepository;
     private final AlbumRepository albumRepository;
@@ -219,5 +227,47 @@ public class SongService {
         }
 
         return userDetails.getSongs().stream().map(SongDTO::new).toList();
+    }
+
+    public Resource getSongInResourceFormatByNameHashed(CustomUserDetails userDetails, String nameHashed){
+        Path path = Paths.get(musicPathName);
+
+        Song song = songRepository.findByNameHashed(nameHashed)
+                .orElseThrow(ResourceNotFoundException::new);
+
+        if(!song.getProtectionType().getName().equals("PRIVATE")){
+            try{
+                Path imagePath = path.resolve(song.getNameHashed());
+                Resource resource = new UrlResource(imagePath.toUri());
+
+                if (resource.exists()) {
+                    return resource;
+                } else {
+                    throw new ResourceNotFoundException();
+                }
+            }
+            catch (IOException e){
+                throw new ResourceNotFoundException();
+            }
+        }
+
+        if (userDetails != null) {
+            if(song.getUser().getId().equals(userDetails.getId())){
+                try{
+                    Path imagePath = path.resolve(song.getNameHashed());
+                    Resource resource = new UrlResource(imagePath.toUri());
+
+                    if (resource.exists()) {
+                        return resource;
+                    } else {
+                        throw new ResourceNotFoundException();
+                    }
+                }
+                catch (IOException e){
+                    throw new ResourceNotFoundException();
+                }
+            }
+        }
+        throw new ResourceNotFoundException();
     }
 }

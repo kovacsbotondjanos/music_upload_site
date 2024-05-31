@@ -29,7 +29,7 @@ public class SongController {
 
     @GetMapping("/{id}")
     public SongDTO getSongById(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                         @PathVariable Long id){
+                               @PathVariable Long id){
         return songService.findById(userDetails, id);
     }
 
@@ -41,11 +41,11 @@ public class SongController {
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createSong(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                             @RequestParam(name = "protection_type") String protectionType,
-                                             @RequestParam(name = "name") String name,
-                                             @RequestParam(name = "image", required = false) MultipartFile image,
-                                             @RequestParam(name = "song") MultipartFile song){
-        //TODO: make these parallel too
+                           @RequestParam(name = "protection_type") String protectionType,
+                           @RequestParam(name = "name") String name,
+                           @RequestParam(name = "image", required = false) MultipartFile image,
+                           @RequestParam(name = "song") MultipartFile song){
+
         userDetails.addSong(songService.saveSong(
             userDetails,
             protectionType,
@@ -58,10 +58,10 @@ public class SongController {
     @PatchMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void patchSong(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                       @PathVariable Long id,
-                                       @RequestParam(name = "protection_type", required = false) String protectionType,
-                                       @RequestParam(name = "name", required = false) String name,
-                                       @RequestParam(name = "image", required = false) MultipartFile image){
+                          @PathVariable Long id,
+                          @RequestParam(name = "protection_type", required = false) String protectionType,
+                          @RequestParam(name = "name", required = false) String name,
+                          @RequestParam(name = "image", required = false) MultipartFile image){
         songService.updateSong(
             userDetails,
             id,
@@ -74,7 +74,7 @@ public class SongController {
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteSong(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                             @PathVariable Long id){
+                           @PathVariable Long id){
         songService.deleteSong(userDetails, id);
     }
 }

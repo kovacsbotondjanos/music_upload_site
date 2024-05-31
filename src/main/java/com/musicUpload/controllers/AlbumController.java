@@ -5,7 +5,6 @@ import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,9 +36,9 @@ public class AlbumController {
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                              @RequestParam(name = "protection_type") String protectionType,
-                                              @RequestParam(name = "name") String name,
-                                              @RequestParam(name = "image", required = false) MultipartFile image){
+                            @RequestParam(name = "protection_type") String protectionType,
+                            @RequestParam(name = "name") String name,
+                            @RequestParam(name = "image", required = false) MultipartFile image){
         albumService.saveAlbum(
                      userDetails,
                      protectionType,
@@ -50,11 +49,11 @@ public class AlbumController {
     @PatchMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                             @PathVariable Long id,
-                                             @RequestParam(name = "protection_type", required = false) String protectionType,
-                                             @RequestParam(name = "song_id", required = false) List<Long> songId,
-                                             @RequestParam(name = "name", required = false) String name,
-                                             @RequestParam(name = "image", required = false) MultipartFile image){
+                           @PathVariable Long id,
+                           @RequestParam(name = "protection_type", required = false) String protectionType,
+                           @RequestParam(name = "song_id", required = false) List<Long> songId,
+                           @RequestParam(name = "name", required = false) String name,
+                           @RequestParam(name = "image", required = false) MultipartFile image){
         //TODO: fix the issue and make this parallel too
         albumService.patchAlbum(
                 userDetails,
@@ -69,7 +68,7 @@ public class AlbumController {
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                         @PathVariable Long id){
+                            @PathVariable Long id){
         albumService.deleteAlbum(userDetails, id);
     }
 }

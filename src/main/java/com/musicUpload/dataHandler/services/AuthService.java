@@ -21,11 +21,11 @@ public class AuthService {
         return authRepository.save(auth);
     }
 
-    public List<Auth> getAllPossibleAuth(){
-        return authRepository.findAll();
-    }
-
     public Optional<Auth> getByName(String name){
         return authRepository.findByName(name);
+    }
+
+    public List<Auth> getAllPossibleAuth(){
+        return authRepository.findAll();
     }
 }

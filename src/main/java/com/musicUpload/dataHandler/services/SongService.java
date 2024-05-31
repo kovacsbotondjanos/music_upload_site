@@ -8,17 +8,12 @@ import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.exceptions.FileIsInWrongFormatException;
-import com.musicUpload.exceptions.ResourceNotFoundException;
-import com.musicUpload.exceptions.UnauthenticatedException;
-import com.musicUpload.exceptions.UserNotFoundException;
+import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -81,7 +76,7 @@ public class SongService {
         if(image != null && !image.isEmpty()){
             try{
                 if(!Objects.requireNonNull(image.getContentType()).contains("image")){
-                    throw new FileIsInWrongFormatException();
+                    throw new UnprocessableException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".jpg";
                 image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
@@ -89,7 +84,7 @@ public class SongService {
                 song.setImage(hashedFileName);
             }
             catch (IOException ioException){
-                throw new FileIsInWrongFormatException();
+                throw new UnprocessableException();
             }
         }
         else{
@@ -121,64 +116,51 @@ public class SongService {
 
     public SongDTO findById(CustomUserDetails userDetails,
                             Long id){
-        Optional<Song> songOptional = findById(id);
-        if(songOptional.isPresent() && !songOptional.get().getProtectionType().getName().equals("PRIVATE")){
-            return SongDTO.of(songOptional.get());
-        }
-
-        if(userDetails != null){
-            Optional<Song> songOptionalForUser = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny();
-
-            if(songOptionalForUser.isPresent()){
-                return SongDTO.of(songOptionalForUser.get());
-            }
+        Song song = findById(id)
+                .orElseThrow(NotFoundException::new);
+        if(!song.getProtectionType().getName().equals("PRIVATE") ||
+                userDetails != null && song.getUser().getId().equals(userDetails.getId())){
+            return SongDTO.of(song);
         }
         throw new UnauthenticatedException();
     }
 
-    public Song deleteSong(CustomUserDetails userDetails,
-                           Long id){
-        if(userDetails == null){
-            throw new UnauthenticatedException();
-        }
-
-        User user = userRepository.findById(userDetails.getId())
-                .orElseThrow(UserNotFoundException::new);
-
-        Song song = user.getSongs().stream()
-                .filter(s -> s.getId().equals(id))
-                .findAny()
-                .orElseThrow(UnauthenticatedException::new);
-
-        user.getSongs().remove(song);
-        userRepository.save(user);
-
-        ProtectionType protectionType = song.getProtectionType();
-        protectionType.getSongs().remove(song);
-        protectionTypeService.save(protectionType);
-
-        song.getAlbums().forEach(a -> {
-            a.getSongs().remove(song);
-            albumRepository.save(a);
-        });
-
-        songRepository.delete(song);
-        imageFactory.deleteFile(song.getImage());
-        musicFactory.deleteFile(song.getNameHashed());
-
-        userDetails.getSongs().remove(song);
-
-        return song;
-    }
-
     public List<SongDTO> getRandomSongs(){
-        return songRepository.findRandomSongs().stream()
+        return songRepository.getRandomSongs().stream()
                 .map(SongDTO::new)
                 .toList();
     }
 
-    public Optional<Song> findByNameHashed(String name){
-        return songRepository.findByNameHashed(name);
+    public List<SongDTO> getSongs(CustomUserDetails userDetails){
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+
+        return userDetails.getSongs().stream().map(SongDTO::new).toList();
+    }
+
+    public Resource getSongInResourceFormatByNameHashed(CustomUserDetails userDetails, String nameHashed){
+        Path path = Paths.get(musicPathName);
+        Song song = songRepository.findByNameHashed(nameHashed)
+                .orElseThrow(NotFoundException::new);
+
+        if(!song.getProtectionType().getName().equals("PRIVATE") ||
+                userDetails != null && song.getUser().getId().equals(userDetails.getId())){
+            try{
+                Path imagePath = path.resolve(song.getNameHashed());
+                Resource resource = new UrlResource(imagePath.toUri());
+
+                if (resource.exists()) {
+                    return resource;
+                } else {
+                    throw new NotFoundException();
+                }
+            }
+            catch (IOException e){
+                throw new NotFoundException();
+            }
+        }
+        throw new NotFoundException();
     }
 
     public void updateSong(CustomUserDetails userDetails,
@@ -221,53 +203,38 @@ public class SongService {
         songRepository.save(song);
     }
 
-    public List<SongDTO> getSongs(CustomUserDetails userDetails){
+    public Song deleteSong(CustomUserDetails userDetails,
+                           Long id){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
 
-        return userDetails.getSongs().stream().map(SongDTO::new).toList();
-    }
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(NotFoundException::new);
 
-    public Resource getSongInResourceFormatByNameHashed(CustomUserDetails userDetails, String nameHashed){
-        Path path = Paths.get(musicPathName);
+        Song song = user.getSongs().stream()
+                .filter(s -> s.getId().equals(id))
+                .findAny()
+                .orElseThrow(UnauthenticatedException::new);
 
-        Song song = songRepository.findByNameHashed(nameHashed)
-                .orElseThrow(ResourceNotFoundException::new);
+        user.getSongs().remove(song);
+        userRepository.save(user);
 
-        if(!song.getProtectionType().getName().equals("PRIVATE")){
-            try{
-                Path imagePath = path.resolve(song.getNameHashed());
-                Resource resource = new UrlResource(imagePath.toUri());
+        ProtectionType protectionType = song.getProtectionType();
+        protectionType.getSongs().remove(song);
+        protectionTypeService.save(protectionType);
 
-                if (resource.exists()) {
-                    return resource;
-                } else {
-                    throw new ResourceNotFoundException();
-                }
-            }
-            catch (IOException e){
-                throw new ResourceNotFoundException();
-            }
-        }
+        song.getAlbums().forEach(a -> {
+            a.getSongs().remove(song);
+            albumRepository.save(a);
+        });
 
-        if (userDetails != null) {
-            if(song.getUser().getId().equals(userDetails.getId())){
-                try{
-                    Path imagePath = path.resolve(song.getNameHashed());
-                    Resource resource = new UrlResource(imagePath.toUri());
+        songRepository.delete(song);
+        imageFactory.deleteFile(song.getImage());
+        musicFactory.deleteFile(song.getNameHashed());
 
-                    if (resource.exists()) {
-                        return resource;
-                    } else {
-                        throw new ResourceNotFoundException();
-                    }
-                }
-                catch (IOException e){
-                    throw new ResourceNotFoundException();
-                }
-            }
-        }
-        throw new ResourceNotFoundException();
+        userDetails.getSongs().remove(song);
+
+        return song;
     }
 }

@@ -57,6 +57,71 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    public User registerUser(User user) {
+
+        if(user.getEmail() == null || user.getPassword() == null || user.getUsername() == null){
+            throw new WrongFormatException("Please fill out all the fields");
+        }
+
+        if(user.getPassword().length() < 8){
+            throw new NotAcceptableException("Password is in wrong format");
+        }
+
+        if(user.getUsername().isEmpty()){
+            throw new NotAcceptableException("Please fill the name field with valid data");
+        }
+
+        Pattern p = Pattern.compile(ePattern);
+        Matcher m = p.matcher(user.getEmail());
+        if(!m.matches()){
+            throw new WrongFormatException("Please fill the email field with valid data");
+        }
+
+
+        //TODO: This will have to change in the future, bc it can be unsafe
+        if(user.getAuthority() == null){
+            Auth auth = authService.getByName("USER")
+                            .orElseThrow(IllegalArgumentException::new);
+            user.setAuthority(auth);
+        }
+
+        if(userRepository.findByUsername(user.getUsername()).isPresent()){
+            throw new NotAcceptableException("Username already exists");
+        }
+
+        if(userRepository.findByEmail(user.getEmail()).isPresent()){
+            throw new WrongFormatException("Email already exists");
+        }
+
+        String image = imageFactory.getRandomImage();
+        user.setProfilePicture(image);
+
+        user.setPassword(encoder.encode(user.getPassword()));
+
+        return userRepository.save(user);
+    }
+
+    public User saveUser(User user){
+        return userRepository.save(user);
+    }
+
+    public Optional<User> findById(Long id){
+        return userRepository.findById(id);
+    }
+
+    public UserDTO findCurrUser(CustomUserDetails userDetails){
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+
+        return findById(userDetails.getId()).map(UserDTO::new)
+                .orElseThrow(NotFoundException::new);
+    }
+
+    public List<User> getUsers(){
+        return userRepository.findAll();
+    }
+
     public void patchUser(CustomUserDetails userDetails,
                           String username,
                           String email,
@@ -69,7 +134,7 @@ public class UserService implements UserDetailsService {
         }
 
         User user = userRepository.findById(userDetails.getId())
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(NotFoundException::new);
 
         if(username != null && !username.isEmpty()){
             user.setUsername(username);
@@ -79,21 +144,21 @@ public class UserService implements UserDetailsService {
             Pattern p = Pattern.compile(ePattern);
             Matcher m = p.matcher(user.getEmail());
             if(!m.matches()){
-                throw new EmailInWrongFormatException();
+                throw new WrongFormatException();
             }
             user.setEmail(email);
         }
 
         if(password != null && oldPassword != null){
             if(password.length() < 8 || !encoder.matches(oldPassword, userDetails.getPassword())) {
-                throw new PasswordInWrongFormatException();
+                throw new NotAcceptableException();
             }
             user.setPassword(password);
         }
 
         if(image != null && !image.isEmpty()){
             if(!Objects.requireNonNull(image.getContentType()).contains("image")){
-                throw  new FileIsInWrongFormatException();
+                throw  new UnprocessableException();
             }
 
             try {
@@ -110,77 +175,12 @@ public class UserService implements UserDetailsService {
         User u = userRepository.save(user);
     }
 
-    public User registerUser(User user) {
-
-        if(user.getEmail() == null || user.getPassword() == null || user.getUsername() == null){
-            throw new EmptyFieldException("Please fill out all the fields");
-        }
-
-        if(user.getPassword().length() < 8){
-            throw new PasswordInWrongFormatException("Password is in wrong format");
-        }
-
-        if(user.getUsername().isEmpty()){
-            throw new NameInWrongFormatException("Please fill the name field with valid data");
-        }
-
-        Pattern p = Pattern.compile(ePattern);
-        Matcher m = p.matcher(user.getEmail());
-        if(!m.matches()){
-            throw new EmailInWrongFormatException("Please fill the email field with valid data");
-        }
-
-
-        //TODO: This will have to change in the future, bc it can be unsafe
-        if(user.getAuthority() == null){
-            Auth auth = authService.getByName("USER")
-                            .orElseThrow(IllegalArgumentException::new);
-            user.setAuthority(auth);
-        }
-
-        if(userRepository.findByUsername(user.getUsername()).isPresent()){
-            throw new NameInWrongFormatException("Username already exists");
-        }
-
-        if(userRepository.findByEmail(user.getEmail()).isPresent()){
-            throw new EmailInWrongFormatException("Email already exists");
-        }
-
-        String image = imageFactory.getRandomImage();
-        user.setProfilePicture(image);
-
-        user.setPassword(encoder.encode(user.getPassword()));
-
-        return userRepository.save(user);
-    }
-
     public void deleteUser(CustomUserDetails userDetails){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
         User user = userRepository.findById(userDetails.getId())
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(NotFoundException::new);
         userRepository.delete(user);
-    }
-
-    public User saveUser(User user){
-        return userRepository.save(user);
-    }
-
-    public List<User> getUsers(){
-        return userRepository.findAll();
-    }
-
-    public UserDTO findCurrUser(CustomUserDetails userDetails){
-        if(userDetails == null){
-            throw new UnauthenticatedException();
-        }
-
-        return findById(userDetails.getId()).map(UserDTO::new)
-                .orElseThrow(UserNotFoundException::new);
-    }
-
-    public Optional<User> findById(Long id){
-        return userRepository.findById(id);
     }
 }

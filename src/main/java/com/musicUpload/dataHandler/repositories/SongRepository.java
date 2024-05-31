@@ -21,7 +21,7 @@ public interface SongRepository extends JpaRepository<Song, Long> {
                     "ORDER BY RAND() " +
                     "LIMIT 10",
             nativeQuery = true)
-    List<Song> findRandomSongs();
+    List<Song> getRandomSongs();
 
     Optional<Song> findByNameHashed(String name);
 }

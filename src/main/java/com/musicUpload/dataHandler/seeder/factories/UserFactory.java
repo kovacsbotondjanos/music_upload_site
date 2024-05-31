@@ -58,7 +58,7 @@ public class UserFactory {
     }
 
     public void createAdminFromConfigFile(Auth adminAuth){
-        Optional<User> admin;
+        User admin;
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .create();
@@ -66,9 +66,9 @@ public class UserFactory {
         try (InputStream inputStream = classLoader.getResourceAsStream("adminConfig.json")) {
             assert inputStream != null;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                admin = Optional.of(gson.fromJson(reader, User.class));
-                admin.get().setAuthority(adminAuth);
-                userService.registerUser(admin.get());
+                admin = gson.fromJson(reader, User.class);
+                admin.setAuthority(adminAuth);
+                userService.registerUser(admin);
             }
         }
         catch (Exception e){

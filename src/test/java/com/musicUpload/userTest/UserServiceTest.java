@@ -43,7 +43,7 @@ public class UserServiceTest {
     @Test
     void registerUserWithNoInfo(){
         user = new User();
-        assertThrows(EmptyFieldException.class,
+        assertThrows(WrongFormatException.class,
                 () -> userService.registerUser(user));
     }
 
@@ -52,7 +52,7 @@ public class UserServiceTest {
         user.setEmail("");
         user.setUsername("");
         user.setPassword("1234567");
-        assertThrows(PasswordInWrongFormatException.class,
+        assertThrows(NotAcceptableException.class,
                 () -> userService.registerUser(user));
     }
 
@@ -61,7 +61,7 @@ public class UserServiceTest {
         user.setEmail("");
         user.setUsername("");
         user.setPassword("12345678");
-        assertThrows(NameInWrongFormatException.class,
+        assertThrows(NotAcceptableException.class,
                 () -> userService.registerUser(user));
     }
 
@@ -70,7 +70,7 @@ public class UserServiceTest {
         user.setEmail("asd@");
         user.setUsername("user");
         user.setPassword("12345678");
-        assertThrows(EmailInWrongFormatException.class,
+        assertThrows(WrongFormatException.class,
                 () -> userService.registerUser(user));
     }
 
@@ -85,7 +85,7 @@ public class UserServiceTest {
         user.setEmail("asd@asd.com");
         user.setUsername("user");
         user.setPassword("12345678");
-        assertThrows(NameInWrongFormatException.class,
+        assertThrows(NotAcceptableException.class,
                 () -> userService.registerUser(user));
     }
 
@@ -100,7 +100,7 @@ public class UserServiceTest {
         user.setEmail("asd@asd.com");
         user.setUsername("user");
         user.setPassword("12345678");
-        assertThrows(EmailInWrongFormatException.class,
+        assertThrows(WrongFormatException.class,
                 () -> userService.registerUser(user));
     }
 

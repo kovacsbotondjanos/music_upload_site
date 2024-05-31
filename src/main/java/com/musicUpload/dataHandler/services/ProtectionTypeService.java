@@ -21,11 +21,11 @@ public class ProtectionTypeService {
         return protectionTypeRepository.save(protectionType);
     }
 
-    public List<ProtectionType> getAllPossibleProtectionType(){
-        return protectionTypeRepository.findAll();
-    }
-
     public Optional<ProtectionType> getProtectionTypeByName(String name){
         return protectionTypeRepository.findByName(name);
+    }
+
+    public List<ProtectionType> getAllPossibleProtectionType(){
+        return protectionTypeRepository.findAll();
     }
 }

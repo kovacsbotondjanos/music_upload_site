@@ -184,7 +184,7 @@ public class SongService {
             song.setName(name);
         }
 
-        if(image != null && image.isEmpty()){
+        if(image != null && !image.isEmpty()){
             try{
                 if(!Objects.requireNonNull(image.getContentType()).contains("image")){
                     throw new IllegalArgumentException();

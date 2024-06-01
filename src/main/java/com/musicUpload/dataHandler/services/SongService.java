@@ -58,17 +58,17 @@ public class SongService {
         }
 
         if(name == null || protectionType == null || songFile == null){
-            throw new IllegalArgumentException();
+            throw new WrongFormatException();
         }
 
         User user = userRepository.findById(userDetails.getId())
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(UnauthenticatedException::new);
 
         Song song = new Song();
         song.setUser(user);
 
         ProtectionType protection = protectionTypeService.getProtectionTypeByName(protectionType)
-                .orElseThrow(IllegalAccessError::new);
+                .orElseThrow(NotFoundException::new);
         song.setProtectionType(protection);
 
         song.setName(name);
@@ -95,15 +95,14 @@ public class SongService {
         if(!songFile.isEmpty()) {
             try {
                 if (!Objects.requireNonNull(songFile.getContentType()).contains("audio")) {
-                    throw new IllegalArgumentException();
+                    throw new UnprocessableException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".mp3";
                 songFile.transferTo(new File(musicFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
                 musicFactory.deleteFile(song.getNameHashed());
                 song.setNameHashed(hashedFileName);
             } catch (IOException ioException) {
-                //TODO: create a custom exception here
-                throw new IllegalArgumentException();
+                throw new UnprocessableException();
             }
         }
 
@@ -139,6 +138,16 @@ public class SongService {
         }
 
         return userDetails.getSongs().stream().map(SongDTO::new).toList();
+    }
+
+    public List<SongDTO> findByNameLike(CustomUserDetails userDetails, String name){
+        List<SongDTO> songs = songRepository.findByNameLike(name).stream().map(SongDTO::new).toList();
+        if(userDetails == null){
+            return songs.stream().filter(s -> s.getProtectionType().equals("PUBLIC")).limit(10).toList();
+        }
+        return songs.stream()
+                .filter(s -> s.getProtectionType().equals("PUBLIC")
+                        || s.getUserId().equals(userDetails.getId())).limit(10).toList();
     }
 
     public Resource getSongInResourceFormatByNameHashed(CustomUserDetails userDetails, String nameHashed){
@@ -189,7 +198,7 @@ public class SongService {
         if(image != null && !image.isEmpty()){
             try{
                 if(!Objects.requireNonNull(image.getContentType()).contains("image")){
-                    throw new IllegalArgumentException();
+                    throw new WrongFormatException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".jpg";
                 image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
@@ -197,8 +206,7 @@ public class SongService {
                 song.setImage(hashedFileName);
             }
             catch (IOException ioException){
-                //TODO: create a custom exception here
-                throw new IllegalArgumentException();
+                throw new WrongFormatException();
             }
         }
 

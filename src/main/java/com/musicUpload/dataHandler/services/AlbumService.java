@@ -50,13 +50,13 @@ public class AlbumService {
         }
 
         if (protectionType == null || name == null) {
-            throw new IllegalArgumentException();
+            throw new WrongFormatException();
         }
 
         Album album = new Album();
 
         ProtectionType protection = protectionTypeService.getProtectionTypeByName(protectionType)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(NotFoundException::new);
 
         album.setProtectionType(protection);
 
@@ -109,6 +109,16 @@ public class AlbumService {
             return AlbumDTO.of(album);
         }
         throw new UnauthenticatedException();
+    }
+
+    public List<AlbumDTO> findByNameLike(CustomUserDetails userDetails, String name){
+        List<AlbumDTO> albums = albumRepository.findByNameLike(name).stream().map(AlbumDTO::new).toList();
+        if(userDetails == null){
+            return albums.stream().filter(s -> s.getProtectionType().equals("PUBLIC")).limit(10).toList();
+        }
+        return albums.stream()
+                .filter(s -> s.getProtectionType().equals("PUBLIC")
+                        || s.getUserId().equals(userDetails.getId())).limit(10).toList();
     }
 
     public Album patchAlbum(CustomUserDetails userDetails,

@@ -1,6 +1,7 @@
 package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
+import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,12 @@ public class AlbumController {
     public AlbumDTO getAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                              @PathVariable Long id){
         return albumService.findById(id, userDetails);
+    }
+
+    @GetMapping("/search/{name}")
+    public List<AlbumDTO> getAlbumByNameLike(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                            @PathVariable String name){
+        return albumService.findByNameLike(userDetails, name);
     }
 
     @PostMapping("/add")

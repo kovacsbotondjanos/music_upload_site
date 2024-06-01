@@ -33,6 +33,12 @@ public class SongController {
         return songService.findById(userDetails, id);
     }
 
+    @GetMapping("/search/{name}")
+    public List<SongDTO> getSongByNameLike(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                           @PathVariable String name){
+        return songService.findByNameLike(userDetails, name);
+    }
+
     @GetMapping("/random")
     public List<SongDTO> getRandomSongs(){
         return songService.getRandomSongs();

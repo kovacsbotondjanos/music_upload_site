@@ -81,7 +81,7 @@ public class UserService implements UserDetailsService {
         //TODO: This will have to change in the future, bc it can be unsafe
         if(user.getAuthority() == null){
             Auth auth = authService.getByName("USER")
-                            .orElseThrow(IllegalArgumentException::new);
+                            .orElseThrow(NotFoundException::new);
             user.setAuthority(auth);
         }
 

@@ -1,5 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
+import com.musicUpload.cronJobs.SongListenCountJob;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.ProtectionType;
@@ -33,15 +34,17 @@ public class SongService {
     private final ImageFactory imageFactory;
     private final MusicFactory musicFactory;
     private final ProtectionTypeService protectionTypeService;
+    private final SongListenCountJob listenCountJob;
 
     @Autowired
-    public SongService(SongRepository songRepository, UserRepository userRepository, AlbumRepository albumRepository, ImageFactory imageFactory, MusicFactory songFactory, ProtectionTypeService protectionTypeService) {
+    public SongService(SongRepository songRepository, UserRepository userRepository, AlbumRepository albumRepository, ImageFactory imageFactory, MusicFactory songFactory, ProtectionTypeService protectionTypeService, SongListenCountJob listenCountJob) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
         this.imageFactory = imageFactory;
         this.musicFactory = songFactory;
         this.protectionTypeService = protectionTypeService;
+        this.listenCountJob = listenCountJob;
     }
 
     public Song saveSong(Song song){
@@ -162,6 +165,7 @@ public class SongService {
                 Resource resource = new UrlResource(imagePath.toUri());
 
                 if (resource.exists()) {
+                    listenCountJob.addListenToSong(song.getId());
                     return resource;
                 } else {
                     throw new NotFoundException();

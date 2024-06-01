@@ -14,6 +14,7 @@ public class SongDTO {
     private String protectionType;
     private Long userId;
     private Date createdAt;
+    private Long listenCount;
 
     public SongDTO(Song song){
         this.id = song.getId();
@@ -23,6 +24,7 @@ public class SongDTO {
         this.protectionType = song.getProtectionType().getName();
         this.userId = song.getUser().getId();
         this.createdAt = song.getCreatedAt();
+        this.listenCount = song.getListenCount();
     }
 
     public static SongDTO of(Song song){

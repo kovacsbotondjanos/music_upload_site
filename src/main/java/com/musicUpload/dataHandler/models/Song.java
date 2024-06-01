@@ -23,6 +23,7 @@ public class Song {
     private String image;
     private String name;
     private String nameHashed;
+    private Long listenCount = 0L;
 
     @ManyToOne
     @JoinColumn(name = "protection_id")
@@ -52,5 +53,13 @@ public class Song {
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
+    }
+
+    public void addListen(){
+        listenCount++;
+    }
+
+    public void addListen(Long count){
+        listenCount += count;
     }
 }

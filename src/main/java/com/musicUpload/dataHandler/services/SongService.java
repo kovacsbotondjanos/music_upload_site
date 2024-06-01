@@ -26,7 +26,7 @@ import java.util.*;
 
 @Service
 public class SongService {
-    private final String musicPathName = "music\\";
+    private final String musicPathName = "music" + FileSystems.getDefault().getSeparator();
     private final SongRepository songRepository;
     private final UserRepository userRepository;
     private final AlbumRepository albumRepository;
@@ -107,7 +107,9 @@ public class SongService {
             }
         }
 
-        return saveSong(song);
+        Song s = saveSong(song);
+        userDetails.addSong(s);
+        return s;
     }
 
     public Optional<Song> findById(Long id){

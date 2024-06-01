@@ -46,13 +46,13 @@ public class SongController {
                            @RequestParam(name = "image", required = false) MultipartFile image,
                            @RequestParam(name = "song") MultipartFile song){
 
-        userDetails.addSong(songService.saveSong(
+        songService.saveSong(
             userDetails,
             protectionType,
             name,
             image,
             song
-        ));
+        );
     }
 
     @PatchMapping("/{id}")

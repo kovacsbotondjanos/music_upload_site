@@ -42,9 +42,9 @@ public class AlbumService {
     }
 
     public void saveAlbum(CustomUserDetails userDetails,
-                           String protectionType,
-                           String name,
-                           MultipartFile image){
+                          String protectionType,
+                          String name,
+                          MultipartFile image){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
@@ -112,11 +112,11 @@ public class AlbumService {
     }
 
     public Album patchAlbum(CustomUserDetails userDetails,
-                           Long id,
-                           String protectionType,
-                           List<Long> songIds,
-                           String name,
-                           MultipartFile image){
+                            Long id,
+                            String protectionType,
+                            List<Long> songIds,
+                            String name,
+                            MultipartFile image){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
@@ -174,7 +174,6 @@ public class AlbumService {
         Album album = user.getAlbums().stream()
                 .filter(a -> a.getId().equals(id)).findAny()
                 .orElseThrow(UnauthenticatedException::new);
-
 
         user.getAlbums().remove(album);
         userRepository.save(user);

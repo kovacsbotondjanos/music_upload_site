@@ -14,13 +14,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.MalformedURLException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @RestController
 @CrossOrigin
 public class ResourceController {
-    private final String imagePathName = "images\\";
+    private final String imagePathName = "images" + FileSystems.getDefault().getSeparator();
     private final SongService songService;
 
     @Autowired
@@ -46,8 +47,8 @@ public class ResourceController {
     }
 
     @GetMapping("/music/{nameHashed}")
-    public ResponseEntity<Resource> getSong(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String nameHashed){
-
+    public ResponseEntity<Resource> getSong(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                            @PathVariable String nameHashed){
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("audio/mpeg"))
                 .body(songService.getSongInResourceFormatByNameHashed(userDetails, nameHashed));

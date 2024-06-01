@@ -10,6 +10,7 @@ import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.ProtectionTypeService;
 import com.musicUpload.dataHandler.services.SongService;
+import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
@@ -89,11 +90,12 @@ public class FindByIdTest {
     void canFindByIdNonExistingSongWithAuth(){
         //Given
         song.setId(2L);
+        song.setUser(new User(userDetails));
         userDetails.setSongs(List.of(song));
         given(songRepository.findById(id))
                 .willReturn(Optional.empty());
         //Then
-        assertThrows(UnauthenticatedException.class,
+        assertThrows(NotFoundException.class,
                 () -> songService.findById(userDetails, id));
     }
 
@@ -112,6 +114,7 @@ public class FindByIdTest {
     void canFindByIdPrivateWithUser(){
         //Given
         song.setProtectionType(privateprotectionType);
+        song.setUser(new User(userDetails));
         userDetails.setSongs(List.of(song));
         given(songRepository.findById(id))
                 .willReturn(Optional.of(song));

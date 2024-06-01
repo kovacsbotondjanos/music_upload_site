@@ -10,6 +10,7 @@ import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.ProtectionTypeService;
 import com.musicUpload.dataHandler.services.SongService;
+import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,7 +89,7 @@ public class FindByIdTest {
         given(albumRepository.findById(id))
                 .willReturn(Optional.empty());
         //Then
-        assertThrows(UnauthenticatedException.class,
+        assertThrows(NotFoundException.class,
                 () -> albumService.findById(id, userDetails));
     }
 
@@ -107,6 +108,7 @@ public class FindByIdTest {
     void canFindByIdPrivateWithUser(){
         //Given
         album.setProtectionType(privateprotectionType);
+        album.setUser(new User(userDetails));
         userDetails.setAlbums(List.of(album));
         given(albumRepository.findById(id))
                 .willReturn(Optional.of(album));

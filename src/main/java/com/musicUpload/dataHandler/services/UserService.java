@@ -14,10 +14,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,21 +60,21 @@ public class UserService implements UserDetailsService {
     public User registerUser(User user) {
 
         if(user.getEmail() == null || user.getPassword() == null || user.getUsername() == null){
-            throw new EmptyFieldException("Please fill out all the fields");
+            throw new WrongFormatException("Please fill out all the fields");
         }
 
         if(user.getPassword().length() < 8){
-            throw new PasswordInWrongFormatException("Password is in wrong format");
+            throw new NotAcceptableException("Password is in wrong format");
         }
 
         if(user.getUsername().isEmpty()){
-            throw new NameInWrongFormatException("Please fill the name field with valid data");
+            throw new NotAcceptableException("Please fill the name field with valid data");
         }
 
         Pattern p = Pattern.compile(ePattern);
         Matcher m = p.matcher(user.getEmail());
         if(!m.matches()){
-            throw new EmailInWrongFormatException("Please fill the email field with valid data");
+            throw new WrongFormatException("Please fill the email field with valid data");
         }
 
 
@@ -85,11 +86,11 @@ public class UserService implements UserDetailsService {
         }
 
         if(userRepository.findByUsername(user.getUsername()).isPresent()){
-            throw new NameInWrongFormatException("Username already exists");
+            throw new NotAcceptableException("Username already exists");
         }
 
         if(userRepository.findByEmail(user.getEmail()).isPresent()){
-            throw new EmailInWrongFormatException("Email already exists");
+            throw new WrongFormatException("Email already exists");
         }
 
         String image = imageFactory.getRandomImage();
@@ -104,8 +105,8 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public List<User> getUsers(){
-        return userRepository.findAll();
+    public Optional<User> findById(Long id){
+        return userRepository.findById(id);
     }
 
     public UserDTO findCurrUser(CustomUserDetails userDetails){
@@ -114,10 +115,72 @@ public class UserService implements UserDetailsService {
         }
 
         return findById(userDetails.getId()).map(UserDTO::new)
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(NotFoundException::new);
     }
 
-    public Optional<User> findById(Long id){
-        return userRepository.findById(id);
+    public List<User> getUsers(){
+        return userRepository.findAll();
+    }
+
+    public void patchUser(CustomUserDetails userDetails,
+                          String username,
+                          String email,
+                          String password,
+                          String oldPassword,
+                          MultipartFile image) {
+        //TODO: return something if these details doesnt match
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(NotFoundException::new);
+
+        if(username != null && !username.isEmpty()){
+            user.setUsername(username);
+        }
+
+        if(email != null){
+            Pattern p = Pattern.compile(ePattern);
+            Matcher m = p.matcher(user.getEmail());
+            if(!m.matches()){
+                throw new WrongFormatException();
+            }
+            user.setEmail(email);
+        }
+
+        if(password != null && oldPassword != null){
+            if(password.length() < 8 || !encoder.matches(oldPassword, userDetails.getPassword())) {
+                throw new NotAcceptableException();
+            }
+            user.setPassword(password);
+        }
+
+        if(image != null && !image.isEmpty()){
+            if(!Objects.requireNonNull(image.getContentType()).contains("image")){
+                throw  new UnprocessableException();
+            }
+
+            try {
+                imageFactory.deleteFile(user.getProfilePicture());
+                String hashedFileName = UUID.randomUUID() + ".jpg";
+                image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
+                user.setProfilePicture(hashedFileName);
+            }
+            catch (IOException e){
+                System.err.println(e.getMessage());
+            }
+        }
+
+        User u = userRepository.save(user);
+    }
+
+    public void deleteUser(CustomUserDetails userDetails){
+        if(userDetails == null){
+            throw new UnauthenticatedException();
+        }
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(NotFoundException::new);
+        userRepository.delete(user);
     }
 }

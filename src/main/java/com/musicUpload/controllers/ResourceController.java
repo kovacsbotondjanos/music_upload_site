@@ -1,7 +1,5 @@
 package com.musicUpload.controllers;
 
-
-import com.musicUpload.dataHandler.models.Song;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,17 +13,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin
 public class ResourceController {
     private final String imagePathName = "images\\";
-    private final String musicPathName = "music\\";
     private final SongService songService;
 
     @Autowired
@@ -33,6 +28,7 @@ public class ResourceController {
         this.songService = songService;
     }
 
+    //TODO: put the business logic in an other calss
     @GetMapping("/images/{name}")
     public ResponseEntity<Resource> getImage(@PathVariable String name){
         try{
@@ -52,42 +48,8 @@ public class ResourceController {
     @GetMapping("/music/{nameHashed}")
     public ResponseEntity<Resource> getSong(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String nameHashed){
 
-        Path path = Paths.get(musicPathName);
-
-        Optional<Song> songOptional = songService.findByNameHashed(nameHashed);
-        if(songOptional.isPresent() && !songOptional.get().getProtectionType().getName().equals("PRIVATE")){
-            try{
-                Path imagePath = path.resolve(songOptional.get().getNameHashed());
-                Resource resource = new UrlResource(imagePath.toUri());
-
-                if (resource.exists()) {
-                    return ResponseEntity.ok()
-                            .contentType(MediaType.parseMediaType("audio/mpeg"))
-                            .body(resource);
-                } else {
-                    return ResponseEntity.notFound().build();
-                }
-            }
-            catch (IOException e){
-                return ResponseEntity.notFound().build();
-            }
-        }
-
-        if (userDetails != null) {
-            Optional<Song> songOptionalForUser = userDetails.getSongs().stream().filter(s -> s.getNameHashed().equals(nameHashed)).findAny();
-            if(songOptionalForUser.isPresent()){
-                try{
-                    Path imagePath = path.resolve(songOptionalForUser.get().getNameHashed());
-                    Resource resource = new UrlResource(imagePath.toUri());
-                    return ResponseEntity.ok()
-                            .contentType(MediaType.parseMediaType("audio/mpeg"))
-                            .body(resource);
-                }
-                catch (IOException e){
-                    return ResponseEntity.notFound().build();
-                }
-            }
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("audio/mpeg"))
+                .body(songService.getSongInResourceFormatByNameHashed(userDetails, nameHashed));
     }
 }

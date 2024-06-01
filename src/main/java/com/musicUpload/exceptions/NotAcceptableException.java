@@ -4,12 +4,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.NOT_ACCEPTABLE)
-public class PasswordInWrongFormatException extends RuntimeException{
-    public PasswordInWrongFormatException(String msg){
+public class NotAcceptableException extends RuntimeException{
+    public NotAcceptableException(String msg){
         super(msg);
     }
 
-    public PasswordInWrongFormatException(){
+    public NotAcceptableException(){
         super();
     }
 }

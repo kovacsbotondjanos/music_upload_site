@@ -7,10 +7,7 @@ import com.musicUpload.dataHandler.models.ProtectionType;
 import com.musicUpload.dataHandler.models.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.exceptions.FileIsInWrongFormatException;
-import com.musicUpload.exceptions.ImageCannotBeSavedException;
-import com.musicUpload.exceptions.UnauthenticatedException;
-import com.musicUpload.exceptions.UserNotFoundException;
+import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,7 +61,7 @@ public class AlbumService {
         album.setProtectionType(protection);
 
         User user = userRepository.findById(userDetails.getId())
-                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(NotFoundException::new);
 
         album.setUser(user);
 
@@ -73,7 +70,7 @@ public class AlbumService {
         if(image != null && !image.isEmpty()){
             try{
                 if(!Objects.requireNonNull(image.getContentType()).contains("image")){
-                    throw new FileIsInWrongFormatException();
+                    throw new UnprocessableException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".jpg";
                 image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
@@ -81,7 +78,7 @@ public class AlbumService {
                 album.setImage(hashedFileName);
             }
             catch (IOException ioException){
-                throw new ImageCannotBeSavedException();
+                throw new UnprocessableException();
             }
         }
         else{
@@ -97,46 +94,19 @@ public class AlbumService {
         return albumRepository.save(album);
     }
 
-    public Album deleteAlbum(CustomUserDetails userDetails,
-                            Long id){
+    public List<AlbumDTO> getAlbums(CustomUserDetails userDetails){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
-
-        User user = userRepository.findById(userDetails.getId())
-                        .orElseThrow(UserNotFoundException::new);
-
-        Album album = user.getAlbums().stream()
-                .filter(a -> a.getId().equals(id)).findAny()
-                .orElseThrow(UnauthenticatedException::new);
-
-
-        user.getAlbums().remove(album);
-        userRepository.save(user);
-
-        ProtectionType protectionType = album.getProtectionType();
-        protectionType.getAlbums().remove(album);
-        protectionTypeService.save(protectionType);
-
-        imageFactory.deleteFile(album.getImage());
-
-        albumRepository.delete(album);
-        userDetails.getAlbums().remove(album);
-
-        return album;
+        return userDetails.getAlbums().stream().map(AlbumDTO::new).toList();
     }
 
     public AlbumDTO findById(Long id, CustomUserDetails userDetails){
-        Optional<Album> albumOptional = findById(id);
-        if(albumOptional.isPresent() && !albumOptional.get().getProtectionType().getName().equals("PRIVATE")){
-            return AlbumDTO.of(albumOptional.get());
-        }
-
-        if (userDetails != null) {
-            albumOptional = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny();
-            if(albumOptional.isPresent()){
-                return AlbumDTO.of(albumOptional.get());
-            }
+        Album album = findById(id)
+                .orElseThrow(NotFoundException::new);
+        if(!album.getProtectionType().getName().equals("PRIVATE") ||
+                userDetails != null && album.getUser().getId().equals(userDetails.getId())){
+            return AlbumDTO.of(album);
         }
         throw new UnauthenticatedException();
     }
@@ -162,10 +132,10 @@ public class AlbumService {
             album.setName(name);
         }
 
-        if(image != null && image.isEmpty()){
+        if(image != null && !image.isEmpty()){
             try{
                 if(!Objects.requireNonNull(image.getContentType()).contains("image")){
-                    throw new FileIsInWrongFormatException();
+                    throw new UnprocessableException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".jpg";
                 image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
@@ -173,7 +143,7 @@ public class AlbumService {
                 album.setImage(hashedFileName);
             }
             catch (IOException ioException){
-                throw new ImageCannotBeSavedException();
+                throw new UnprocessableException();
             }
         }
 
@@ -192,11 +162,33 @@ public class AlbumService {
         return albumRepository.save(album);
     }
 
-    public List<AlbumDTO> getAlbums(CustomUserDetails userDetails){
+    public Album deleteAlbum(CustomUserDetails userDetails,
+                             Long id){
         if(userDetails == null){
             throw new UnauthenticatedException();
         }
-        return userDetails.getAlbums().stream().map(AlbumDTO::new).toList();
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(NotFoundException::new);
+
+        Album album = user.getAlbums().stream()
+                .filter(a -> a.getId().equals(id)).findAny()
+                .orElseThrow(UnauthenticatedException::new);
+
+
+        user.getAlbums().remove(album);
+        userRepository.save(user);
+
+        ProtectionType protectionType = album.getProtectionType();
+        protectionType.getAlbums().remove(album);
+        protectionTypeService.save(protectionType);
+
+        imageFactory.deleteFile(album.getImage());
+
+        albumRepository.delete(album);
+        userDetails.getAlbums().remove(album);
+
+        return album;
     }
 
     private Optional<Album> findById(Long id){

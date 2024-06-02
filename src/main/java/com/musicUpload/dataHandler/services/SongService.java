@@ -1,11 +1,12 @@
 package com.musicUpload.dataHandler.services;
 
+import com.musicUpload.cronJobs.EntityManager;
 import com.musicUpload.cronJobs.SongListenCountJob;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.models.Song;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -35,9 +36,10 @@ public class SongService {
     private final MusicFactory musicFactory;
     private final ProtectionTypeService protectionTypeService;
     private final SongListenCountJob listenCountJob;
+    private final EntityManager<Song> entityManager;
 
     @Autowired
-    public SongService(SongRepository songRepository, UserRepository userRepository, AlbumRepository albumRepository, ImageFactory imageFactory, MusicFactory songFactory, ProtectionTypeService protectionTypeService, SongListenCountJob listenCountJob) {
+    public SongService(SongRepository songRepository, UserRepository userRepository, AlbumRepository albumRepository, ImageFactory imageFactory, MusicFactory songFactory, ProtectionTypeService protectionTypeService, SongListenCountJob listenCountJob, EntityManager<Song> entityManager) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
@@ -45,10 +47,13 @@ public class SongService {
         this.musicFactory = songFactory;
         this.protectionTypeService = protectionTypeService;
         this.listenCountJob = listenCountJob;
+        this.entityManager = entityManager;
     }
 
     public Song saveSong(Song song){
-        return songRepository.save(song);
+        Song s = songRepository.save(song);
+        entityManager.addEntity(s);
+        return s;
     }
 
     public Song saveSong(CustomUserDetails userDetails,
@@ -111,17 +116,24 @@ public class SongService {
 
         Song s = saveSong(song);
         userDetails.addSong(s);
+        entityManager.addEntity(s);
         return s;
     }
 
-    public Optional<Song> findById(Long id){
-        return songRepository.findById(id);
+    public Optional<Song> findById(Long id) {
+        Optional<Song> s = entityManager.getEntity(id);
+        if(s.isEmpty()){
+            //we only use this once, and if the opt is not empty we put it in the entityManager
+            s = songRepository.findById(id);
+        }
+        return s;
     }
 
     public SongDTO findById(CustomUserDetails userDetails,
                             Long id){
         Song song = findById(id)
                 .orElseThrow(NotFoundException::new);
+        entityManager.addEntity(song);
         if(!song.getProtectionType().getName().equals("PRIVATE") ||
                 userDetails != null && song.getUser().getId().equals(userDetails.getId())){
             return SongDTO.of(song);
@@ -131,6 +143,7 @@ public class SongService {
 
     public List<SongDTO> getRandomSongs(){
         return songRepository.getRandomSongs().stream()
+                .peek(entityManager::addEntity)
                 .map(SongDTO::new)
                 .toList();
     }
@@ -144,13 +157,21 @@ public class SongService {
     }
 
     public List<SongDTO> findByNameLike(CustomUserDetails userDetails, String name){
-        List<SongDTO> songs = songRepository.findByNameLike(name).stream().map(SongDTO::new).toList();
+        List<Song> songs = songRepository.findByNameLike(name);
         if(userDetails == null){
-            return songs.stream().filter(s -> s.getProtectionType().equals("PUBLIC")).limit(10).toList();
+            return songs.stream()
+                    .peek(entityManager::addEntity)
+                    .filter(s -> s.getProtectionType().getName().equals("PUBLIC")).limit(10)
+                    .map(SongDTO::new)
+                    .toList();
         }
         return songs.stream()
-                .filter(s -> s.getProtectionType().equals("PUBLIC")
-                        || s.getUserId().equals(userDetails.getId())).limit(10).toList();
+                .peek(entityManager::addEntity)
+                .filter(s -> s.getProtectionType().getName().equals("PUBLIC")
+                        || s.getUser().getId().equals(userDetails.getId()))
+                .limit(10)
+                .map(SongDTO::new)
+                .toList();
     }
 
     public Resource getSongInResourceFormatByNameHashed(CustomUserDetails userDetails, String nameHashed){
@@ -166,6 +187,7 @@ public class SongService {
 
                 if (resource.exists()) {
                     listenCountJob.addListenToSong(song.getId());
+                    entityManager.addEntity(song);
                     return resource;
                 } else {
                     throw new NotFoundException();
@@ -214,7 +236,7 @@ public class SongService {
             }
         }
 
-        songRepository.save(song);
+        entityManager.addEntity(songRepository.save(song));
     }
 
     public Song deleteSong(CustomUserDetails userDetails,
@@ -248,6 +270,7 @@ public class SongService {
         musicFactory.deleteFile(song.getNameHashed());
 
         userDetails.getSongs().remove(song);
+        entityManager.removeEntity(song.getId());
 
         return song;
     }

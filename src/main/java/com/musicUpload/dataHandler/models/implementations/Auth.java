@@ -1,7 +1,8 @@
-package com.musicUpload.dataHandler.models;
+package com.musicUpload.dataHandler.models.implementations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
+import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,12 +12,12 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
 @Entity
-@ToString(exclude = {"id", "songs", "albums"})
+@Data
+@ToString(exclude = {"users"})
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProtectionType {
+public class Auth implements CustomEntityInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonIgnore
@@ -25,11 +26,7 @@ public class ProtectionType {
     @Expose
     private String name;
 
-    @OneToMany(mappedBy = "protectionType", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "authority", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Song> songs = new ArrayList<>();
-
-    @OneToMany(mappedBy = "protectionType", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Album> albums = new ArrayList<>();
+    private List<User> users = new ArrayList<>();
 }

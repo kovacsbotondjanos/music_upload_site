@@ -1,5 +1,6 @@
 package com.musicUpload.cronJobs;
 
+import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import lombok.Data;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -9,17 +10,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
-public class EntityManager<T> {
-    private ConcurrentMap<Long, EntityWrapper<T>> entityMap;
-    private final int SCHEDULE = 1 * 1000 * 60;
-    private final int REMOVE_SCHEDULE = 15 * 1000 * 60;
+public class EntityManager<T extends CustomEntityInterface> {
+    private final ConcurrentMap<Long, EntityWrapper<T>> entityMap = new ConcurrentHashMap<>();
+    private final int SCHEDULE = 15 * 1000 * 60;
+    private final int REMOVE_SCHEDULE = 30 * 1000 * 60;
 
-    public EntityManager() {
-        entityMap = new ConcurrentHashMap<>();
-    }
-
-    public void addEntity(Long id, T entity) {
-        entityMap.put(id, new EntityWrapper<>(entity));
+    public void addEntity(T entity) {
+        entityMap.put(entity.getId(), new EntityWrapper<>(entity));
     }
 
     public void removeEntity(Long id) {

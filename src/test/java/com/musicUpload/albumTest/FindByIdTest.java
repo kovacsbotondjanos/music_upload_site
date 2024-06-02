@@ -1,10 +1,11 @@
 package com.musicUpload.albumTest;
 
+import com.musicUpload.cronJobs.EntityManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.Album;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.Album;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
@@ -38,6 +39,8 @@ public class FindByIdTest {
     private SongService songService;
     @Mock
     private ImageFactory imageFactory;
+    @Mock
+    private EntityManager<Album> albumEntityManager;
 
     private AlbumService albumService;
     private Album album;
@@ -58,7 +61,8 @@ public class FindByIdTest {
                                         userRepository,
                                         protectionTypeService,
                                         songService,
-                                        imageFactory);
+                                        imageFactory,
+                                        albumEntityManager);
         id = 1L;
         album = new Album(id,
                         "",

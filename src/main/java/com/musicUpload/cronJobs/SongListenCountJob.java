@@ -1,6 +1,6 @@
 package com.musicUpload.cronJobs;
 
-import com.musicUpload.dataHandler.models.Song;
+import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,7 +29,6 @@ public class SongListenCountJob {
     @Scheduled(fixedRate = SCHEDULE)
     public void saveReport(){
         var copyMap = userSongMap;
-        System.out.println(copyMap);
         copyMap.forEach((s, l) -> {
             Optional<Song> songOpt = songRepository.findById(s);
             songOpt.ifPresent(song -> {

@@ -1,6 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
-import com.musicUpload.dataHandler.models.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import com.musicUpload.dataHandler.repositories.ProtectionTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

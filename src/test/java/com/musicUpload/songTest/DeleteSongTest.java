@@ -1,9 +1,11 @@
 package com.musicUpload.songTest;
 
+import com.musicUpload.cronJobs.EntityManager;
+import com.musicUpload.cronJobs.SongListenCountJob;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.models.Song;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -35,6 +37,10 @@ public class DeleteSongTest {
     private MusicFactory songFactory;
     @Mock
     private ProtectionTypeService protectionTypeService;
+    @Mock
+    private SongListenCountJob listenCountJob;
+    @Mock
+    private EntityManager<Song> entityManager;
 
     private SongService songService;
     private List<Song> songs;
@@ -55,12 +61,15 @@ public class DeleteSongTest {
                 albumRepository,
                 imageFactory,
                 songFactory,
-                protectionTypeService);
+                protectionTypeService,
+                listenCountJob,
+                entityManager);
         songs = List.of(
                 new Song(1L,
                         "",
                         "foo",
                         "",
+                        1L,
                         protectionType,
                         new User(),
                         new ArrayList<>(),
@@ -70,6 +79,7 @@ public class DeleteSongTest {
                         "",
                         "bar",
                         "",
+                        1L,
                         protectionType,
                         new User(),
                         new ArrayList<>(),
@@ -79,6 +89,7 @@ public class DeleteSongTest {
                         "",
                         "baz",
                         "",
+                        1L,
                         protectionType,
                         new User(),
                         new ArrayList<>(),

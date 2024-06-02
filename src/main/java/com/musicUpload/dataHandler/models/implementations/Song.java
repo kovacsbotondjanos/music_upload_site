@@ -1,6 +1,7 @@
-package com.musicUpload.dataHandler.models;
+package com.musicUpload.dataHandler.models.implementations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"protectionType", "user", "albums"})
-public class Song {
+public class Song implements CustomEntityInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

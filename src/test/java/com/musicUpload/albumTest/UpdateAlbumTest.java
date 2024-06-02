@@ -1,7 +1,8 @@
 package com.musicUpload.albumTest;
 
+import com.musicUpload.cronJobs.EntityManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.*;
+import com.musicUpload.dataHandler.models.implementations.*;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
@@ -34,6 +35,8 @@ public class UpdateAlbumTest {
     private SongService songService;
     @Mock
     private ImageFactory imageFactory;
+    @Mock
+    private EntityManager<Album> albumEntityManager;
 
     private AlbumService albumService;
     private Album album;
@@ -52,6 +55,7 @@ public class UpdateAlbumTest {
             "",
             "foo",
             "",
+            0L,
             privateProtectionType,
             new User(),
             new ArrayList<>(),
@@ -65,7 +69,8 @@ public class UpdateAlbumTest {
                 userRepository,
                 protectionTypeService,
                 songService,
-                imageFactory);
+                imageFactory,
+                albumEntityManager);
         id = 1L;
         album = new Album(id,
                 "",

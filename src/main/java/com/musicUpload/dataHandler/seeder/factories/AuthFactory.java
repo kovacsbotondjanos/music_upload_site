@@ -3,7 +3,7 @@ package com.musicUpload.dataHandler.seeder.factories;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.musicUpload.dataHandler.models.Auth;
+import com.musicUpload.dataHandler.models.implementations.Auth;
 import com.musicUpload.dataHandler.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,10 +1,11 @@
 package com.musicUpload.dataHandler.services;
 
+import com.musicUpload.cronJobs.EntityManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.Album;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.Album;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
@@ -28,17 +29,19 @@ public class AlbumService {
     private final ProtectionTypeService protectionTypeService;
     private final SongService songService;
     private final ImageFactory imageFactory;
+    private final EntityManager<Album> albumEntityManager;
 
     @Autowired
     public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
                         ProtectionTypeService protectionTypeService,
                         SongService songService,
-                        ImageFactory imageFactory) {
+                        ImageFactory imageFactory, EntityManager<Album> albumEntityManager) {
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
         this.protectionTypeService = protectionTypeService;
         this.songService = songService;
         this.imageFactory = imageFactory;
+        this.albumEntityManager = albumEntityManager;
     }
 
     public void saveAlbum(CustomUserDetails userDetails,

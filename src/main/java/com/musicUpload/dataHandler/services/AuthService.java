@@ -1,6 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
-import com.musicUpload.dataHandler.models.Auth;
+import com.musicUpload.dataHandler.models.implementations.Auth;
 import com.musicUpload.dataHandler.repositories.AuthRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

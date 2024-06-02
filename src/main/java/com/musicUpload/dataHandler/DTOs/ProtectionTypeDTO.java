@@ -1,6 +1,6 @@
 package com.musicUpload.dataHandler.DTOs;
 
-import com.musicUpload.dataHandler.models.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import lombok.Data;
 
 @Data

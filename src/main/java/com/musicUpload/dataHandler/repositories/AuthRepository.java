@@ -1,6 +1,6 @@
 package com.musicUpload.dataHandler.repositories;
 
-import com.musicUpload.dataHandler.models.Auth;
+import com.musicUpload.dataHandler.models.implementations.Auth;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

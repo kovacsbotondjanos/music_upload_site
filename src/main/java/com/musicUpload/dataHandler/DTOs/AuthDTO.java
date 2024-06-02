@@ -1,6 +1,6 @@
 package com.musicUpload.dataHandler.DTOs;
 
-import com.musicUpload.dataHandler.models.Auth;
+import com.musicUpload.dataHandler.models.implementations.Auth;
 import lombok.Data;
 
 @Data

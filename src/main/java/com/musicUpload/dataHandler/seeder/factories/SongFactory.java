@@ -1,9 +1,9 @@
 package com.musicUpload.dataHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.models.Song;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
@@ -52,7 +52,7 @@ public class SongFactory {
         song.setNameHashed(musicFactory.createSong());
         song.setImage(imageFactory.getRandomImage());
         song.setProtectionType(protectionTypes.get(random.nextInt(1, Integer.MAX_VALUE) % protectionTypes.size()));
-//        song.setListenCount(faker.number().numberBetween(0L, 100L));
+        song.setListenCount(faker.number().numberBetween(0L, 100L));
 
         User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
 

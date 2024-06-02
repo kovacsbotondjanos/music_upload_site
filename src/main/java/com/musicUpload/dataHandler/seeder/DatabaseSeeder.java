@@ -1,11 +1,11 @@
 package com.musicUpload.dataHandler.seeder;
 
-import com.musicUpload.dataHandler.models.Auth;
+import com.musicUpload.dataHandler.models.implementations.Auth;
 import com.musicUpload.dataHandler.services.AuthService;
-import com.musicUpload.dataHandler.models.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import com.musicUpload.dataHandler.services.ProtectionTypeService;
-import com.musicUpload.dataHandler.models.Song;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.dataHandler.seeder.factories.*;
 import org.springframework.beans.factory.annotation.Autowired;

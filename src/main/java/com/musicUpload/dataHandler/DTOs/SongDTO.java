@@ -1,6 +1,6 @@
 package com.musicUpload.dataHandler.DTOs;
 
-import com.musicUpload.dataHandler.models.Song;
+import com.musicUpload.dataHandler.models.implementations.Song;
 import lombok.Data;
 
 import java.util.Date;

@@ -59,6 +59,7 @@ public class UpdateAlbumTest {
             privateProtectionType,
             new User(),
             new ArrayList<>(),
+            new ArrayList<>(),
             new Date(),
             new Date());
 
@@ -81,7 +82,7 @@ public class UpdateAlbumTest {
                 new Date(),
                 new Date());
         user = new User(1L, null, null, null,
-                "user", List.of(), List.of(), new Auth(), List.of(), List.of(), null, null);
+                "user", List.of(), List.of(), new Auth(), List.of(), List.of(), List.of(), null, null);
     }
 
     @Test

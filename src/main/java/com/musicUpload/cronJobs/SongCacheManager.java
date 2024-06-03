@@ -2,11 +2,12 @@ package com.musicUpload.cronJobs;
 
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.repositories.SongRepository;
+import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -16,13 +17,15 @@ import java.util.concurrent.ConcurrentMap;
 public class SongCacheManager {
     private final EntityManager<Song> songEntityManager;
     private final SongRepository songRepository;
+    private final UserRepository userRepository;
     private final int SCHEDULE = 5 * 1000 * 60;
     private ConcurrentMap<Long, Long> songListensBuffer;
 
     @Autowired
-    public SongCacheManager(EntityManager<Song> songEntityManager, SongRepository songRepository) {
+    public SongCacheManager(EntityManager<Song> songEntityManager, SongRepository songRepository, UserRepository userRepository) {
         this.songEntityManager = songEntityManager;
         this.songRepository = songRepository;
+        this.userRepository = userRepository;
         songListensBuffer = new ConcurrentHashMap<>();
     }
 
@@ -51,17 +54,17 @@ public class SongCacheManager {
         var copyMap = songListensBuffer;
         songListensBuffer = new ConcurrentHashMap<>();
         new Thread(() -> {
-            ConcurrentLinkedQueue<Song> songsToSave = new ConcurrentLinkedQueue<>();
+            ConcurrentLinkedQueue<Pair<Song, Long>> songsToSave = new ConcurrentLinkedQueue<>();
             copyMap.entrySet().stream()
                     .parallel()
                     .forEach(e -> {
                         Optional<Song> songOpt = songRepository.findById(e.getKey());
                         songOpt.ifPresent(song -> {
                             song.addListen(e.getValue());
-                            songsToSave.add(song);
+                            songsToSave.add(new Pair<>(song, null));
                         });
                     });
-            songRepository.saveAll(new ArrayList<>(songsToSave));
+            songRepository.saveAll(songsToSave.stream().parallel().map(Pair::getFirst).toList());
         });
     }
 }

@@ -38,6 +38,10 @@ public class Song implements CustomEntityInterface {
     @JsonIgnore
     private List<Album> albums = new ArrayList<>();
 
+    @OneToMany(mappedBy = "song", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<UserSong> userSong = new ArrayList<>();
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;

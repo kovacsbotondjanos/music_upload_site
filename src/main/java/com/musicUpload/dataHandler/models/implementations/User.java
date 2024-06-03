@@ -55,6 +55,10 @@ public class User implements CustomEntityInterface {
     @JsonIgnore
     private List<User> followedUsers = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<UserSong> userSong = new ArrayList<>();
+
     @ManyToMany(mappedBy = "followedUsers")
     @JsonIgnore
     private List<User> followers = new ArrayList<>();

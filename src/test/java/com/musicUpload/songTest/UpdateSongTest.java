@@ -71,6 +71,7 @@ public class UpdateSongTest {
                 new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>()),
                 new User(),
                 new ArrayList<>(),
+                new ArrayList<>(),
                 new Date(),
                 new Date());
         userDetails = new CustomUserDetails(

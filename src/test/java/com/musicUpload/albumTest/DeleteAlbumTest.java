@@ -41,17 +41,17 @@ public class DeleteAlbumTest {
 
     private AlbumService albumService;
     private List<Album> albums;
-    private CustomUserDetails userDetails = new CustomUserDetails(1L,
+    private final CustomUserDetails userDetails = new CustomUserDetails(1L,
             "user1",
             "pwd",
             List.of(),
             "",
             List.of(),
             List.of());
-    private ProtectionType protectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
+    private final ProtectionType protectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
 
     @BeforeEach
-    void onSetUp(){
+    void onSetUp() {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
                 userRepository,
@@ -87,13 +87,13 @@ public class DeleteAlbumTest {
     }
 
     @Test
-    void canDeleteAlbumWithoutAuth(){
+    void canDeleteAlbumWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
                 () -> albumService.deleteAlbum(null, 1L));
     }
 
     @Test
-    void canDeleteOtherUsersAlbum(){
+    void canDeleteOtherUsersAlbum() {
         //Given
         userDetails.setAlbums(List.of(albums.get(0)));
         given(userRepository.findById(1L))
@@ -104,7 +104,7 @@ public class DeleteAlbumTest {
     }
 
     @Test
-    void canDeleteOwnAlbumWithAuth(){
+    void canDeleteOwnAlbumWithAuth() {
         //Given
         userDetails.setAlbums(new ArrayList<>(List.of(albums.get(0))));
         given(userRepository.findById(1L))

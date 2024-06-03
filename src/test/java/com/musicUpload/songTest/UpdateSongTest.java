@@ -1,7 +1,7 @@
 package com.musicUpload.songTest;
 
 import com.musicUpload.cronJobs.EntityManager;
-import com.musicUpload.cronJobs.SongListenCountJob;
+import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
@@ -42,7 +42,7 @@ public class UpdateSongTest {
     @Mock
     private ProtectionTypeService protectionTypeService;
     @Mock
-    private SongListenCountJob listenCountJob;
+    private SongCacheManager listenCountJob;
     @Mock
     private EntityManager<Song> entityManager;
 
@@ -52,16 +52,16 @@ public class UpdateSongTest {
     private CustomUserDetails userDetails;
 
     @BeforeEach
-    void onSetUp(){
+    void onSetUp() {
         MockitoAnnotations.initMocks(this);
         songService = new SongService(songRepository,
-                                      userRepository,
-                                      albumRepository,
-                                      imageFactory,
-                                      songFactory,
-                                      protectionTypeService,
-                                      listenCountJob,
-                                      entityManager);
+                userRepository,
+                albumRepository,
+                imageFactory,
+                songFactory,
+                protectionTypeService,
+                listenCountJob,
+                entityManager);
         id = 1L;
         song = new Song(id,
                 "",
@@ -84,7 +84,7 @@ public class UpdateSongTest {
     }
 
     @Test
-    void updateSongWithoutAuth(){
+    void updateSongWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
                 () -> songService.updateSong(
                         null,
@@ -95,7 +95,7 @@ public class UpdateSongTest {
     }
 
     @Test
-    void updateOtherUsersSong(){
+    void updateOtherUsersSong() {
         assertThrows(UnauthenticatedException.class,
                 () -> songService.updateSong(
                         userDetails,
@@ -106,25 +106,25 @@ public class UpdateSongTest {
     }
 
     @Test
-    void updateNameTest(){
+    void updateNameTest() {
         songService.updateSong(userDetails,
-                            1L,
-                            null,
-                            "bar",
-                            null);
+                1L,
+                null,
+                "bar",
+                null);
 
         assertEquals("bar", song.getName());
     }
 
     @Test
-    void updateProtectionTest(){
+    void updateProtectionTest() {
         given(protectionTypeService.getProtectionTypeByName("PROTECTED"))
                 .willReturn(Optional.of(new ProtectionType(1L, "PROTECTED", null, null)));
         songService.updateSong(userDetails,
-                            1L,
-                            "PROTECTED",
-                            null,
-                            null);
+                1L,
+                "PROTECTED",
+                null,
+                null);
 
         assertEquals("PROTECTED", song.getProtectionType().getName());
     }

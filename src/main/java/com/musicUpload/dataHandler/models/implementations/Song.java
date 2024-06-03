@@ -56,11 +56,11 @@ public class Song implements CustomEntityInterface {
         createdAt = new Date();
     }
 
-    public void addListen(){
+    public void addListen() {
         listenCount++;
     }
 
-    public void addListen(Long count){
+    public void addListen(Long count) {
         listenCount += count;
     }
 }

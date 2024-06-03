@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.UNPROCESSABLE_ENTITY)
 public class UnprocessableException extends RuntimeException {
-    public UnprocessableException(String msg){
+    public UnprocessableException(String msg) {
         super(msg);
     }
 
-    public UnprocessableException(){
+    public UnprocessableException() {
         super();
     }
 }

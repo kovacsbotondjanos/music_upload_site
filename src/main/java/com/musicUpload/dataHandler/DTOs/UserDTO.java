@@ -21,7 +21,7 @@ public class UserDTO {
     private List<Long> followers;
     private Date createdAt;
 
-    public UserDTO(User user){
+    public UserDTO(User user) {
         this.id = user.getId();
         this.profilePicture = user.getProfilePicture();
         this.email = user.getEmail();
@@ -34,7 +34,7 @@ public class UserDTO {
         this.createdAt = user.getCreatedAt();
     }
 
-    public static UserDTO of(User user){
+    public static UserDTO of(User user) {
         return new UserDTO(user);
     }
 }

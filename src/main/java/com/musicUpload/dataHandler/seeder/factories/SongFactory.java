@@ -29,7 +29,7 @@ public class SongFactory {
         musicFactory.createMusicDir();
     }
 
-    public List<Song> generateSongs(int number, List<User> users, List<ProtectionType> protectionTypes){
+    public List<Song> generateSongs(int number, List<User> users, List<ProtectionType> protectionTypes) {
         List<Song> songs = new CopyOnWriteArrayList<>();
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
@@ -41,7 +41,7 @@ public class SongFactory {
         return songs;
     }
 
-    private Song createSong(List<User> users, List<ProtectionType> protectionTypes){
+    private Song createSong(List<User> users, List<ProtectionType> protectionTypes) {
         Song song = new Song();
         Random random = new Random();
 
@@ -56,7 +56,7 @@ public class SongFactory {
 
         User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
 
-        synchronized (user){
+        synchronized (user) {
             song.setUser(user);
             user.getSongs().add(song);
         }

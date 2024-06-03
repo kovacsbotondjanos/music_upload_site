@@ -18,26 +18,25 @@ import java.util.UUID;
 public class ImageFactory {
     private final String dirName = System.getProperty("user.dir") + FileSystems.getDefault().getSeparator() + "images";
 
-    public void deleteFile(String fileName){
+    public void deleteFile(String fileName) {
         File f = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
-        if(f.delete()){
+        if (f.delete()) {
             System.out.println(f.getName() + " deleted");
         }
     }
 
-    public void createImagesDir(){
-        try{
+    public void createImagesDir() {
+        try {
             Path dir = Path.of(dirName);
             if (Files.notExists(dir)) {
                 Files.createDirectories(dir);
             }
-        }
-        catch (IOException ioe){
+        } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
         }
     }
 
-    public String saveFile(ByteArrayInputStream byteArrayInputStream) throws IOException, NullPointerException{
+    public String saveFile(ByteArrayInputStream byteArrayInputStream) throws IOException, NullPointerException {
         BufferedImage bufferedImage = ImageIO.read(byteArrayInputStream);
         if (bufferedImage == null) {
             throw new NullPointerException("Could not create image from byte array.");
@@ -49,8 +48,8 @@ public class ImageFactory {
         return fileName;
     }
 
-    public String getRandomImage(){
-        try{
+    public String getRandomImage() {
+        try {
             URL imageUrl = new URL("https://picsum.photos/200");
             HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
             connection.setRequestMethod("GET");
@@ -58,7 +57,7 @@ public class ImageFactory {
             connection.connect();
 
             try (InputStream inputStream = connection.getInputStream();
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[200];
                 int bytesRead;
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -68,8 +67,7 @@ public class ImageFactory {
                 byte[] imageBytes = outputStream.toByteArray();
                 return saveFile(new ByteArrayInputStream(imageBytes));
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e.getMessage());
         }
         return "";

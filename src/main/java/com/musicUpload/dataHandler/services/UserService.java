@@ -27,9 +27,8 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final AuthService authService;
     private final ImageFactory imageFactory;
-
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Autowired
     public UserService(UserRepository userRepository, AuthService authService, ImageFactory imageFactory) {
@@ -59,37 +58,37 @@ public class UserService implements UserDetailsService {
 
     public User registerUser(User user) {
 
-        if(user.getEmail() == null || user.getPassword() == null || user.getUsername() == null){
+        if (user.getEmail() == null || user.getPassword() == null || user.getUsername() == null) {
             throw new WrongFormatException("Please fill out all the fields");
         }
 
-        if(user.getPassword().length() < 8){
+        if (user.getPassword().length() < 8) {
             throw new NotAcceptableException("Password is in wrong format");
         }
 
-        if(user.getUsername().isEmpty()){
+        if (user.getUsername().isEmpty()) {
             throw new NotAcceptableException("Please fill the name field with valid data");
         }
 
         Pattern p = Pattern.compile(ePattern);
         Matcher m = p.matcher(user.getEmail());
-        if(!m.matches()){
+        if (!m.matches()) {
             throw new WrongFormatException("Please fill the email field with valid data");
         }
 
 
         //TODO: This will have to change in the future, bc it can be unsafe
-        if(user.getAuthority() == null){
+        if (user.getAuthority() == null) {
             Auth auth = authService.getByName("USER")
-                            .orElseThrow(NotFoundException::new);
+                    .orElseThrow(NotFoundException::new);
             user.setAuthority(auth);
         }
 
-        if(userRepository.findByUsername(user.getUsername()).isPresent()){
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new NotAcceptableException("Username already exists");
         }
 
-        if(userRepository.findByEmail(user.getEmail()).isPresent()){
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new WrongFormatException("Email already exists");
         }
 
@@ -101,16 +100,16 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public User saveUser(User user){
+    public User saveUser(User user) {
         return userRepository.save(user);
     }
 
-    public Optional<User> findById(Long id){
+    public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
 
-    public UserDTO findCurrUser(CustomUserDetails userDetails){
-        if(userDetails == null){
+    public UserDTO findCurrUser(CustomUserDetails userDetails) {
+        if (userDetails == null) {
             throw new UnauthenticatedException();
         }
 
@@ -118,7 +117,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(NotFoundException::new);
     }
 
-    public List<User> getUsers(){
+    public List<User> getUsers() {
         return userRepository.findAll();
     }
 
@@ -129,36 +128,36 @@ public class UserService implements UserDetailsService {
                           String oldPassword,
                           MultipartFile image) {
         //TODO: return something if these details doesnt match
-        if(userDetails == null){
+        if (userDetails == null) {
             throw new UnauthenticatedException();
         }
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
 
-        if(username != null && !username.isEmpty()){
+        if (username != null && !username.isEmpty()) {
             user.setUsername(username);
         }
 
-        if(email != null){
+        if (email != null) {
             Pattern p = Pattern.compile(ePattern);
             Matcher m = p.matcher(user.getEmail());
-            if(!m.matches()){
+            if (!m.matches()) {
                 throw new WrongFormatException();
             }
             user.setEmail(email);
         }
 
-        if(password != null && oldPassword != null){
-            if(password.length() < 8 || !encoder.matches(oldPassword, userDetails.getPassword())) {
+        if (password != null && oldPassword != null) {
+            if (password.length() < 8 || !encoder.matches(oldPassword, userDetails.getPassword())) {
                 throw new NotAcceptableException();
             }
             user.setPassword(password);
         }
 
-        if(image != null && !image.isEmpty()){
-            if(!Objects.requireNonNull(image.getContentType()).contains("image")){
-                throw  new UnprocessableException();
+        if (image != null && !image.isEmpty()) {
+            if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
+                throw new UnprocessableException();
             }
 
             try {
@@ -166,8 +165,7 @@ public class UserService implements UserDetailsService {
                 String hashedFileName = UUID.randomUUID() + ".jpg";
                 image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
                 user.setProfilePicture(hashedFileName);
-            }
-            catch (IOException e){
+            } catch (IOException e) {
                 System.err.println(e.getMessage());
             }
         }
@@ -175,8 +173,8 @@ public class UserService implements UserDetailsService {
         User u = userRepository.save(user);
     }
 
-    public void deleteUser(CustomUserDetails userDetails){
-        if(userDetails == null){
+    public void deleteUser(CustomUserDetails userDetails) {
+        if (userDetails == null) {
             throw new UnauthenticatedException();
         }
         User user = userRepository.findById(userDetails.getId())

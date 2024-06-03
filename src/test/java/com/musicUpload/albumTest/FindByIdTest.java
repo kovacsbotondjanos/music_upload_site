@@ -29,6 +29,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 public class FindByIdTest {
+    CustomUserDetails userDetails = new CustomUserDetails(1L,
+            "user1",
+            "pwd",
+            List.of(),
+            "",
+            List.of(),
+            List.of());
     @Mock
     private AlbumRepository albumRepository;
     @Mock
@@ -41,41 +48,33 @@ public class FindByIdTest {
     private ImageFactory imageFactory;
     @Mock
     private EntityManager<Album> albumEntityManager;
-
     private AlbumService albumService;
     private Album album;
     private Long id;
-    private ProtectionType privateprotectionType = new ProtectionType(1L, "PRIVATE", List.of(), List.of());
-    CustomUserDetails userDetails = new CustomUserDetails(1L,
-                                                        "user1",
-                                                        "pwd",
-                                                        List.of(),
-                                                        "",
-                                                        List.of(),
-                                                        List.of());
+    private final ProtectionType privateprotectionType = new ProtectionType(1L, "PRIVATE", List.of(), List.of());
 
     @BeforeEach
-    void onSetUp(){
+    void onSetUp() {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
-                                        userRepository,
-                                        protectionTypeService,
-                                        songService,
-                                        imageFactory,
-                                        albumEntityManager);
+                userRepository,
+                protectionTypeService,
+                songService,
+                imageFactory,
+                albumEntityManager);
         id = 1L;
         album = new Album(id,
-                        "",
-                        "foo",
-                        new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>()),
-                        new User(),
-                        new ArrayList<>(),
-                        new Date(),
-                        new Date());
+                "",
+                "foo",
+                new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>()),
+                new User(),
+                new ArrayList<>(),
+                new Date(),
+                new Date());
     }
 
     @Test
-    void canFindByIdPublicAlbum(){
+    void canFindByIdPublicAlbum() {
         //Given
         given(albumRepository.findById(id))
                 .willReturn(Optional.of(album));
@@ -86,7 +85,7 @@ public class FindByIdTest {
     }
 
     @Test
-    void canFindByIdNonExistingWithAuthAlbum(){
+    void canFindByIdNonExistingWithAuthAlbum() {
         //Given
         album.setId(2L);
         userDetails.setAlbums(List.of(album));
@@ -98,7 +97,7 @@ public class FindByIdTest {
     }
 
     @Test
-    void canFindByIdPrivateNoAuth(){
+    void canFindByIdPrivateNoAuth() {
         //Given
         album.setProtectionType(privateprotectionType);
         given(albumRepository.findById(id))
@@ -109,7 +108,7 @@ public class FindByIdTest {
     }
 
     @Test
-    void canFindByIdPrivateWithUser(){
+    void canFindByIdPrivateWithUser() {
         //Given
         album.setProtectionType(privateprotectionType);
         album.setUser(new User(userDetails));

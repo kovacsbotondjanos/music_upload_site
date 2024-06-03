@@ -1,13 +1,13 @@
 package com.musicUpload.dataHandler.seeder;
 
 import com.musicUpload.dataHandler.models.implementations.Auth;
-import com.musicUpload.dataHandler.services.AuthService;
 import com.musicUpload.dataHandler.models.implementations.ProtectionType;
-import com.musicUpload.dataHandler.services.ProtectionTypeService;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
-import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.dataHandler.seeder.factories.*;
+import com.musicUpload.dataHandler.services.AuthService;
+import com.musicUpload.dataHandler.services.ProtectionTypeService;
+import com.musicUpload.dataHandler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +37,7 @@ public class DatabaseSeeder {
         this.protectionTypeFactory = protectionTypeFactory;
     }
 
-    public void seedDatabase(){
+    public void seedDatabase() {
         List<Auth> auths = authService.getAllPossibleAuth();
         List<ProtectionType> protectionTypes = protectionTypeService.getAllPossibleProtectionType();
 
@@ -50,8 +50,8 @@ public class DatabaseSeeder {
         albumFactory.createAlbums(20, users, songs, protectionTypes);
     }
 
-    public void seedDatabaseIfEmpty(){
-        if(userService.getUsers().isEmpty()){
+    public void seedDatabaseIfEmpty() {
+        if (userService.getUsers().isEmpty()) {
             List<Auth> auths = authFactory.createAuthorities();
 
             protectionTypeFactory.generateProtectionTypes();

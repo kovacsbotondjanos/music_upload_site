@@ -10,10 +10,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class MusicUploadApplication {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(MusicUploadApplication.class, args);
-		DatabaseSeeder dbSeeder = context.getBean(DatabaseSeeder.class);
-		//TODO: take this out soon
-		dbSeeder.seedDatabaseIfEmpty();
-	}
+        DatabaseSeeder dbSeeder = context.getBean(DatabaseSeeder.class);
+        //TODO: take this out soon
+        dbSeeder.seedDatabaseIfEmpty();
+    }
 }

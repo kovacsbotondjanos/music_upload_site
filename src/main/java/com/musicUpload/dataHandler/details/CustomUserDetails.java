@@ -48,7 +48,7 @@ public class CustomUserDetails implements UserDetails {
         return authorities.stream().toList();
     }
 
-    public List<Song> addSong(Song song){
+    public List<Song> addSong(Song song) {
         songs.add(song);
         return songs;
     }

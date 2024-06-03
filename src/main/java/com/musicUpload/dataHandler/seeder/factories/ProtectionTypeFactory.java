@@ -23,7 +23,7 @@ public class ProtectionTypeFactory {
         this.protectionTypeService = protectionTypeService;
     }
 
-    public List<ProtectionType> generateProtectionTypes(){
+    public List<ProtectionType> generateProtectionTypes() {
         List<ProtectionType> protectionTypes;
 
         Gson gson = new GsonBuilder()
@@ -33,13 +33,12 @@ public class ProtectionTypeFactory {
         try (InputStream inputStream = classLoader.getResourceAsStream("protectionConfig.json")) {
             assert inputStream != null;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                TypeToken<List<ProtectionType>> token = new TypeToken<>() {};
+                TypeToken<List<ProtectionType>> token = new TypeToken<>() { };
                 protectionTypes = gson.fromJson(reader, token.getType());
                 protectionTypes.stream().parallel().forEach(protectionTypeService::save);
                 return protectionTypes;
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e.getMessage());
         }
 

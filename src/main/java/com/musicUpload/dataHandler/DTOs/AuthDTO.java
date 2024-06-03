@@ -8,12 +8,12 @@ public class AuthDTO {
     private Long id;
     private String name;
 
-    public AuthDTO(Auth auth){
+    public AuthDTO(Auth auth) {
         this.id = auth.getId();
         this.name = auth.getName();
     }
 
-    public static AuthDTO of(Auth auth){
+    public static AuthDTO of(Auth auth) {
         return new AuthDTO(auth);
     }
 }

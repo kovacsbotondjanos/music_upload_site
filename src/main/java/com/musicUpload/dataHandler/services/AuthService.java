@@ -17,15 +17,15 @@ public class AuthService {
         this.authRepository = authRepository;
     }
 
-    public Auth save(Auth auth){
+    public Auth save(Auth auth) {
         return authRepository.save(auth);
     }
 
-    public Optional<Auth> getByName(String name){
+    public Optional<Auth> getByName(String name) {
         return authRepository.findByName(name);
     }
 
-    public List<Auth> getAllPossibleAuth(){
+    public List<Auth> getAllPossibleAuth() {
         return authRepository.findAll();
     }
 }

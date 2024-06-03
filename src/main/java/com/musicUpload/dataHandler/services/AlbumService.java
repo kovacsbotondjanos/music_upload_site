@@ -8,7 +8,10 @@ import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.exceptions.*;
+import com.musicUpload.exceptions.NotFoundException;
+import com.musicUpload.exceptions.UnauthenticatedException;
+import com.musicUpload.exceptions.UnprocessableException;
+import com.musicUpload.exceptions.WrongFormatException;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,8 +50,8 @@ public class AlbumService {
     public void saveAlbum(CustomUserDetails userDetails,
                           String protectionType,
                           String name,
-                          MultipartFile image){
-        if(userDetails == null){
+                          MultipartFile image) {
+        if (userDetails == null) {
             throw new UnauthenticatedException();
         }
 
@@ -70,21 +73,19 @@ public class AlbumService {
 
         album.setName(name);
 
-        if(image != null && !image.isEmpty()){
-            try{
-                if(!Objects.requireNonNull(image.getContentType()).contains("image")){
+        if (image != null && !image.isEmpty()) {
+            try {
+                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                     throw new UnprocessableException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".jpg";
                 image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
                 imageFactory.deleteFile(album.getImage());
                 album.setImage(hashedFileName);
-            }
-            catch (IOException ioException){
+            } catch (IOException ioException) {
                 throw new UnprocessableException();
             }
-        }
-        else{
+        } else {
             String img = imageFactory.getRandomImage();
             album.setImage(img);
         }
@@ -93,30 +94,30 @@ public class AlbumService {
         userDetails.getAlbums().add(a);
     }
 
-    public Album saveAlbum(Album album){
+    public Album saveAlbum(Album album) {
         return albumRepository.save(album);
     }
 
-    public List<AlbumDTO> getAlbums(CustomUserDetails userDetails){
-        if(userDetails == null){
+    public List<AlbumDTO> getAlbums(CustomUserDetails userDetails) {
+        if (userDetails == null) {
             throw new UnauthenticatedException();
         }
         return userDetails.getAlbums().stream().map(AlbumDTO::new).toList();
     }
 
-    public AlbumDTO findById(Long id, CustomUserDetails userDetails){
+    public AlbumDTO findById(Long id, CustomUserDetails userDetails) {
         Album album = findById(id)
                 .orElseThrow(NotFoundException::new);
-        if(!album.getProtectionType().getName().equals("PRIVATE") ||
-                userDetails != null && album.getUser().getId().equals(userDetails.getId())){
+        if (!album.getProtectionType().getName().equals("PRIVATE") ||
+                userDetails != null && album.getUser().getId().equals(userDetails.getId())) {
             return AlbumDTO.of(album);
         }
         throw new UnauthenticatedException();
     }
 
-    public List<AlbumDTO> findByNameLike(CustomUserDetails userDetails, String name){
+    public List<AlbumDTO> findByNameLike(CustomUserDetails userDetails, String name) {
         List<AlbumDTO> albums = albumRepository.findByNameLike(name).stream().map(AlbumDTO::new).toList();
-        if(userDetails == null){
+        if (userDetails == null) {
             return albums.stream().filter(s -> s.getProtectionType().equals("PUBLIC")).limit(10).toList();
         }
         return albums.stream()
@@ -129,43 +130,42 @@ public class AlbumService {
                             String protectionType,
                             List<Long> songIds,
                             String name,
-                            MultipartFile image){
-        if(userDetails == null){
+                            MultipartFile image) {
+        if (userDetails == null) {
             throw new UnauthenticatedException();
         }
 
         Album album = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny()
                 .orElseThrow(UnauthenticatedException::new);
-        if(protectionType != null){
+        if (protectionType != null) {
             Optional<ProtectionType> protectionOpt = protectionTypeService.getProtectionTypeByName(protectionType);
             protectionOpt.ifPresent(album::setProtectionType);
         }
 
-        if(name != null){
+        if (name != null) {
             album.setName(name);
         }
 
-        if(image != null && !image.isEmpty()){
-            try{
-                if(!Objects.requireNonNull(image.getContentType()).contains("image")){
+        if (image != null && !image.isEmpty()) {
+            try {
+                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                     throw new UnprocessableException();
                 }
                 String hashedFileName = UUID.randomUUID() + ".jpg";
                 image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
                 imageFactory.deleteFile(album.getImage());
                 album.setImage(hashedFileName);
-            }
-            catch (IOException ioException){
+            } catch (IOException ioException) {
                 throw new UnprocessableException();
             }
         }
 
-        if(songIds != null){
+        if (songIds != null) {
             songIds.forEach(songId -> {
                 songService.findById(songId).ifPresent(song -> {
-                    if(!song.getProtectionType().getName().equals("PRIVATE")
+                    if (!song.getProtectionType().getName().equals("PRIVATE")
                             || album.getUser().getSongs().stream()
-                            .anyMatch(s -> s.getId().equals(song.getId()))){
+                            .anyMatch(s -> s.getId().equals(song.getId()))) {
                         album.getSongs().add(song);
                     }
                 });
@@ -176,8 +176,8 @@ public class AlbumService {
     }
 
     public Album deleteAlbum(CustomUserDetails userDetails,
-                             Long id){
-        if(userDetails == null){
+                             Long id) {
+        if (userDetails == null) {
             throw new UnauthenticatedException();
         }
 
@@ -203,7 +203,7 @@ public class AlbumService {
         return album;
     }
 
-    private Optional<Album> findById(Long id){
+    private Optional<Album> findById(Long id) {
         return albumRepository.findById(id);
     }
 }

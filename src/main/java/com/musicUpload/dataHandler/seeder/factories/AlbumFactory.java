@@ -26,7 +26,7 @@ public class AlbumFactory {
         this.albumService = albumService;
     }
 
-    public List<Album> createAlbums(int number, List<User> users, List<Song> songs, List<ProtectionType> protectionTypes){
+    public List<Album> createAlbums(int number, List<User> users, List<Song> songs, List<ProtectionType> protectionTypes) {
         List<Album> albums = new CopyOnWriteArrayList<>();
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
@@ -38,7 +38,7 @@ public class AlbumFactory {
         return albums;
     }
 
-    private Album createAlbum(List<User> users, List<Song> songs, List<ProtectionType> protectionTypes){
+    private Album createAlbum(List<User> users, List<Song> songs, List<ProtectionType> protectionTypes) {
         Album album = new Album();
         Random random = new Random();
 
@@ -50,15 +50,15 @@ public class AlbumFactory {
         album.setProtectionType(protectionTypes.get(random.nextInt(1, Integer.MAX_VALUE) % protectionTypes.size()));
 
         User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
-        synchronized (user){
+        synchronized (user) {
             album.setUser(user);
             user.getAlbums().add(album);
         }
 
         IntStream.range(0, random.nextInt(1, Integer.MAX_VALUE) % songs.size()).forEachOrdered(__ -> {
             Song song = songs.get(random.nextInt(1, Integer.MAX_VALUE) % songs.size());
-            synchronized (song){
-                if(album.getSongs().stream().noneMatch(s -> s.equals(song))){
+            synchronized (song) {
+                if (album.getSongs().stream().noneMatch(s -> s.equals(song))) {
                     album.getSongs().add(song);
                     song.getAlbums().add(album);
                 }

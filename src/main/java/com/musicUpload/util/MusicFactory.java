@@ -7,7 +7,9 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.FileSystems;
@@ -26,26 +28,25 @@ public class MusicFactory {
     private final int numChannels = 2;
     private final int sampleSizeBits = 16;
 
-    public void createMusicDir(){
-        try{
+    public void createMusicDir() {
+        try {
             Path dir = Path.of(dirName);
             if (Files.notExists(dir)) {
                 Files.createDirectories(dir);
             }
-        }
-        catch (IOException ioe){
+        } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
         }
     }
 
-    public void deleteFile(String fileName){
+    public void deleteFile(String fileName) {
         File f = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
-        if(f.delete()){
+        if (f.delete()) {
             System.out.println(f.getName() + " deleted");
         }
     }
 
-    public String createSong(){
+    public String createSong() {
         return saveAsMP3(generateRandomAudioData());
     }
 
@@ -62,8 +63,7 @@ public class MusicFactory {
             AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, outputFile.toFile());
             return fileName;
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println(e.getMessage());
         }
         return " ";

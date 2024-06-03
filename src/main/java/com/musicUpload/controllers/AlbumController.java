@@ -1,9 +1,8 @@
 package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
-import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.services.AlbumService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,19 +23,19 @@ public class AlbumController {
     }
 
     @GetMapping
-    public List<AlbumDTO> getAlbums(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public List<AlbumDTO> getAlbums(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return albumService.getAlbums(userDetails);
     }
 
     @GetMapping("/{id}")
     public AlbumDTO getAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                             @PathVariable Long id){
+                             @PathVariable Long id) {
         return albumService.findById(id, userDetails);
     }
 
     @GetMapping("/search/{name}")
     public List<AlbumDTO> getAlbumByNameLike(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                            @PathVariable String name){
+                                             @PathVariable String name) {
         return albumService.findByNameLike(userDetails, name);
     }
 
@@ -45,12 +44,12 @@ public class AlbumController {
     public void createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                             @RequestParam(name = "protection_type") String protectionType,
                             @RequestParam(name = "name") String name,
-                            @RequestParam(name = "image", required = false) MultipartFile image){
+                            @RequestParam(name = "image", required = false) MultipartFile image) {
         albumService.saveAlbum(
-                     userDetails,
-                     protectionType,
-                     name,
-                     image);
+                userDetails,
+                protectionType,
+                name,
+                image);
     }
 
     @PatchMapping("/{id}")
@@ -60,7 +59,7 @@ public class AlbumController {
                            @RequestParam(name = "protection_type", required = false) String protectionType,
                            @RequestParam(name = "song_id", required = false) List<Long> songId,
                            @RequestParam(name = "name", required = false) String name,
-                           @RequestParam(name = "image", required = false) MultipartFile image){
+                           @RequestParam(name = "image", required = false) MultipartFile image) {
         //TODO: fix the issue and make this parallel too
         albumService.patchAlbum(
                 userDetails,
@@ -75,7 +74,7 @@ public class AlbumController {
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                            @PathVariable Long id){
+                            @PathVariable Long id) {
         albumService.deleteAlbum(userDetails, id);
     }
 }

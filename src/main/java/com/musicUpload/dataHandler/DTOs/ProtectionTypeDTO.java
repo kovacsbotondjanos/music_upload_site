@@ -8,12 +8,12 @@ public class ProtectionTypeDTO {
     private Long id;
     private String name;
 
-    public ProtectionTypeDTO(ProtectionType protectionType){
+    public ProtectionTypeDTO(ProtectionType protectionType) {
         this.id = protectionType.getId();
         this.name = protectionType.getName();
     }
 
-    public static ProtectionTypeDTO of(ProtectionType protectionType){
+    public static ProtectionTypeDTO of(ProtectionType protectionType) {
         return new ProtectionTypeDTO(protectionType);
     }
 }

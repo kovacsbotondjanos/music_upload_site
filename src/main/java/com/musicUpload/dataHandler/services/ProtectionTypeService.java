@@ -17,15 +17,15 @@ public class ProtectionTypeService {
         this.protectionTypeRepository = protectionTypeRepository;
     }
 
-    public ProtectionType save(ProtectionType protectionType){
+    public ProtectionType save(ProtectionType protectionType) {
         return protectionTypeRepository.save(protectionType);
     }
 
-    public Optional<ProtectionType> getProtectionTypeByName(String name){
+    public Optional<ProtectionType> getProtectionTypeByName(String name) {
         return protectionTypeRepository.findByName(name);
     }
 
-    public List<ProtectionType> getAllPossibleProtectionType(){
+    public List<ProtectionType> getAllPossibleProtectionType() {
         return protectionTypeRepository.findAll();
     }
 }

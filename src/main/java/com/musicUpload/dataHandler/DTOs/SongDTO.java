@@ -16,7 +16,7 @@ public class SongDTO {
     private Date createdAt;
     private Long listenCount;
 
-    public SongDTO(Song song){
+    public SongDTO(Song song) {
         this.id = song.getId();
         this.image = song.getImage();
         this.name = song.getName();
@@ -27,7 +27,7 @@ public class SongDTO {
         this.listenCount = song.getListenCount();
     }
 
-    public static SongDTO of(Song song){
+    public static SongDTO of(Song song) {
         return new SongDTO(song);
     }
 }

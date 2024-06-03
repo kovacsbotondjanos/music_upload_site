@@ -67,6 +67,15 @@ public class User implements CustomEntityInterface {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    public User(CustomUserDetails userDetails) {
+        this.id = userDetails.getId();
+        this.username = userDetails.getUsername();
+        this.albums = userDetails.getAlbums();
+        this.songs = userDetails.getSongs();
+        this.profilePicture = userDetails.getProfilePicture();
+        this.password = userDetails.getPassword();
+    }
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = new Date();
@@ -75,14 +84,5 @@ public class User implements CustomEntityInterface {
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
-    }
-
-    public User(CustomUserDetails userDetails){
-        this.id = userDetails.getId();
-        this.username = userDetails.getUsername();
-        this.albums = userDetails.getAlbums();
-        this.songs = userDetails.getSongs();
-        this.profilePicture = userDetails.getProfilePicture();
-        this.password = userDetails.getPassword();
     }
 }

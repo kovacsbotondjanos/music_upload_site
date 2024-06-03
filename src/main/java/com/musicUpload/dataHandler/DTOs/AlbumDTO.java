@@ -16,7 +16,7 @@ public class AlbumDTO {
     private Long userId;
     private Date createdAt;
 
-    public AlbumDTO(Album album){
+    public AlbumDTO(Album album) {
         this.id = album.getId();
         this.name = album.getName();
         this.songs = album.getSongs().stream().map(SongDTO::new).toList();
@@ -26,7 +26,7 @@ public class AlbumDTO {
         this.createdAt = album.getCreatedAt();
     }
 
-    public static AlbumDTO of(Album album){
+    public static AlbumDTO of(Album album) {
         return new AlbumDTO(album);
     }
 }

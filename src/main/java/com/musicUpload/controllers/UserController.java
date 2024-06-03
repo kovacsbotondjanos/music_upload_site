@@ -22,13 +22,13 @@ public class UserController {
     }
 
     @GetMapping
-    public UserDTO getCurrUser(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public UserDTO getCurrUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return userService.findCurrUser(userDetails);
     }
 
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void createUser(@ModelAttribute User user){
+    public void createUser(@ModelAttribute User user) {
         userService.registerUser(user);
     }
 
@@ -39,18 +39,18 @@ public class UserController {
                           @RequestParam(name = "email", required = false) String email,
                           @RequestParam(name = "new_password", required = false) String password,
                           @RequestParam(name = "old_password", required = false) String oldPassword,
-                          @RequestParam(name = "image", required = false)MultipartFile image){
+                          @RequestParam(name = "image", required = false) MultipartFile image) {
         userService.patchUser(userDetails,
-                              username,
-                              email,
-                              password,
-                              oldPassword,
-                              image);
+                username,
+                email,
+                password,
+                oldPassword,
+                image);
     }
 
     @DeleteMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public void deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         userService.deleteUser(userDetails);
     }
 }

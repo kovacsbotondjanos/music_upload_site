@@ -23,7 +23,7 @@ public class AuthFactory {
         this.authService = authService;
     }
 
-    public List<Auth> createAuthorities(){
+    public List<Auth> createAuthorities() {
         List<Auth> auths;
 
         Gson gson = new GsonBuilder()
@@ -33,13 +33,12 @@ public class AuthFactory {
         try (InputStream inputStream = classLoader.getResourceAsStream("authConfig.json")) {
             assert inputStream != null;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                TypeToken<List<Auth>> token = new TypeToken<>() {};
+                TypeToken<List<Auth>> token = new TypeToken<>() { };
                 auths = gson.fromJson(reader, token.getType());
                 auths.stream().parallel().forEach(authService::save);
                 return auths;
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e.getMessage());
         }
 

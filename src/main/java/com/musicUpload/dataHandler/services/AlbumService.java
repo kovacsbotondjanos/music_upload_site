@@ -1,6 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
-import com.musicUpload.cronJobs.EntityManager;
+import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.implementations.Album;
@@ -32,13 +32,13 @@ public class AlbumService {
     private final ProtectionTypeService protectionTypeService;
     private final SongService songService;
     private final ImageFactory imageFactory;
-    private final EntityManager<Album> albumEntityManager;
+    private final EntityCacheManager<Album> albumEntityManager;
 
     @Autowired
     public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
                         ProtectionTypeService protectionTypeService,
                         SongService songService,
-                        ImageFactory imageFactory, EntityManager<Album> albumEntityManager) {
+                        ImageFactory imageFactory, EntityCacheManager<Album> albumEntityManager) {
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
         this.protectionTypeService = protectionTypeService;

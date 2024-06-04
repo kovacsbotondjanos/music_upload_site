@@ -1,6 +1,6 @@
 package com.musicUpload.albumTest;
 
-import com.musicUpload.cronJobs.EntityManager;
+import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.ProtectionType;
@@ -37,7 +37,7 @@ public class DeleteAlbumTest {
     @Mock
     private ImageFactory imageFactory;
     @Mock
-    private EntityManager<Album> albumEntityManager;
+    private EntityCacheManager<Album> albumEntityManager;
 
     private AlbumService albumService;
     private List<Album> albums;

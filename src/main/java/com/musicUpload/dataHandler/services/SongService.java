@@ -1,6 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
-import com.musicUpload.cronJobs.EntityManager;
+import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
@@ -42,10 +42,10 @@ public class SongService {
     private final MusicFactory musicFactory;
     private final ProtectionTypeService protectionTypeService;
     private final SongCacheManager songCacheManager;
-    private final EntityManager<Song> entityManager;
+    private final EntityCacheManager<Song> entityManager;
 
     @Autowired
-    public SongService(SongRepository songRepository, UserRepository userRepository, AlbumRepository albumRepository, ImageFactory imageFactory, MusicFactory songFactory, ProtectionTypeService protectionTypeService, SongCacheManager listenCountJob, EntityManager<Song> entityManager) {
+    public SongService(SongRepository songRepository, UserRepository userRepository, AlbumRepository albumRepository, ImageFactory imageFactory, MusicFactory songFactory, ProtectionTypeService protectionTypeService, SongCacheManager listenCountJob, EntityCacheManager<Song> entityManager) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
@@ -190,7 +190,7 @@ public class SongService {
                 Resource resource = new UrlResource(imagePath.toUri());
 
                 if (resource.exists()) {
-                    songCacheManager.addListenToSong(song.getId());
+                    songCacheManager.addListenToSong(song.getId(), userDetails);
                     songCacheManager.addSong(song);
                     return resource;
                 } else {

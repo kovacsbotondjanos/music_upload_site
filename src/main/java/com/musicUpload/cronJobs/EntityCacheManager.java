@@ -10,19 +10,27 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
-public class EntityManager<T extends CustomEntityInterface> {
+public class EntityCacheManager<T extends CustomEntityInterface> {
     private final ConcurrentMap<Long, EntityWrapper<T>> entityCacheMap = new ConcurrentHashMap<>();
-    private final int SCHEDULE = 10 * 1000 * 60;
-    private final int REMOVE_SCHEDULE = 30 * 1000 * 60;
+    private final int SCHEDULE = 1000 * 60;
+    private final int REMOVE_SCHEDULE = 15 * 1000 * 60;
 
-    public void addEntity(T entity) {
+    private void addEntity(EntityWrapper<T> entity) {
         new Thread(() -> {
-            if (entityCacheMap.containsKey(entity.getId())) {
-                entityCacheMap.get(entity.getId()).setEntity(entity);
+            if (entityCacheMap.containsKey(entity.getEntity().getId())) {
+                entityCacheMap.get(entity.getEntity().getId()).setEntity(entity.getEntity());
             } else {
-                entityCacheMap.put(entity.getId(), new EntityWrapper<>(entity));
+                entityCacheMap.put(entity.getEntity().getId(), entity);
             }
         }).start();
+    }
+
+    public void addEntity(T entity, long removeTime) {
+        this.addEntity(new EntityWrapper<>(entity, removeTime));
+    }
+
+    public void addEntity(T entity) {
+        this.addEntity(new EntityWrapper<>(entity, REMOVE_SCHEDULE));
     }
 
     public void removeEntity(Long id) {
@@ -38,8 +46,12 @@ public class EntityManager<T extends CustomEntityInterface> {
     @Scheduled(fixedRate = SCHEDULE)
     public void unCache() {
         new Thread(() -> {
+            System.out.println(entityCacheMap.size());
+            System.out.println(entityCacheMap);
             long currentTime = System.currentTimeMillis();
-            entityCacheMap.entrySet().removeIf(e -> currentTime - e.getValue().getTimeStamp() > REMOVE_SCHEDULE);
+            entityCacheMap.entrySet().removeIf(e -> currentTime > e.getValue().getRemoveTime());
+            System.out.println(entityCacheMap.size());
+            System.out.println(entityCacheMap);
         }).start();
     }
 
@@ -47,10 +59,12 @@ public class EntityManager<T extends CustomEntityInterface> {
     static class EntityWrapper<T extends CustomEntityInterface> {
         private T entity;
         private long timeStamp;
+        private long removeTime;
 
-        public EntityWrapper(T entity) {
+        public EntityWrapper(T entity, long removeTime) {
             this.entity = entity;
             timeStamp = System.currentTimeMillis();
+            this.removeTime = timeStamp + removeTime;
         }
     }
 }

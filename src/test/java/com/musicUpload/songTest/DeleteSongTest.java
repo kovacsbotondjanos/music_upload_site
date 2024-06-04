@@ -1,6 +1,6 @@
 package com.musicUpload.songTest;
 
-import com.musicUpload.cronJobs.EntityManager;
+import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.implementations.ProtectionType;
@@ -50,7 +50,7 @@ public class DeleteSongTest {
     @Mock
     private SongCacheManager listenCountJob;
     @Mock
-    private EntityManager<Song> entityManager;
+    private EntityCacheManager<Song> entityManager;
     private SongService songService;
     private List<Song> songs;
     private final ProtectionType protectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());

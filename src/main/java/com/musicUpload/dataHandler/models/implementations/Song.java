@@ -38,10 +38,6 @@ public class Song implements CustomEntityInterface {
     @JsonIgnore
     private List<Album> albums = new ArrayList<>();
 
-    @OneToMany(mappedBy = "song", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<UserSong> userSong = new ArrayList<>();
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
@@ -66,5 +62,14 @@ public class Song implements CustomEntityInterface {
 
     public void addListen(Long count) {
         listenCount += count;
+    }
+
+    public long getCacheIndex() {
+        if(listenCount == 0) {
+            return 0;
+        }
+        //I take the 100 base log of the listen count to determine how long i have to cache the song, the cap is one hour
+        //TODO: write a better method than this, maybe take sqrt of this number?
+        return Math.min(1000 * 60 * 60, (long) (1000 * 60 * Math.log(listenCount) / Math.log(100)));
     }
 }

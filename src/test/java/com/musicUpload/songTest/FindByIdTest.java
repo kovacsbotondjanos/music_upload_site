@@ -1,6 +1,6 @@
 package com.musicUpload.songTest;
 
-import com.musicUpload.cronJobs.EntityManager;
+import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
@@ -46,7 +46,7 @@ public class FindByIdTest {
     @Mock
     private SongCacheManager listenCountJob;
     @Mock
-    private EntityManager<Song> entityManager;
+    private EntityCacheManager<Song> entityManager;
 
     private SongService songService;
     private Song song;

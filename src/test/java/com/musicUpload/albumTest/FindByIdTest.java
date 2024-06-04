@@ -1,6 +1,6 @@
 package com.musicUpload.albumTest;
 
-import com.musicUpload.cronJobs.EntityManager;
+import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.implementations.Album;
@@ -47,7 +47,7 @@ public class FindByIdTest {
     @Mock
     private ImageFactory imageFactory;
     @Mock
-    private EntityManager<Album> albumEntityManager;
+    private EntityCacheManager<Album> albumEntityManager;
     private AlbumService albumService;
     private Album album;
     private Long id;

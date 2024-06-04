@@ -19,14 +19,8 @@ public class UserSong implements CustomEntityInterface {
     private Long id;
 
     private Long listenCount;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "song_id")
-    private Song song;
+    private Long userId;
+    private Long songId;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
@@ -44,5 +38,11 @@ public class UserSong implements CustomEntityInterface {
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
+    }
+
+    public UserSong(Long songId, Long userId, Long listenCount) {
+        this.userId = userId;
+        this.songId = songId;
+        this.listenCount = listenCount;
     }
 }

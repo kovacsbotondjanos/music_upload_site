@@ -81,7 +81,7 @@ public class SongCacheManager {
                             songsToSave.put(e.getKey().getFirst(), songsToSave.get(e.getKey().getFirst()) + e.getValue());
                         }
                         else {
-                            songsToSave.put(e.getKey().getFirst(), e.getValue()1);
+                            songsToSave.put(e.getKey().getFirst(), e.getValue());
                         }
 
                         LocalDate date = LocalDate.now();

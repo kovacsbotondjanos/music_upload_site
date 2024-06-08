@@ -1,6 +1,5 @@
 package com.musicUpload.cronJobs;
 
-import com.musicUpload.MusicUploadApplication;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.UserSong;
@@ -42,6 +41,7 @@ public class SongCacheManager {
         new Thread(() -> {
             Long userId = userDetails == null ? null : userDetails.getId();
             songListensBuffer.merge(new Pair<>(songId, userId), 1L, Long::sum);
+            logger.info("buffer: {}", songListensBuffer);
             //I make sure here that the cached data is not stale
             songEntityManager.getEntity(songId)
                     .ifPresent(Song::addListen);
@@ -62,12 +62,12 @@ public class SongCacheManager {
 
     @Scheduled(fixedRate = SCHEDULE)
     public void saveReport() {
-        logger.info("New listens are being saved into the database");
         var copyMap = songListensBuffer.entrySet().stream()
                         .filter(e -> songListensBuffer.remove(e.getKey(), e.getValue()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         //TODO: look into this, it is possible that this can lead to data loss, if a request arrives after the copy and before the clear
         songListensBuffer.clear();
+        logger.info("{} new listens are being saved into the database", copyMap.size());
 
         new Thread(() -> {
             ConcurrentLinkedQueue<Song> songsToSave = new ConcurrentLinkedQueue<>();
@@ -84,30 +84,27 @@ public class SongCacheManager {
                         LocalDate date = LocalDate.now();
                         int month = date.getMonthValue();
                         int year = date.getYear();
-
                         Optional<UserSong> userListenOpt = userSongRepository.findBySongIdAndUserIdAndYearAndMonth(e.getKey().getFirst(),
                                                                                                                    e.getKey().getSecond(),
                                                                                                                    year,
                                                                                                                    month);
-
-                        Long listens = userListenOpt.map(userSong -> userSong.getListenCount() + 1).orElse(1L);
                         userListenOpt.ifPresentOrElse(
-                                userListensToSave::add,
+                                u -> {
+                                    u.setListenCount(u.getListenCount() + e.getValue());
+                                    userListensToSave.add(u);
+                                },
                                 () -> {
                                     if(e.getKey().getSecond() != null) {
-                                        userListensToSave.add(
-                                                new UserSong(
-                                                        e.getKey().getFirst(),
-                                                        e.getKey().getSecond(),
-                                                        listens,
-                                                        year,
-                                                        month));
+                                        userListensToSave.add(new UserSong(e.getKey().getFirst(),
+                                                                           e.getKey().getSecond(),
+                                                                           e.getValue(),
+                                                                           year,
+                                                                           month));
                                     }
                                 }
                         );
                     });
             songRepository.saveAll(songsToSave);
-            //TODO: this can be saved less frequently
             userSongRepository.saveAll(userListensToSave);
         }).start();
     }

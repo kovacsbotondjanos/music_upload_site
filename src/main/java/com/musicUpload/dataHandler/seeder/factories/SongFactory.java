@@ -52,9 +52,9 @@ public class SongFactory {
         song.setNameHashed(musicFactory.createSong());
         song.setImage(imageFactory.getRandomImage());
         song.setProtectionType(protectionTypes.get(random.nextInt(1, Integer.MAX_VALUE) % protectionTypes.size()));
-        song.setListenCount(faker.number().numberBetween(0L, 100L));
+        song.setListenCount(faker.number().numberBetween(0L, 1_000_000L));
 
-        User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
+        User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
 
         synchronized (user) {
             song.setUser(user);

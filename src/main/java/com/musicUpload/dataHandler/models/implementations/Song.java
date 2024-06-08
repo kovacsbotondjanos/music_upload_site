@@ -69,7 +69,6 @@ public class Song implements CustomEntityInterface {
             return 0;
         }
         //I take the 100 base log of the listen count to determine how long i have to cache the song, the cap is one hour
-        //TODO: write a better method than this, maybe take sqrt of this number?
-        return Math.min(1000 * 60 * 60, (long) (1000 * 60 * Math.log(listenCount) / Math.log(100)));
+        return (long)(Math.min(1000 * 60 * 60, 100 * Math.log(listenCount) / Math.log(100)) * Math.sqrt(listenCount));
     }
 }

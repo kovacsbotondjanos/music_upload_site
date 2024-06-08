@@ -16,6 +16,8 @@ import com.musicUpload.exceptions.UnprocessableException;
 import com.musicUpload.exceptions.WrongFormatException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -34,6 +36,7 @@ import java.util.UUID;
 
 @Service
 public class SongService {
+    private static final Logger logger = LogManager.getLogger(SongService.class);
     private final String musicPathName = "music" + FileSystems.getDefault().getSeparator();
     private final SongRepository songRepository;
     private final UserRepository userRepository;
@@ -126,6 +129,7 @@ public class SongService {
 
     public Optional<Song> findById(Long id) {
         Optional<Song> s = songCacheManager.getSong(id);
+        s.ifPresent(__ -> logger.info("Song retrieved from cache"));
         if (s.isEmpty()) {
             //we only use this once, and if the opt is not empty we put it in the entityManager
             s = songRepository.findById(id);

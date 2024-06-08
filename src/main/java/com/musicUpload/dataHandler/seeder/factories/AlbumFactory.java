@@ -47,16 +47,16 @@ public class AlbumFactory {
 
         album.setName(name);
         album.setImage(imageFactory.getRandomImage());
-        album.setProtectionType(protectionTypes.get(random.nextInt(1, Integer.MAX_VALUE) % protectionTypes.size()));
+        album.setProtectionType(protectionTypes.get(random.nextInt(0, Integer.MAX_VALUE) % protectionTypes.size()));
 
-        User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
+        User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
         synchronized (user) {
             album.setUser(user);
             user.getAlbums().add(album);
         }
 
-        IntStream.range(0, random.nextInt(1, Integer.MAX_VALUE) % songs.size()).forEachOrdered(__ -> {
-            Song song = songs.get(random.nextInt(1, Integer.MAX_VALUE) % songs.size());
+        IntStream.range(0, random.nextInt(0, Integer.MAX_VALUE) % songs.size()).forEachOrdered(__ -> {
+            Song song = songs.get(random.nextInt(0, Integer.MAX_VALUE) % songs.size());
             synchronized (song) {
                 if (album.getSongs().stream().noneMatch(s -> s.equals(song))) {
                     album.getSongs().add(song);

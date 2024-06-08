@@ -37,7 +37,7 @@ public class UserFactory {
 
         users.stream().parallel().forEach(currUser -> {
             IntStream.range(0, random.nextInt() % users.size()).forEachOrdered(__ -> {
-                User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
+                User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
                 if (currUser.getFollowedUsers().stream().noneMatch(u -> u.equals(user) || u.equals(currUser))) {
                     currUser.getFollowedUsers().add(user);
                 }

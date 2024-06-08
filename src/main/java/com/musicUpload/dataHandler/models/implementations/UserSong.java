@@ -46,5 +46,7 @@ public class UserSong implements CustomEntityInterface {
         this.userId = userId;
         this.songId = songId;
         this.listenCount = listenCount;
+        this.year = year;
+        this.month = month;
     }
 }

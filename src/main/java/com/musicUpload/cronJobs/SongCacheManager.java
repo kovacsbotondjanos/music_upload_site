@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,7 +80,16 @@ public class SongCacheManager {
                             song.addListen(e.getValue());
                             songsToSave.add(song);
                         });
-                        Optional<UserSong> userListenOpt = userSongRepository.findBySongIdAndUserId(e.getKey().getFirst(), e.getKey().getSecond());
+
+                        LocalDate date = LocalDate.now();
+                        int month = date.getMonthValue();
+                        int year = date.getYear();
+
+                        Optional<UserSong> userListenOpt = userSongRepository.findBySongIdAndUserIdAndYearAndMonth(e.getKey().getFirst(),
+                                                                                                                   e.getKey().getSecond(),
+                                                                                                                   year,
+                                                                                                                   month);
+
                         Long listens = userListenOpt.map(userSong -> userSong.getListenCount() + 1).orElse(1L);
                         userListenOpt.ifPresentOrElse(
                                 userListensToSave::add,
@@ -89,7 +99,9 @@ public class SongCacheManager {
                                                 new UserSong(
                                                         e.getKey().getFirst(),
                                                         e.getKey().getSecond(),
-                                                        listens));
+                                                        listens,
+                                                        year,
+                                                        month));
                                     }
                                 }
                         );

@@ -5,8 +5,11 @@ import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.implementations.Auth;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.dataHandler.seeder.factories.UserFactory;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +27,7 @@ import java.util.regex.Pattern;
 
 @Service
 public class UserService implements UserDetailsService {
+    private static final Logger logger = LogManager.getLogger(UserDetailsService.class);
     private final UserRepository userRepository;
     private final AuthService authService;
     private final ImageFactory imageFactory;
@@ -166,11 +170,11 @@ public class UserService implements UserDetailsService {
                 image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
                 user.setProfilePicture(hashedFileName);
             } catch (IOException e) {
-                System.err.println(e.getMessage());
+                logger.error(e.getMessage());
             }
         }
 
-        User u = userRepository.save(user);
+        userRepository.save(user);
     }
 
     public void deleteUser(CustomUserDetails userDetails) {
@@ -180,5 +184,9 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
         userRepository.delete(user);
+    }
+
+    public long count() {
+        return userRepository.count();
     }
 }

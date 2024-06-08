@@ -1,11 +1,14 @@
 package com.musicUpload.cronJobs;
 
+import com.musicUpload.MusicUploadApplication;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.UserSong;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserSongRepository;
 import com.musicUpload.util.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class SongCacheManager {
+    private static final Logger logger = LogManager.getLogger(SongCacheManager.class);
     private final EntityCacheManager<Song> songEntityManager;
     private final SongRepository songRepository;
     private final UserSongRepository userSongRepository;
@@ -57,6 +61,7 @@ public class SongCacheManager {
 
     @Scheduled(fixedRate = SCHEDULE)
     public void saveReport() {
+        logger.info("New listens are being saved into the database");
         var copyMap = songListensBuffer.entrySet().stream()
                         .filter(e -> songListensBuffer.remove(e.getKey(), e.getValue()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -89,8 +94,6 @@ public class SongCacheManager {
                                 }
                         );
                     });
-            System.out.println(songsToSave);
-            System.out.println(userListensToSave);
             songRepository.saveAll(songsToSave);
             //TODO: this can be saved less frequently
             userSongRepository.saveAll(userListensToSave);

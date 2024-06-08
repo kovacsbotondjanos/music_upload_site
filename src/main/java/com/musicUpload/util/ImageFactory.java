@@ -1,6 +1,9 @@
 package com.musicUpload.util;
 
+import com.musicUpload.dataHandler.seeder.DatabaseSeeder;
 import lombok.Data;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -16,12 +19,13 @@ import java.util.UUID;
 @Data
 @Service
 public class ImageFactory {
+    private static final Logger logger = LogManager.getLogger(ImageFactory.class);
     private final String dirName = System.getProperty("user.dir") + FileSystems.getDefault().getSeparator() + "images";
 
     public void deleteFile(String fileName) {
         File f = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
         if (f.delete()) {
-            System.out.println(f.getName() + " deleted");
+            logger.info("{} deleted", f.getName());
         }
     }
 
@@ -32,7 +36,7 @@ public class ImageFactory {
                 Files.createDirectories(dir);
             }
         } catch (IOException ioe) {
-            System.err.println(ioe.getMessage());
+            logger.error(ioe.getMessage());
         }
     }
 
@@ -68,7 +72,7 @@ public class ImageFactory {
                 return saveFile(new ByteArrayInputStream(imageBytes));
             }
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            logger.error(e.getMessage());
         }
         return "";
     }

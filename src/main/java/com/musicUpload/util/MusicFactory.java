@@ -1,6 +1,8 @@
 package com.musicUpload.util;
 
 import lombok.Data;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -22,6 +24,7 @@ import java.util.UUID;
 @Service
 @Data
 public class MusicFactory {
+    private static final Logger logger = LogManager.getLogger(MusicFactory.class);
     private final String dirName = System.getProperty("user.dir") + FileSystems.getDefault().getSeparator() + "music";
     private final int durationInSeconds = 60;
     private final int sampleRate = 44100;
@@ -35,14 +38,14 @@ public class MusicFactory {
                 Files.createDirectories(dir);
             }
         } catch (IOException ioe) {
-            System.err.println(ioe.getMessage());
+            logger.error(ioe.getMessage());
         }
     }
 
     public void deleteFile(String fileName) {
         File f = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
         if (f.delete()) {
-            System.out.println(f.getName() + " deleted");
+            logger.info("{} deleted", f.getName());
         }
     }
 
@@ -64,7 +67,7 @@ public class MusicFactory {
             return fileName;
 
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
         }
         return " ";
     }

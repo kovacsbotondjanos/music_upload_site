@@ -2,6 +2,8 @@ package com.musicUpload.cronJobs;
 
 import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import lombok.Data;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class EntityCacheManager<T extends CustomEntityInterface> {
+    private static final Logger logger = LogManager.getLogger(SongCacheManager.class);
     private final ConcurrentMap<Long, EntityWrapper<T>> entityCacheMap = new ConcurrentHashMap<>();
     private final int SCHEDULE = 1000 * 60;
     private final int REMOVE_SCHEDULE = 15 * 1000 * 60;
@@ -45,13 +48,10 @@ public class EntityCacheManager<T extends CustomEntityInterface> {
 
     @Scheduled(fixedRate = SCHEDULE)
     public void unCache() {
+        logger.info("Cache is being emptied");
         new Thread(() -> {
-            System.out.println(entityCacheMap.size());
-            System.out.println(entityCacheMap);
             long currentTime = System.currentTimeMillis();
             entityCacheMap.entrySet().removeIf(e -> currentTime > e.getValue().getRemoveTime());
-            System.out.println(entityCacheMap.size());
-            System.out.println(entityCacheMap);
         }).start();
     }
 

@@ -5,6 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import com.musicUpload.dataHandler.services.ProtectionTypeService;
+import com.musicUpload.util.MusicFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,7 @@ import java.util.List;
 
 @Service
 public class ProtectionTypeFactory {
+    private static final Logger logger = LogManager.getLogger(ProtectionTypeFactory.class);
     private final ProtectionTypeService protectionTypeService;
 
     @Autowired
@@ -39,7 +43,7 @@ public class ProtectionTypeFactory {
                 return protectionTypes;
             }
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            logger.error(e.getMessage());
         }
 
         return new ArrayList<>();

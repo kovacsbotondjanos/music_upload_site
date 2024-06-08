@@ -7,6 +7,8 @@ import com.musicUpload.dataHandler.models.implementations.Auth;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.util.ImageFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import java.util.stream.IntStream;
 
 @Service
 public class UserFactory {
+    private static final Logger logger = LogManager.getLogger(UserFactory.class);
     private final UserService userService;
 
     @Autowired
@@ -71,7 +74,7 @@ public class UserFactory {
                 userService.registerUser(admin);
             }
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            logger.error(e.getMessage());
         }
     }
 

@@ -1,7 +1,7 @@
 package com.musicUpload.controllers;
 
-import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.services.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -31,8 +31,8 @@ public class ResourceController {
 
     //TODO: put the business logic in an other calss
     @GetMapping("/images/{name}")
-    public ResponseEntity<Resource> getImage(@PathVariable String name){
-        try{
+    public ResponseEntity<Resource> getImage(@PathVariable String name) {
+        try {
             Path imagePath = Paths.get(imagePathName).resolve(name);
             Resource resource = new UrlResource(imagePath.toUri());
 
@@ -48,7 +48,7 @@ public class ResourceController {
 
     @GetMapping("/music/{nameHashed}")
     public ResponseEntity<Resource> getSong(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                            @PathVariable String nameHashed){
+                                            @PathVariable String nameHashed) {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("audio/mpeg"))
                 .body(songService.getSongInResourceFormatByNameHashed(userDetails, nameHashed));

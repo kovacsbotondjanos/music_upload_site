@@ -34,3 +34,4 @@ build/
 /.mvn/
 /music/
 /images/
+/application.log

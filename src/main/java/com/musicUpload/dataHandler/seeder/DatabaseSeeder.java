@@ -1,13 +1,17 @@
 package com.musicUpload.dataHandler.seeder;
 
-import com.musicUpload.dataHandler.models.Auth;
-import com.musicUpload.dataHandler.services.AuthService;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.services.ProtectionTypeService;
-import com.musicUpload.dataHandler.models.Song;
-import com.musicUpload.dataHandler.models.User;
-import com.musicUpload.dataHandler.services.UserService;
+import com.musicUpload.MusicUploadApplication;
+import com.musicUpload.dataHandler.models.implementations.Auth;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.seeder.factories.*;
+import com.musicUpload.dataHandler.services.AuthService;
+import com.musicUpload.dataHandler.services.ProtectionTypeService;
+import com.musicUpload.dataHandler.services.UserService;
+import jakarta.annotation.PostConstruct;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +20,7 @@ import java.util.Optional;
 
 @Service
 public class DatabaseSeeder {
+    private static final Logger logger = LogManager.getLogger(DatabaseSeeder.class);
     private final UserService userService;
     private final AuthService authService;
     private final ProtectionTypeService protectionTypeService;
@@ -37,7 +42,7 @@ public class DatabaseSeeder {
         this.protectionTypeFactory = protectionTypeFactory;
     }
 
-    public void seedDatabase(){
+    public void seedDatabase() {
         List<Auth> auths = authService.getAllPossibleAuth();
         List<ProtectionType> protectionTypes = protectionTypeService.getAllPossibleProtectionType();
 
@@ -50,8 +55,9 @@ public class DatabaseSeeder {
         albumFactory.createAlbums(20, users, songs, protectionTypes);
     }
 
-    public void seedDatabaseIfEmpty(){
-        if(userService.getUsers().isEmpty()){
+    @PostConstruct
+    public void seedDatabaseIfEmpty() {
+        if (userService.count() == 0) {
             List<Auth> auths = authFactory.createAuthorities();
 
             protectionTypeFactory.generateProtectionTypes();
@@ -59,6 +65,7 @@ public class DatabaseSeeder {
             Optional<Auth> auth = auths.stream().filter(a -> a.getName().equals("ADMIN")).findAny();
             auth.ifPresent(userFactory::createAdminFromConfigFile);
             seedDatabase();
+            logger.info("Database seeding completed");
         }
     }
 }

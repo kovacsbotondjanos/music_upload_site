@@ -1,13 +1,17 @@
 package com.musicUpload.util;
 
 import lombok.Data;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.FileSystems;
@@ -20,32 +24,32 @@ import java.util.UUID;
 @Service
 @Data
 public class MusicFactory {
+    private static final Logger logger = LogManager.getLogger(MusicFactory.class);
     private final String dirName = System.getProperty("user.dir") + FileSystems.getDefault().getSeparator() + "music";
     private final int durationInSeconds = 60;
     private final int sampleRate = 44100;
     private final int numChannels = 2;
     private final int sampleSizeBits = 16;
 
-    public void createMusicDir(){
-        try{
+    public void createMusicDir() {
+        try {
             Path dir = Path.of(dirName);
             if (Files.notExists(dir)) {
                 Files.createDirectories(dir);
             }
-        }
-        catch (IOException ioe){
-            System.err.println(ioe.getMessage());
+        } catch (IOException ioe) {
+            logger.error(ioe.getMessage());
         }
     }
 
-    public void deleteFile(String fileName){
+    public void deleteFile(String fileName) {
         File f = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
-        if(f.delete()){
-            System.out.println(f.getName() + " deleted");
+        if (f.delete()) {
+            logger.info("{} deleted", f.getName());
         }
     }
 
-    public String createSong(){
+    public String createSong() {
         return saveAsMP3(generateRandomAudioData());
     }
 
@@ -62,9 +66,8 @@ public class MusicFactory {
             AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, outputFile.toFile());
             return fileName;
 
-        }
-        catch (IOException e) {
-            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            logger.error(e.getMessage());
         }
         return " ";
     }

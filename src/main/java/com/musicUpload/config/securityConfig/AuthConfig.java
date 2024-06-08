@@ -33,12 +33,12 @@ public class AuthConfig {
                 .csrf().disable()
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers(
-                            "api/v1/users",
-                            "api/v1/album/**",
-                            "/images/**",
-                            "music/**",
-                            "api/v1/songs/**",
-                            "/login")
+                                    "api/v1/users",
+                                    "api/v1/albums/**",
+                                    "api/v1/songs/**",
+                                    "/images/**",
+                                    "music/**",
+                                    "/login")
                             .permitAll();
                     registry.anyRequest().authenticated();
                 })

@@ -1,13 +1,14 @@
 package com.musicUpload.songTest;
 
+import com.musicUpload.cronJobs.EntityCacheManager;
+import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.models.Song;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.ProtectionTypeService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -40,6 +41,10 @@ public class UpdateSongTest {
     private MusicFactory songFactory;
     @Mock
     private ProtectionTypeService protectionTypeService;
+    @Mock
+    private SongCacheManager listenCountJob;
+    @Mock
+    private EntityCacheManager<Song> entityManager;
 
     private SongService songService;
     private Song song;
@@ -47,21 +52,25 @@ public class UpdateSongTest {
     private CustomUserDetails userDetails;
 
     @BeforeEach
-    void onSetUp(){
+    void onSetUp() {
         MockitoAnnotations.initMocks(this);
         songService = new SongService(songRepository,
                 userRepository,
                 albumRepository,
                 imageFactory,
                 songFactory,
-                protectionTypeService);
+                protectionTypeService,
+                listenCountJob,
+                entityManager);
         id = 1L;
         song = new Song(id,
                 "",
                 "foo",
                 "",
+                1L,
                 new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>()),
                 new User(),
+                new ArrayList<>(),
                 new ArrayList<>(),
                 new Date(),
                 new Date());
@@ -76,7 +85,7 @@ public class UpdateSongTest {
     }
 
     @Test
-    void updateSongWithoutAuth(){
+    void updateSongWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
                 () -> songService.updateSong(
                         null,
@@ -87,7 +96,7 @@ public class UpdateSongTest {
     }
 
     @Test
-    void updateOtherUsersSong(){
+    void updateOtherUsersSong() {
         assertThrows(UnauthenticatedException.class,
                 () -> songService.updateSong(
                         userDetails,
@@ -98,25 +107,25 @@ public class UpdateSongTest {
     }
 
     @Test
-    void updateNameTest(){
+    void updateNameTest() {
         songService.updateSong(userDetails,
-                            1L,
-                            null,
-                            "bar",
-                            null);
+                1L,
+                null,
+                "bar",
+                null);
 
         assertEquals("bar", song.getName());
     }
 
     @Test
-    void updateProtectionTest(){
+    void updateProtectionTest() {
         given(protectionTypeService.getProtectionTypeByName("PROTECTED"))
                 .willReturn(Optional.of(new ProtectionType(1L, "PROTECTED", null, null)));
         songService.updateSong(userDetails,
-                            1L,
-                            "PROTECTED",
-                            null,
-                            null);
+                1L,
+                "PROTECTED",
+                null,
+                null);
 
         assertEquals("PROTECTED", song.getProtectionType().getName());
     }

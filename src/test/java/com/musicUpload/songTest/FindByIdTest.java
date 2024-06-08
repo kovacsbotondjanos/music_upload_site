@@ -1,10 +1,12 @@
 package com.musicUpload.songTest;
 
+import com.musicUpload.cronJobs.EntityCacheManager;
+import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.models.Song;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -24,9 +26,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FindByIdTest {
     @Mock
@@ -41,42 +43,50 @@ public class FindByIdTest {
     private MusicFactory songFactory;
     @Mock
     private ProtectionTypeService protectionTypeService;
+    @Mock
+    private SongCacheManager listenCountJob;
+    @Mock
+    private EntityCacheManager<Song> entityManager;
 
     private SongService songService;
     private Song song;
     private Long id;
-    private ProtectionType privateprotectionType = new ProtectionType(1L, "PRIVATE", List.of(), List.of());
-    private CustomUserDetails userDetails = new CustomUserDetails(1L,
-                                                                "user1",
-                                                                "pwd",
-                                                                List.of(),
-                                                                "",
-                                                                List.of(),
-                                                                List.of());
+    private final ProtectionType privateprotectionType = new ProtectionType(1L, "PRIVATE", List.of(), List.of());
+    private final CustomUserDetails userDetails = new CustomUserDetails(1L,
+            "user1",
+            "pwd",
+            List.of(),
+            "",
+            List.of(),
+            List.of());
 
     @BeforeEach
-    void onSetUp(){
+    void onSetUp() {
         MockitoAnnotations.initMocks(this);
         songService = new SongService(songRepository,
-                                      userRepository,
-                                      albumRepository,
-                                      imageFactory,
-                                      songFactory,
-                                      protectionTypeService);
+                userRepository,
+                albumRepository,
+                imageFactory,
+                songFactory,
+                protectionTypeService,
+                listenCountJob,
+                entityManager);
         id = 1L;
         song = new Song(id,
                 "",
                 "foo",
                 "",
+                1L,
                 new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>()),
                 new User(),
+                new ArrayList<>(),
                 new ArrayList<>(),
                 new Date(),
                 new Date());
     }
 
     @Test
-    void canFindByIdPublicSongNoAuth(){
+    void canFindByIdPublicSongNoAuth() {
         //Given
         given(songRepository.findById(id))
                 .willReturn(Optional.of(song));
@@ -87,7 +97,7 @@ public class FindByIdTest {
     }
 
     @Test
-    void canFindByIdNonExistingSongWithAuth(){
+    void canFindByIdNonExistingSongWithAuth() {
         //Given
         song.setId(2L);
         song.setUser(new User(userDetails));
@@ -100,7 +110,7 @@ public class FindByIdTest {
     }
 
     @Test
-    void canFindByIdPrivateNoAuth(){
+    void canFindByIdPrivateNoAuth() {
         //Given
         song.setProtectionType(privateprotectionType);
         given(songRepository.findById(id))
@@ -111,7 +121,7 @@ public class FindByIdTest {
     }
 
     @Test
-    void canFindByIdPrivateWithUser(){
+    void canFindByIdPrivateWithUser() {
         //Given
         song.setProtectionType(privateprotectionType);
         song.setUser(new User(userDetails));

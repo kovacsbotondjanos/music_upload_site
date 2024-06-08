@@ -3,8 +3,11 @@ package com.musicUpload.dataHandler.seeder.factories;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.musicUpload.dataHandler.models.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import com.musicUpload.dataHandler.services.ProtectionTypeService;
+import com.musicUpload.util.MusicFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,7 @@ import java.util.List;
 
 @Service
 public class ProtectionTypeFactory {
+    private static final Logger logger = LogManager.getLogger(ProtectionTypeFactory.class);
     private final ProtectionTypeService protectionTypeService;
 
     @Autowired
@@ -23,7 +27,7 @@ public class ProtectionTypeFactory {
         this.protectionTypeService = protectionTypeService;
     }
 
-    public List<ProtectionType> generateProtectionTypes(){
+    public List<ProtectionType> generateProtectionTypes() {
         List<ProtectionType> protectionTypes;
 
         Gson gson = new GsonBuilder()
@@ -33,14 +37,13 @@ public class ProtectionTypeFactory {
         try (InputStream inputStream = classLoader.getResourceAsStream("protectionConfig.json")) {
             assert inputStream != null;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                TypeToken<List<ProtectionType>> token = new TypeToken<>() {};
+                TypeToken<List<ProtectionType>> token = new TypeToken<>() { };
                 protectionTypes = gson.fromJson(reader, token.getType());
                 protectionTypes.stream().parallel().forEach(protectionTypeService::save);
                 return protectionTypes;
             }
-        }
-        catch (Exception e){
-            System.err.println(e.getMessage());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
 
         return new ArrayList<>();

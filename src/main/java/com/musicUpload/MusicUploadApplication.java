@@ -1,17 +1,18 @@
 package com.musicUpload;
 
-import com.musicUpload.dataHandler.seeder.DatabaseSeeder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class MusicUploadApplication {
+    private static final Logger logger = LogManager.getLogger(MusicUploadApplication.class);
 
-	public static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(MusicUploadApplication.class, args);
-		DatabaseSeeder dbSeeder = context.getBean(DatabaseSeeder.class);
-		//TODO: take this out soon
-		dbSeeder.seedDatabaseIfEmpty();
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MusicUploadApplication.class, args);
+        logger.info("Application started");
+    }
 }

@@ -1,8 +1,8 @@
 package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.services.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,18 +23,24 @@ public class SongController {
     }
 
     @GetMapping
-    public List<SongDTO> getSongs(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public List<SongDTO> getSongs(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return songService.getSongs(userDetails);
     }
 
     @GetMapping("/{id}")
     public SongDTO getSongById(@AuthenticationPrincipal CustomUserDetails userDetails,
-                               @PathVariable Long id){
+                               @PathVariable Long id) {
         return songService.findById(userDetails, id);
     }
 
+    @GetMapping("/search/{name}")
+    public List<SongDTO> getSongByNameLike(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                           @PathVariable String name) {
+        return songService.findByNameLike(userDetails, name);
+    }
+
     @GetMapping("/random")
-    public List<SongDTO> getRandomSongs(){
+    public List<SongDTO> getRandomSongs() {
         return songService.getRandomSongs();
     }
 
@@ -44,14 +50,14 @@ public class SongController {
                            @RequestParam(name = "protection_type") String protectionType,
                            @RequestParam(name = "name") String name,
                            @RequestParam(name = "image", required = false) MultipartFile image,
-                           @RequestParam(name = "song") MultipartFile song){
+                           @RequestParam(name = "song") MultipartFile song) {
 
         songService.saveSong(
-            userDetails,
-            protectionType,
-            name,
-            image,
-            song
+                userDetails,
+                protectionType,
+                name,
+                image,
+                song
         );
     }
 
@@ -61,20 +67,20 @@ public class SongController {
                           @PathVariable Long id,
                           @RequestParam(name = "protection_type", required = false) String protectionType,
                           @RequestParam(name = "name", required = false) String name,
-                          @RequestParam(name = "image", required = false) MultipartFile image){
+                          @RequestParam(name = "image", required = false) MultipartFile image) {
         songService.updateSong(
-            userDetails,
-            id,
-            protectionType,
-            name,
-            image
+                userDetails,
+                id,
+                protectionType,
+                name,
+                image
         );
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteSong(@AuthenticationPrincipal CustomUserDetails userDetails,
-                           @PathVariable Long id){
+                           @PathVariable Long id) {
         songService.deleteSong(userDetails, id);
     }
 }

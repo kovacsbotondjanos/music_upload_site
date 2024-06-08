@@ -1,7 +1,8 @@
 package com.musicUpload.albumTest;
 
+import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.*;
+import com.musicUpload.dataHandler.models.implementations.*;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
@@ -34,13 +35,15 @@ public class UpdateAlbumTest {
     private SongService songService;
     @Mock
     private ImageFactory imageFactory;
+    @Mock
+    private EntityCacheManager<Album> albumEntityManager;
 
     private AlbumService albumService;
     private Album album;
     private Long id;
-    private ProtectionType publicProtectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
-    private ProtectionType privateProtectionType = new ProtectionType(1L, "PRIVATE", List.of(), List.of());
-    private CustomUserDetails userDetails = new CustomUserDetails(1L,
+    private final ProtectionType publicProtectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
+    private final ProtectionType privateProtectionType = new ProtectionType(1L, "PRIVATE", List.of(), List.of());
+    private final CustomUserDetails userDetails = new CustomUserDetails(1L,
             "user1",
             "pwd",
             List.of(),
@@ -48,24 +51,27 @@ public class UpdateAlbumTest {
             List.of(),
             List.of());
     private User user;
-    private Song song = new Song(1L,
+    private final Song song = new Song(1L,
             "",
             "foo",
             "",
+            0L,
             privateProtectionType,
             new User(),
+            new ArrayList<>(),
             new ArrayList<>(),
             new Date(),
             new Date());
 
     @BeforeEach
-    void onSetUp(){
+    void onSetUp() {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
                 userRepository,
                 protectionTypeService,
                 songService,
-                imageFactory);
+                imageFactory,
+                albumEntityManager);
         id = 1L;
         album = new Album(id,
                 "",
@@ -76,24 +82,24 @@ public class UpdateAlbumTest {
                 new Date(),
                 new Date());
         user = new User(1L, null, null, null,
-                "user", List.of(), List.of(), new Auth(), List.of(), List.of(), null, null);
+                "user", List.of(), List.of(), new Auth(), List.of(), List.of(), List.of(), null, null);
     }
 
     @Test
-    void updateAlbumWithoutAuth(){
+    void updateAlbumWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
                 () -> albumService.patchAlbum(null, null, null, null, null, null));
     }
 
     @Test
-    void updateOtherUsersAlbum(){
+    void updateOtherUsersAlbum() {
         userDetails.setAlbums(List.of(album));
         assertThrows(UnauthenticatedException.class,
                 () -> albumService.patchAlbum(userDetails, 2L, null, null, null, null));
     }
 
     @Test
-    void updateNameTest(){
+    void updateNameTest() {
         userDetails.setAlbums(List.of(album));
         albumService.patchAlbum(
                 userDetails,
@@ -101,12 +107,12 @@ public class UpdateAlbumTest {
                 null, null,
                 "bar",
                 null
-                );
+        );
         assertEquals("bar", album.getName());
     }
 
     @Test
-    void updateProtectionType(){
+    void updateProtectionType() {
         given(protectionTypeService.getProtectionTypeByName("PRIVATE"))
                 .willReturn(Optional.of(privateProtectionType));
         userDetails.setAlbums(List.of(album));
@@ -121,7 +127,7 @@ public class UpdateAlbumTest {
     }
 
     @Test
-    void updateAlbumWithPrivateSongNotOwned(){
+    void updateAlbumWithPrivateSongNotOwned() {
         song.setProtectionType(privateProtectionType);
         userDetails.setAlbums(List.of(album));
         albumService.patchAlbum(userDetails,
@@ -133,7 +139,7 @@ public class UpdateAlbumTest {
     }
 
     @Test
-    void updateAlbumWithPublicSongNotOwned(){
+    void updateAlbumWithPublicSongNotOwned() {
         song.setProtectionType(publicProtectionType);
         userDetails.setAlbums(List.of(album));
         given(songService.findById(1L))
@@ -147,7 +153,7 @@ public class UpdateAlbumTest {
     }
 
     @Test
-    void updateAlbumWithPrivateSongOwned(){
+    void updateAlbumWithPrivateSongOwned() {
         song.setProtectionType(privateProtectionType);
         userDetails.setAlbums(List.of(album));
         album.setUser(user);

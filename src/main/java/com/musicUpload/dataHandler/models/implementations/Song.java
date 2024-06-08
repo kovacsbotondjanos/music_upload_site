@@ -1,6 +1,7 @@
-package com.musicUpload.dataHandler.models;
+package com.musicUpload.dataHandler.models.implementations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"protectionType", "user", "albums"})
-public class Song {
+public class Song implements CustomEntityInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -23,6 +24,7 @@ public class Song {
     private String image;
     private String name;
     private String nameHashed;
+    private Long listenCount = 0L;
 
     @ManyToOne
     @JoinColumn(name = "protection_id")
@@ -52,5 +54,21 @@ public class Song {
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
+    }
+
+    public void addListen() {
+        listenCount++;
+    }
+
+    public void addListen(Long count) {
+        listenCount += count;
+    }
+
+    public long getCacheIndex() {
+        if(listenCount == 0) {
+            return 0;
+        }
+        //I take the 100 base log of the listen count to determine how long i have to cache the song, the cap is one hour
+        return (long)(Math.min(1000 * 60 * 60, 100 * Math.log(listenCount) / Math.log(100)) * Math.sqrt(listenCount));
     }
 }

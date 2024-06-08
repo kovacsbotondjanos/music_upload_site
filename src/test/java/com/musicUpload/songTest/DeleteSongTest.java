@@ -1,9 +1,11 @@
 package com.musicUpload.songTest;
 
+import com.musicUpload.cronJobs.EntityCacheManager;
+import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.models.Song;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -17,12 +19,22 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
 public class DeleteSongTest {
+    CustomUserDetails userDetails = new CustomUserDetails(1L,
+            "user1",
+            "",
+            List.of(),
+            "",
+            List.of(),
+            List.of());
     @Mock
     private SongRepository songRepository;
     @Mock
@@ -35,34 +47,34 @@ public class DeleteSongTest {
     private MusicFactory songFactory;
     @Mock
     private ProtectionTypeService protectionTypeService;
-
+    @Mock
+    private SongCacheManager listenCountJob;
+    @Mock
+    private EntityCacheManager<Song> entityManager;
     private SongService songService;
     private List<Song> songs;
-    private ProtectionType protectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
-    CustomUserDetails userDetails = new CustomUserDetails(1L,
-            "user1",
-            "",
-            List.of(),
-            "",
-            List.of(),
-            List.of());
+    private final ProtectionType protectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
 
     @BeforeEach
-    void onSetUp(){
+    void onSetUp() {
         MockitoAnnotations.initMocks(this);
         songService = new SongService(songRepository,
                 userRepository,
                 albumRepository,
                 imageFactory,
                 songFactory,
-                protectionTypeService);
+                protectionTypeService,
+                listenCountJob,
+                entityManager);
         songs = List.of(
                 new Song(1L,
                         "",
                         "foo",
                         "",
+                        1L,
                         protectionType,
                         new User(),
+                        new ArrayList<>(),
                         new ArrayList<>(),
                         new Date(),
                         new Date()),
@@ -70,8 +82,10 @@ public class DeleteSongTest {
                         "",
                         "bar",
                         "",
+                        1L,
                         protectionType,
                         new User(),
+                        new ArrayList<>(),
                         new ArrayList<>(),
                         new Date(),
                         new Date()),
@@ -79,21 +93,23 @@ public class DeleteSongTest {
                         "",
                         "baz",
                         "",
+                        1L,
                         protectionType,
                         new User(),
+                        new ArrayList<>(),
                         new ArrayList<>(),
                         new Date(),
                         new Date()));
     }
 
     @Test
-    void canDeleteWithoutAuth(){
+    void canDeleteWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
                 () -> songService.deleteSong(null, 1L));
     }
 
     @Test
-    void canDeleteOtherUserSongWithAuth(){
+    void canDeleteOtherUserSongWithAuth() {
         //Given
         userDetails.setSongs(List.of(songs.get(0)));
         given(userRepository.findById(userDetails.getId()))
@@ -104,7 +120,7 @@ public class DeleteSongTest {
     }
 
     @Test
-    void canDeleteOwnSongWithAuth(){
+    void canDeleteOwnSongWithAuth() {
         //Given
         userDetails.setSongs(new ArrayList<>(List.of(songs.get(0))));
         given(userRepository.findById(userDetails.getId()))

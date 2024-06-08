@@ -1,6 +1,6 @@
 package com.musicUpload.dataHandler.DTOs;
 
-import com.musicUpload.dataHandler.models.Song;
+import com.musicUpload.dataHandler.models.implementations.Song;
 import lombok.Data;
 
 import java.util.Date;
@@ -14,8 +14,9 @@ public class SongDTO {
     private String protectionType;
     private Long userId;
     private Date createdAt;
+    private Long listenCount;
 
-    public SongDTO(Song song){
+    public SongDTO(Song song) {
         this.id = song.getId();
         this.image = song.getImage();
         this.name = song.getName();
@@ -23,9 +24,10 @@ public class SongDTO {
         this.protectionType = song.getProtectionType().getName();
         this.userId = song.getUser().getId();
         this.createdAt = song.getCreatedAt();
+        this.listenCount = song.getListenCount();
     }
 
-    public static SongDTO of(Song song){
+    public static SongDTO of(Song song) {
         return new SongDTO(song);
     }
 }

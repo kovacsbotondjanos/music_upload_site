@@ -3,10 +3,12 @@ package com.musicUpload.dataHandler.seeder.factories;
 import com.github.javafaker.Faker;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.musicUpload.dataHandler.models.Auth;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.Auth;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.util.ImageFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import java.util.stream.IntStream;
 
 @Service
 public class UserFactory {
+    private static final Logger logger = LogManager.getLogger(UserFactory.class);
     private final UserService userService;
 
     @Autowired
@@ -29,13 +32,13 @@ public class UserFactory {
         imageFactory.createImagesDir();
     }
 
-    public List<User> createFollow(List<User> users){
+    public List<User> createFollow(List<User> users) {
         Random random = new Random();
 
         users.stream().parallel().forEach(currUser -> {
             IntStream.range(0, random.nextInt() % users.size()).forEachOrdered(__ -> {
-                User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
-                if(currUser.getFollowedUsers().stream().noneMatch(u -> u.equals(user) || u.equals(currUser))){
+                User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
+                if (currUser.getFollowedUsers().stream().noneMatch(u -> u.equals(user) || u.equals(currUser))) {
                     currUser.getFollowedUsers().add(user);
                 }
             });
@@ -45,7 +48,7 @@ public class UserFactory {
         return users;
     }
 
-    public List<User> createUsers(int number, List<Auth> auths){
+    public List<User> createUsers(int number, List<Auth> auths) {
         List<User> users = new CopyOnWriteArrayList<>();
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
@@ -57,7 +60,7 @@ public class UserFactory {
         return users;
     }
 
-    public void createAdminFromConfigFile(Auth adminAuth){
+    public void createAdminFromConfigFile(Auth adminAuth) {
         User admin;
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
@@ -70,13 +73,12 @@ public class UserFactory {
                 admin.setAuthority(adminAuth);
                 userService.registerUser(admin);
             }
-        }
-        catch (Exception e){
-            System.err.println(e.getMessage());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
     }
 
-    private User createUser(List<Auth> auths){
+    private User createUser(List<Auth> auths) {
         Faker faker = new Faker(new Random());
         String firstName = faker.name().firstName();
         String lastName = faker.name().lastName();

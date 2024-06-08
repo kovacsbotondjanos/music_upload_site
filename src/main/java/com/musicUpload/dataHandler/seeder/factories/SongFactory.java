@@ -1,9 +1,9 @@
 package com.musicUpload.dataHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
-import com.musicUpload.dataHandler.models.ProtectionType;
-import com.musicUpload.dataHandler.models.Song;
-import com.musicUpload.dataHandler.models.User;
+import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
@@ -29,7 +29,7 @@ public class SongFactory {
         musicFactory.createMusicDir();
     }
 
-    public List<Song> generateSongs(int number, List<User> users, List<ProtectionType> protectionTypes){
+    public List<Song> generateSongs(int number, List<User> users, List<ProtectionType> protectionTypes) {
         List<Song> songs = new CopyOnWriteArrayList<>();
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
@@ -41,7 +41,7 @@ public class SongFactory {
         return songs;
     }
 
-    private Song createSong(List<User> users, List<ProtectionType> protectionTypes){
+    private Song createSong(List<User> users, List<ProtectionType> protectionTypes) {
         Song song = new Song();
         Random random = new Random();
 
@@ -52,10 +52,11 @@ public class SongFactory {
         song.setNameHashed(musicFactory.createSong());
         song.setImage(imageFactory.getRandomImage());
         song.setProtectionType(protectionTypes.get(random.nextInt(1, Integer.MAX_VALUE) % protectionTypes.size()));
+        song.setListenCount(faker.number().numberBetween(0L, 1_000_000L));
 
-        User user = users.get(random.nextInt(1, Integer.MAX_VALUE) % users.size());
+        User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
 
-        synchronized (user){
+        synchronized (user) {
             song.setUser(user);
             user.getSongs().add(song);
         }

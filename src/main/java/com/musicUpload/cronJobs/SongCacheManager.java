@@ -13,8 +13,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -70,16 +72,17 @@ public class SongCacheManager {
         logger.info("{} new listens are being saved into the database", copyMap.size());
 
         new Thread(() -> {
-            ConcurrentLinkedQueue<Song> songsToSave = new ConcurrentLinkedQueue<>();
-            ConcurrentLinkedQueue<UserSong> userListensToSave = new ConcurrentLinkedQueue<>();
+            Map<Long, Long> songsToSave = new ConcurrentHashMap<>();
+            Queue<UserSong> userListensToSave = new ConcurrentLinkedQueue<>();
             copyMap.entrySet().stream()
                     .parallel()
                     .forEach(e -> {
-                        Optional<Song> songOpt = songRepository.findById(e.getKey().getFirst());
-                        songOpt.ifPresent(song -> {
-                            song.addListen(e.getValue());
-                            songsToSave.add(song);
-                        });
+                        if(songsToSave.containsKey(e.getKey().getFirst())) {
+                            songsToSave.put(e.getKey().getFirst(), songsToSave.get(e.getKey().getFirst()) + e.getValue());
+                        }
+                        else {
+                            songsToSave.put(e.getKey().getFirst(), e.getValue()1);
+                        }
 
                         LocalDate date = LocalDate.now();
                         int month = date.getMonthValue();
@@ -104,7 +107,12 @@ public class SongCacheManager {
                                 }
                         );
                     });
-            songRepository.saveAll(songsToSave);
+            List<Song> songList = songsToSave.entrySet().stream().map(entry -> {
+                Optional<Song> s = songRepository.findById(entry.getKey());
+                s.ifPresent(song -> song.addListen(entry.getValue()));
+                return s;
+            }).filter(Optional::isPresent).map(Optional::get).toList();
+            songRepository.saveAll(songList);
             userSongRepository.saveAll(userListensToSave);
         }).start();
     }

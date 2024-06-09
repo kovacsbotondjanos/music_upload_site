@@ -35,3 +35,4 @@ build/
 /music/
 /images/
 /application.log
+/*.log

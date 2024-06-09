@@ -1,0 +1,187 @@
+2024-06-08 18:03:47 INFO  c.musicUpload.MusicUploadApplication - Starting MusicUploadApplication using Java 22.0.1 with PID 14268 (C:\Users\Kovács Botond\Desktop\musicupload\target\classes started by Kovács Botond in C:\Users\Kovács Botond\Desktop\musicupload)
+2024-06-08 18:03:47 INFO  c.musicUpload.MusicUploadApplication - No active profile set, falling back to 1 default profile: "default"
+2024-06-08 18:03:50 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-06-08 18:03:50 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 175 ms. Found 6 JPA repository interfaces.
+2024-06-08 18:03:51 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2024-06-08 18:03:51 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2024-06-08 18:03:51 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2024-06-08 18:03:51 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2024-06-08 18:03:51 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2024-06-08 18:03:51 INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3820 ms
+2024-06-08 18:03:52 INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-06-08 18:03:52 INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.4.Final
+2024-06-08 18:03:52 INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2024-06-08 18:03:52 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-06-08 18:03:52 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2024-06-08 18:03:53 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@47797401
+2024-06-08 18:03:53 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2024-06-08 18:03:54 INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-06-08 18:03:54 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-06-08 18:03:55 INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2024-06-08 18:03:56 INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7fcc8d9f, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7315264e, org.springframework.security.web.context.SecurityContextHolderFilter@77fd5501, org.springframework.security.web.header.HeaderWriterFilter@bf0025d, org.springframework.web.filter.CorsFilter@9fd5dd0, org.springframework.security.web.authentication.logout.LogoutFilter@144caca6, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@363751f2, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@4f7a2262, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@11c68269, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@3debeb5e, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@93cc5eb, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@3ef7064b, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7b237c2c, org.springframework.security.web.access.ExceptionTranslationFilter@4ff233f9, org.springframework.security.web.access.intercept.AuthorizationFilter@7410c197]
+2024-06-08 18:03:57 INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2024-06-08 18:03:57 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2024-06-08 18:03:57 INFO  c.musicUpload.MusicUploadApplication - Started MusicUploadApplication in 10.738 seconds (process running for 11.536)
+2024-06-08 18:03:57 INFO  c.musicUpload.MusicUploadApplication - Application started
+2024-06-08 18:03:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 0
+2024-06-08 18:03:57 INFO  c.m.cronJobs.SongCacheManager - 0 new listens are being saved into the database
+2024-06-08 18:03:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 0
+2024-06-08 18:04:23 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2024-06-08 18:04:23 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2024-06-08 18:04:23 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 131 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 152 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 226 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 272 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 198 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 207 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 220 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 291 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 108 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 217 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 86 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 154 seconds
+2024-06-08 18:04:24 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 191 seconds
+2024-06-08 18:04:26 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 206 seconds
+2024-06-08 18:04:26 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 49 seconds
+2024-06-08 18:04:42 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:04:42 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=41, second=1)=1}
+2024-06-08 18:04:42 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:04:43 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=41, second=1)=2}
+2024-06-08 18:04:54 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:04:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 16
+2024-06-08 18:04:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 15
+2024-06-08 18:05:32 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:05:32 INFO  c.m.dataHandler.services.SongService - Song retrieved from cache
+2024-06-08 18:05:57 INFO  c.m.cronJobs.SongCacheManager - 1 new listens are being saved into the database
+2024-06-08 18:05:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 16
+2024-06-08 18:05:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 13
+2024-06-08 18:06:07 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 49 seconds
+2024-06-08 18:06:07 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 86 seconds
+2024-06-08 18:06:19 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:06:23 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=1)=1}
+2024-06-08 18:06:23 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:06:23 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=1)=2}
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 196 seconds
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 184 seconds
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 195 seconds
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 231 seconds
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 94 seconds
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 41 seconds
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 299 seconds
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 283 seconds
+2024-06-08 18:06:40 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 158 seconds
+2024-06-08 18:06:40 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:06:42 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=null)=1, Pair(first=52, second=1)=2}
+2024-06-08 18:06:42 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:06:42 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=null)=2, Pair(first=52, second=1)=2}
+2024-06-08 18:06:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 26
+2024-06-08 18:06:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 21
+2024-06-08 18:06:58 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:06:58 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 152 seconds
+2024-06-08 18:06:58 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 108 seconds
+2024-06-08 18:06:58 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 131 seconds
+2024-06-08 18:06:58 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:07:13 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:07:15 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=null)=2, Pair(first=52, second=1)=2, Pair(first=52, second=3)=1}
+2024-06-08 18:07:15 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:07:15 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=null)=2, Pair(first=52, second=1)=2, Pair(first=52, second=3)=2}
+2024-06-08 18:07:23 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:07:24 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=null)=2, Pair(first=52, second=1)=2, Pair(first=52, second=3)=2, Pair(first=3, second=3)=1}
+2024-06-08 18:07:24 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:07:24 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=null)=2, Pair(first=52, second=1)=2, Pair(first=52, second=3)=2, Pair(first=3, second=3)=2}
+2024-06-08 18:07:32 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:07:32 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=null)=2, Pair(first=52, second=1)=2, Pair(first=52, second=3)=2, Pair(first=7, second=3)=1, Pair(first=3, second=3)=2}
+2024-06-08 18:07:32 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:07:57 INFO  c.m.cronJobs.SongCacheManager - 5 new listens are being saved into the database
+2024-06-08 18:07:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 26
+2024-06-08 18:07:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 16
+2024-06-08 18:08:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 16
+2024-06-08 18:08:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 10
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 191 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 94 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 220 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 41 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 206 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 272 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 154 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 217 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 49 seconds
+2024-06-08 18:09:29 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 86 seconds
+2024-06-08 18:09:31 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=3)=1}
+2024-06-08 18:09:31 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:09:56 INFO  c.m.cronJobs.SongCacheManager - buffer: {Pair(first=52, second=1)=1, Pair(first=52, second=3)=1}
+2024-06-08 18:09:57 INFO  c.m.cronJobs.SongCacheManager - 2 new listens are being saved into the database
+2024-06-08 18:09:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 22
+2024-06-08 18:09:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 13
+2024-06-08 18:10:19 WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2024-06-08 18:10:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 13
+2024-06-08 18:10:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 9
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 184 seconds
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 231 seconds
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 196 seconds
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 41 seconds
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 195 seconds
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 131 seconds
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 158 seconds
+2024-06-08 18:11:46 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 86 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 142 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 193 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 42 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 233 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 80 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 207 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 154 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 49 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 236 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 181 seconds
+2024-06-08 18:11:50 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 291 seconds
+2024-06-08 18:11:57 INFO  c.m.cronJobs.SongCacheManager - 0 new listens are being saved into the database
+2024-06-08 18:11:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 30
+2024-06-08 18:11:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 25
+2024-06-08 18:12:07 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 152 seconds
+2024-06-08 18:12:07 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 226 seconds
+2024-06-08 18:12:07 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 108 seconds
+2024-06-08 18:12:07 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 198 seconds
+2024-06-08 18:12:07 INFO  c.m.cronJobs.SongCacheManager - Entity cached for 0 seconds
+2024-06-08 18:12:10 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-06-08 18:12:10 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2024-06-08 18:12:10 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2024-06-08 18:18:50 INFO  c.musicUpload.MusicUploadApplication - Starting MusicUploadApplication using Java 22.0.1 with PID 19116 (C:\Users\Kovács Botond\Desktop\musicupload\target\classes started by Kovács Botond in C:\Users\Kovács Botond\Desktop\musicupload)
+2024-06-08 18:18:50 INFO  c.musicUpload.MusicUploadApplication - No active profile set, falling back to 1 default profile: "default"
+2024-06-08 18:18:51 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-06-08 18:18:52 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 86 ms. Found 6 JPA repository interfaces.
+2024-06-08 18:18:52 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2024-06-08 18:18:52 INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2024-06-08 18:18:52 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2024-06-08 18:18:52 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2024-06-08 18:18:53 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2024-06-08 18:18:53 INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2179 ms
+2024-06-08 18:18:53 INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-06-08 18:18:53 INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.4.Final
+2024-06-08 18:18:53 INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2024-06-08 18:18:53 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-06-08 18:18:53 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2024-06-08 18:18:54 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@11180750
+2024-06-08 18:18:54 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2024-06-08 18:18:55 INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-06-08 18:18:55 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-06-08 18:18:56 INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2024-06-08 18:18:57 INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7fb70e94, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5abf9a76, org.springframework.security.web.context.SecurityContextHolderFilter@14501070, org.springframework.security.web.header.HeaderWriterFilter@23bf19c9, org.springframework.web.filter.CorsFilter@4fce655d, org.springframework.security.web.authentication.logout.LogoutFilter@ab90b8c, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@511ba9c9, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@117bfeb8, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@4e132a9b, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@3ae5cbb9, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@4a577b99, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@440309c5, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7f2d4ffc, org.springframework.security.web.access.ExceptionTranslationFilter@93cc5eb, org.springframework.security.web.access.intercept.AuthorizationFilter@1227ea21]
+2024-06-08 18:18:57 INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2024-06-08 18:18:57 INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2024-06-08 18:18:57 INFO  c.musicUpload.MusicUploadApplication - Started MusicUploadApplication in 7.478 seconds (process running for 8.065)
+2024-06-08 18:18:57 INFO  c.musicUpload.MusicUploadApplication - Application started
+2024-06-08 18:18:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 0
+2024-06-08 18:18:57 INFO  c.m.cronJobs.SongCacheManager - 0 new listens are being saved into the database
+2024-06-08 18:18:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 0
+2024-06-08 18:19:57 INFO  c.m.cronJobs.SongCacheManager - Cache size before emptying: 0
+2024-06-08 18:19:57 INFO  c.m.cronJobs.SongCacheManager - Cache size after emptying: 0
+2024-06-08 18:20:22 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-06-08 18:20:22 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2024-06-08 18:20:22 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

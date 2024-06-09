@@ -16,6 +16,7 @@ import com.musicUpload.exceptions.UnprocessableException;
 import com.musicUpload.exceptions.WrongFormatException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
+import com.musicUpload.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -241,8 +242,11 @@ public class SongService {
                 throw new WrongFormatException();
             }
         }
-
-        songCacheManager.addSong(songRepository.save(song));
+        synchronized (songCacheManager.getCopyMap()) {
+            logger.info("lock for song with id {} starts, because update", song.getId());
+            songCacheManager.addSong(songRepository.save(song));
+            logger.info("lock for song with id {} ends, because update", song.getId());
+        }
     }
 
     public Song deleteSong(CustomUserDetails userDetails,
@@ -275,8 +279,12 @@ public class SongService {
         imageFactory.deleteFile(song.getImage());
         musicFactory.deleteFile(song.getNameHashed());
 
-        userDetails.getSongs().remove(song);
-        songCacheManager.removeSong(song.getId());
+        synchronized (songCacheManager.getCopyMap()) {
+            logger.info("lock for song with id {} starts, because deletion", song.getId());
+            userDetails.getSongs().remove(song);
+            songCacheManager.removeSong(song.getId());
+            logger.info("lock for song with id {} ends, because deletion", song.getId());
+        }
 
         return song;
     }

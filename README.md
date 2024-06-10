@@ -9,7 +9,7 @@ Besides the basic JPA classes, a database cache has been implemented to improve 
 queried it will be cached for an amount of time calculated based on the number of listens on the song
 
 When a user listens to a song it will be saved into the database in batches, with a scheduled job. This will
-enable the application to analyze the data later on and recommend songs to the user based on the listen history
+enable the application to analyze the data later on and recommend songs to the users based on their listen history
 
 Currently, in progress:
 --

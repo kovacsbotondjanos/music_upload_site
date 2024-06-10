@@ -54,21 +54,32 @@ public class AlbumController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public AlbumDTO patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                            @PathVariable Long id,
                            @RequestParam(name = "protection_type", required = false) String protectionType,
-                           @RequestParam(name = "song_id", required = false) List<Long> songId,
+                           @RequestParam(name = "song_id", required = false) List<Long> songIds,
                            @RequestParam(name = "name", required = false) String name,
                            @RequestParam(name = "image", required = false) MultipartFile image) {
-        //TODO: fix the issue and make this parallel too
-        albumService.patchAlbum(
+        return AlbumDTO.of(albumService.patchAlbum(
                 userDetails,
                 id,
                 protectionType,
-                songId,
+                songIds,
                 name,
                 image
-        );
+        ));
+    }
+
+    @PatchMapping("/add-songs/{id}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public AlbumDTO addSongs(@AuthenticationPrincipal CustomUserDetails userDetails,
+                         @PathVariable Long id,
+                         @RequestParam(name = "song_id", required = false) List<Long> songIds) {
+        return AlbumDTO.of(albumService.addSongs(
+                userDetails,
+                id,
+                songIds
+        ));
     }
 
     @DeleteMapping("/{id}")

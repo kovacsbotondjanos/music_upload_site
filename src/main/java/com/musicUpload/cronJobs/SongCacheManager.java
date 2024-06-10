@@ -93,6 +93,7 @@ public class SongCacheManager {
                             LocalDate date = LocalDate.now();
                             int month = date.getMonthValue();
                             int year = date.getYear();
+                            //TODO: user createdAt field here!!!
                             var userListenOpt = userSongRepository.findBySongIdAndUserIdAndYearAndMonth(e.getKey().getFirst(),
                                                                                                                        e.getKey().getSecond(),
                                                                                                                        year,

@@ -4,6 +4,7 @@ import com.musicUpload.dataHandler.models.implementations.UserSong;
 import com.musicUpload.dataHandler.repositories.UserSongRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ public class UserSongService {
         return userSongRepository.findAll();
     }
 
-    public Set<UserSong> findByLastTwoMonths(int y1, int m1, int y2, int m2) {
-        return userSongRepository.findByLastTwoMonths(y1, m1, y2, m2);
+    public Set<UserSong> findByLastTwoMonths(Date start) {
+        return userSongRepository.findByCreatedAtGreaterThan(start);
     }
 }

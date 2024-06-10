@@ -23,9 +23,6 @@ public class UserSong implements CustomEntityInterface {
     private Long listenCount;
     private Long userId;
     private Long songId;
-    //TODO: user createdAt for this
-    private int year;
-    private int month;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
@@ -45,11 +42,9 @@ public class UserSong implements CustomEntityInterface {
         createdAt = new Date();
     }
 
-    public UserSong(Long songId, Long userId, Long listenCount, int year, int month) {
+    public UserSong(Long songId, Long userId, Long listenCount) {
         this.userId = userId;
         this.songId = songId;
         this.listenCount = listenCount;
-        this.year = year;
-        this.month = month;
     }
 }

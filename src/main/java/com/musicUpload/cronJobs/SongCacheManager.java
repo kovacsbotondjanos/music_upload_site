@@ -14,10 +14,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -91,13 +89,10 @@ public class SongCacheManager {
                             }
 
                             LocalDate date = LocalDate.now();
-                            int month = date.getMonthValue();
-                            int year = date.getYear();
-                            //TODO: user createdAt field here!!!
-                            var userListenOpt = userSongRepository.findBySongIdAndUserIdAndYearAndMonth(e.getKey().getFirst(),
-                                                                                                                       e.getKey().getSecond(),
-                                                                                                                       year,
-                                                                                                                       month);
+                            Date firstDate = Date.from(date.withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                            Date lastDate = Date.from(date.withDayOfMonth(date.lengthOfMonth()).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                            var userListenOpt = userSongRepository.findByCreatedAtBetween(firstDate, lastDate);
+
                             userListenOpt.ifPresentOrElse(
                                     u -> {
                                         u.setListenCount(u.getListenCount() + e.getValue());
@@ -107,9 +102,7 @@ public class SongCacheManager {
                                         if(e.getKey().getSecond() != null) {
                                             userListensToSave.add(new UserSong(e.getKey().getFirst(),
                                                                                e.getKey().getSecond(),
-                                                                               e.getValue(),
-                                                                               year,
-                                                                               month));
+                                                                               e.getValue()));
                                         }
                                     }
                             );

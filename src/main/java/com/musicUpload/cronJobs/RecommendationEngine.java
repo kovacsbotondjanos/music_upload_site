@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,23 +21,17 @@ import java.util.stream.Collectors;
 public class RecommendationEngine {
     private static final Logger logger = LogManager.getLogger(RecommendationEngine.class);
     private final UserSongService userSongService;
-    private final UserService userService;
 
     @Autowired
-    public RecommendationEngine(UserSongService userSongService, UserService userService) {
+    public RecommendationEngine(UserSongService userSongService) {
         this.userSongService = userSongService;
-        this.userService = userService;
     }
 
+    //TODO: set this to midnight when done testing
     @Scheduled(cron = "00 * * * * *")
     public void createRecommendations() {
-        LocalDate now = LocalDate.now();
-        LocalDate earlier = now.minusMonths(1);
-        int year = now.getYear();
-        int yearOfLastMonth = earlier.getYear();
-        int month = now.getMonthValue();
-        int lastMonth = earlier.getMonthValue();
-        Set<UserSong> listens = userSongService.findByLastTwoMonths(year, month, yearOfLastMonth, lastMonth);
+        Date start = Date.from(LocalDate.now().minusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Set<UserSong> listens = userSongService.findByLastTwoMonths(start);
         logger.info("all connections from last two months: {}", listens);
         Set<GraphNode> graph = listens.stream().map(GraphNode::new).collect(Collectors.toSet());
         graph.forEach(node -> {

@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface UserSongRepository extends JpaRepository<UserSong, Long> {
-    Optional<UserSong> findByCreatedAtBetween(Date start, Date end);
+    Optional<UserSong> findBySongIdAndUserIdAndCreatedAtBetween(Long songId, Long userId, Date start, Date end);
     Set<UserSong> findByCreatedAtGreaterThan(Date start);
 }

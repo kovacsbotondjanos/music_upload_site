@@ -91,7 +91,10 @@ public class SongCacheManager {
                             LocalDate date = LocalDate.now();
                             Date firstDate = Date.from(date.withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
                             Date lastDate = Date.from(date.withDayOfMonth(date.lengthOfMonth()).atStartOfDay(ZoneId.systemDefault()).toInstant());
-                            var userListenOpt = userSongRepository.findByCreatedAtBetween(firstDate, lastDate);
+                            var userListenOpt = userSongRepository.findBySongIdAndUserIdAndCreatedAtBetween(e.getKey().getFirst(),
+                                                                                                         e.getKey().getSecond(),
+                                                                                                         firstDate,
+                                                                                                         lastDate);
 
                             userListenOpt.ifPresentOrElse(
                                     u -> {

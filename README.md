@@ -1,6 +1,6 @@
 # music_upload_site
 
-### Backend of a website similar to Spotify or Soundcloud, where users can create accounts and albums, upload songs and listen their and other user's songs
+### Backend of a website similar to Spotify or Soundcloud, where users can create accounts and albums, upload songs and listen to their and other user's songs
 
 After starting the application it will automatically check if the database is empty, if yes then it will seed the 
 database with data using Java faker, download pictures for users, songs and albums and generate random audio files

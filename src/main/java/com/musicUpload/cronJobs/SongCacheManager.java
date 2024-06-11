@@ -43,7 +43,7 @@ public class SongCacheManager {
     public void addListenToSong(Long songId, CustomUserDetails userDetails) {
         new Thread(() -> {
             Long userId = userDetails == null ? null : userDetails.getId();
-            songListensBuffer.merge(new Pair<>(songId, userId), 1L, Long::sum);
+            songListensBuffer.merge(Pair.of(songId, userId), 1L, Long::sum);
             logger.info("buffer: {}", songListensBuffer);
             //I make sure here that the cached data is not stale
             songEntityManager.getEntity(songId)

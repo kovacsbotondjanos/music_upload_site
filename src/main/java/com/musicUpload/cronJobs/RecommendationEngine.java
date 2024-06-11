@@ -33,6 +33,7 @@ public class RecommendationEngine {
         Date start = Date.from(LocalDate.now().minusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         Set<UserSong> listens = userSongService.findByLastTwoMonths(start);
         logger.info("all connections from last two months: {}", listens);
+        //TODO: make this graph more efficient, maybe a general hashmap where we put every song with its connections and then filter it
         Set<GraphNode> graph = listens.stream().map(GraphNode::new).collect(Collectors.toSet());
         graph.forEach(node -> {
             Set<GraphNode> nodesWithSameSong = graph.stream()
@@ -54,15 +55,16 @@ public class RecommendationEngine {
                     .collect(Collectors.toSet());
             nodesWithSameSong.forEach(n -> {
                 n.getNodesWithSameUser().stream()
+                        .filter(s -> !s.getUserSong().getUserId().equals(userId))
                         .map(s -> s.getUserSong().getSongId())
                         .forEach(sId -> {
                             if(userIdAndRecommendations.containsKey(userId)) {
                                 var songPairOpt = userIdAndRecommendations.get(userId).stream().filter(p -> p.getFirst().equals(sId)).findAny();
                                 songPairOpt.ifPresentOrElse(songPair -> songPair.setSecond(songPair.getSecond() + 1L),
-                                                            () -> userIdAndRecommendations.get(userId).add(new Pair<>(sId, 1L)));
+                                                            () -> userIdAndRecommendations.get(userId).add(Pair.of(sId, 1L)));
                             }
                             else {
-                                userIdAndRecommendations.put(userId, new HashSet<>(Set.of(new Pair<>(sId, 1L))));
+                                userIdAndRecommendations.put(userId, new HashSet<>(Set.of(Pair.of(sId, 1L))));
                             }
                         });
             });
@@ -73,7 +75,7 @@ public class RecommendationEngine {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    @ToString
+    @ToString(exclude = {"nodesWithSameSong", "nodesWithSameUser"})
     @EqualsAndHashCode(exclude = {"nodesWithSameSong", "nodesWithSameUser"})
     static class GraphNode {
         private UserSong userSong;

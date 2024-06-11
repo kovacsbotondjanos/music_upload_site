@@ -175,6 +175,29 @@ public class AlbumService {
         return albumRepository.save(album);
     }
 
+    public Album addSongs(CustomUserDetails userDetails,
+                          Long id,
+                          List<Long> songIds) {
+        if (userDetails == null) {
+            throw new UnauthenticatedException();
+        }
+
+        Album album = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny()
+                .orElseThrow(UnauthenticatedException::new);
+        if (songIds != null) {
+            songIds.forEach(songId -> {
+                songService.findById(songId).ifPresent(song -> {
+                    if (!song.getProtectionType().getName().equals("PRIVATE")
+                            || album.getUser().getSongs().stream()
+                            .anyMatch(s -> s.getId().equals(song.getId()))) {
+                        album.getSongs().add(song);
+                    }
+                });
+            });
+        }
+        return albumRepository.save(album);
+    }
+
     public Album deleteAlbum(CustomUserDetails userDetails,
                              Long id) {
         if (userDetails == null) {

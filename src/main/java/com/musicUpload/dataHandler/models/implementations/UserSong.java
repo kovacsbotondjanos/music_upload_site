@@ -4,6 +4,7 @@ import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
@@ -13,6 +14,7 @@ import java.util.Date;
 @Table(name = "USERS_SONGS")
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"updatedAt", "createdAt"})
 public class UserSong implements CustomEntityInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,8 +23,6 @@ public class UserSong implements CustomEntityInterface {
     private Long listenCount;
     private Long userId;
     private Long songId;
-    private int year;
-    private int month;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
@@ -42,11 +42,9 @@ public class UserSong implements CustomEntityInterface {
         createdAt = new Date();
     }
 
-    public UserSong(Long songId, Long userId, Long listenCount, int year, int month) {
+    public UserSong(Long songId, Long userId, Long listenCount) {
         this.userId = userId;
         this.songId = songId;
         this.listenCount = listenCount;
-        this.year = year;
-        this.month = month;
     }
 }

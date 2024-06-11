@@ -1,8 +1,6 @@
 package com.musicUpload.cronJobs;
 
-import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.models.implementations.UserSong;
-import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.dataHandler.services.UserSongService;
 import com.musicUpload.util.Pair;
 import lombok.*;
@@ -28,7 +26,7 @@ public class RecommendationEngine {
     }
 
     //TODO: set this to midnight when done testing
-    @Scheduled(cron = "00 * * * * *")
+    @Scheduled(cron = "00 00 00 * * *")
     public void createRecommendations() {
         Date start = Date.from(LocalDate.now().minusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         Set<UserSong> listens = userSongService.findByLastTwoMonths(start);

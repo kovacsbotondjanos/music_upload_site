@@ -75,7 +75,6 @@ public class DeleteSongTest {
                         protectionType,
                         new User(),
                         new ArrayList<>(),
-                        new ArrayList<>(),
                         new Date(),
                         new Date()),
                 new Song(2L,
@@ -86,7 +85,6 @@ public class DeleteSongTest {
                         protectionType,
                         new User(),
                         new ArrayList<>(),
-                        new ArrayList<>(),
                         new Date(),
                         new Date()),
                 new Song(3L,
@@ -96,7 +94,6 @@ public class DeleteSongTest {
                         1L,
                         protectionType,
                         new User(),
-                        new ArrayList<>(),
                         new ArrayList<>(),
                         new Date(),
                         new Date()));

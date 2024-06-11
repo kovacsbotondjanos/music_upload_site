@@ -43,8 +43,6 @@ public class UpdateSongTest {
     private ProtectionTypeService protectionTypeService;
     @Mock
     private SongCacheManager listenCountJob;
-    @Mock
-    private EntityCacheManager<Song> entityManager;
 
     private SongService songService;
     private Song song;
@@ -60,8 +58,7 @@ public class UpdateSongTest {
                 imageFactory,
                 songFactory,
                 protectionTypeService,
-                listenCountJob,
-                entityManager);
+                listenCountJob);
         id = 1L;
         song = new Song(id,
                 "",
@@ -86,7 +83,7 @@ public class UpdateSongTest {
     @Test
     void updateSongWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
-                () -> songService.updateSong(
+                () -> songService.patchSong(
                         null,
                         1L,
                         "",
@@ -97,7 +94,7 @@ public class UpdateSongTest {
     @Test
     void updateOtherUsersSong() {
         assertThrows(UnauthenticatedException.class,
-                () -> songService.updateSong(
+                () -> songService.patchSong(
                         userDetails,
                         2L,
                         "",
@@ -107,7 +104,7 @@ public class UpdateSongTest {
 
     @Test
     void updateNameTest() {
-        songService.updateSong(userDetails,
+        songService.patchSong(userDetails,
                 1L,
                 null,
                 "bar",
@@ -120,7 +117,7 @@ public class UpdateSongTest {
     void updateProtectionTest() {
         given(protectionTypeService.getProtectionTypeByName("PROTECTED"))
                 .willReturn(Optional.of(new ProtectionType(1L, "PROTECTED", null, null)));
-        songService.updateSong(userDetails,
+        songService.patchSong(userDetails,
                 1L,
                 "PROTECTED",
                 null,

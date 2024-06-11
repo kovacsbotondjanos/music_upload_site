@@ -32,22 +32,29 @@ public class AlbumService {
     private final ProtectionTypeService protectionTypeService;
     private final SongService songService;
     private final ImageFactory imageFactory;
-    private final EntityCacheManager<Album> albumEntityManager;
+    private final EntityCacheManager<Album> albumCacheManager;
 
     @Autowired
     public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
                         ProtectionTypeService protectionTypeService,
                         SongService songService,
-                        ImageFactory imageFactory, EntityCacheManager<Album> albumEntityManager) {
+                        ImageFactory imageFactory,
+                        EntityCacheManager<Album> albumCacheManager) {
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
         this.protectionTypeService = protectionTypeService;
         this.songService = songService;
         this.imageFactory = imageFactory;
-        this.albumEntityManager = albumEntityManager;
+        this.albumCacheManager = albumCacheManager;
     }
 
-    public void saveAlbum(CustomUserDetails userDetails,
+    public Album saveAlbum(Album album) {
+        Album a = albumRepository.save(album);
+        albumCacheManager.addEntity(a);
+        return a;
+    }
+
+    public Album saveAlbum(CustomUserDetails userDetails,
                           String protectionType,
                           String name,
                           MultipartFile image) {
@@ -90,12 +97,9 @@ public class AlbumService {
             album.setImage(img);
         }
 
-        Album a = albumRepository.save(album);
-        userDetails.getAlbums().add(a);
-    }
-
-    public Album saveAlbum(Album album) {
-        return albumRepository.save(album);
+        Album a = saveAlbum(album);
+        userDetails.addAlbum(a);
+        return a;
     }
 
     public List<AlbumDTO> getAlbums(CustomUserDetails userDetails) {
@@ -105,9 +109,19 @@ public class AlbumService {
         return userDetails.getAlbums().stream().map(AlbumDTO::new).toList();
     }
 
+    private Optional<Album> findById(Long id) {
+        Optional<Album> a = albumCacheManager.getEntity(id);
+        if(a.isEmpty()){
+            //we only use this once, and if the opt is not empty we put it in the entityManager
+            a = albumRepository.findById(id);
+        }
+        return a;
+    }
+
     public AlbumDTO findById(Long id, CustomUserDetails userDetails) {
         Album album = findById(id)
                 .orElseThrow(NotFoundException::new);
+        albumCacheManager.addEntity(album);
         if (!album.getProtectionType().getName().equals("PRIVATE") ||
                 userDetails != null && album.getUser().getId().equals(userDetails.getId())) {
             return AlbumDTO.of(album);
@@ -116,13 +130,22 @@ public class AlbumService {
     }
 
     public List<AlbumDTO> findByNameLike(CustomUserDetails userDetails, String name) {
-        List<AlbumDTO> albums = albumRepository.findByNameLike(name).stream().map(AlbumDTO::new).toList();
+        List<Album> albums = albumRepository.findByNameLike(name);
         if (userDetails == null) {
-            return albums.stream().filter(s -> s.getProtectionType().equals("PUBLIC")).limit(10).toList();
+            return albums.stream()
+                    .peek(albumCacheManager::addEntity)
+                    .map(AlbumDTO::of)
+                    .filter(s -> s.getProtectionType().equals("PUBLIC"))
+                    .limit(10)
+                    .toList();
         }
         return albums.stream()
+                .peek(albumCacheManager::addEntity)
+                .map(AlbumDTO::of)
                 .filter(s -> s.getProtectionType().equals("PUBLIC")
-                        || s.getUserId().equals(userDetails.getId())).limit(10).toList();
+                        || s.getUserId().equals(userDetails.getId()))
+                .limit(10)
+                .toList();
     }
 
     public Album patchAlbum(CustomUserDetails userDetails,
@@ -172,7 +195,9 @@ public class AlbumService {
             });
         }
 
-        return albumRepository.save(album);
+        Album a = albumRepository.save(album);
+        albumCacheManager.addEntity(a);
+        return a;
     }
 
     public Album addSongs(CustomUserDetails userDetails,
@@ -184,6 +209,8 @@ public class AlbumService {
 
         Album album = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny()
                 .orElseThrow(UnauthenticatedException::new);
+        albumCacheManager.addEntity(album);
+
         if (songIds != null) {
             songIds.forEach(songId -> {
                 songService.findById(songId).ifPresent(song -> {
@@ -222,11 +249,8 @@ public class AlbumService {
 
         albumRepository.delete(album);
         userDetails.getAlbums().remove(album);
+        albumCacheManager.removeEntity(album.getId());
 
         return album;
-    }
-
-    private Optional<Album> findById(Long id) {
-        return albumRepository.findById(id);
     }
 }

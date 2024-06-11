@@ -102,7 +102,7 @@ public class UserServiceTest {
         user.setEmail("asd@asd.com");
         user.setUsername("user");
         user.setPassword("12345678");
-        assertThrows(WrongFormatException.class,
+        assertThrows(NotAcceptableException.class,
                 () -> userService.registerUser(user));
     }
 

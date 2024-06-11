@@ -45,8 +45,6 @@ public class FindByIdTest {
     private ProtectionTypeService protectionTypeService;
     @Mock
     private SongCacheManager listenCountJob;
-    @Mock
-    private EntityCacheManager<Song> entityManager;
 
     private SongService songService;
     private Song song;
@@ -69,8 +67,7 @@ public class FindByIdTest {
                 imageFactory,
                 songFactory,
                 protectionTypeService,
-                listenCountJob,
-                entityManager);
+                listenCountJob);
         id = 1L;
         song = new Song(id,
                 "",

@@ -5,7 +5,6 @@ import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.models.implementations.Auth;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.dataHandler.seeder.factories.UserFactory;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +34,9 @@ public class UserService implements UserDetailsService {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Autowired
-    public UserService(UserRepository userRepository, AuthService authService, ImageFactory imageFactory) {
+    public UserService(UserRepository userRepository,
+                       AuthService authService,
+                       ImageFactory imageFactory) {
         this.userRepository = userRepository;
         this.authService = authService;
         this.imageFactory = imageFactory;
@@ -93,7 +94,7 @@ public class UserService implements UserDetailsService {
         }
 
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new WrongFormatException("Email already exists");
+            throw new NotAcceptableException("Email already exists");
         }
 
         String image = imageFactory.getRandomImage();
@@ -140,10 +141,17 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(NotFoundException::new);
 
         if (username != null && !username.isEmpty()) {
+            if(userRepository.findByUsername(username).isPresent()) {
+                throw new NotAcceptableException("Username already exists");
+            }
             user.setUsername(username);
         }
 
         if (email != null) {
+            if (userRepository.findByEmail(email).isPresent()) {
+                throw new NotAcceptableException("Email already exists");
+            }
+
             Pattern p = Pattern.compile(ePattern);
             Matcher m = p.matcher(user.getEmail());
             if (!m.matches()) {
@@ -175,6 +183,29 @@ public class UserService implements UserDetailsService {
         }
 
         userRepository.save(user);
+    }
+
+    public void followUser(CustomUserDetails userDetails,
+                           Long userId) {
+        if(userDetails == null) {
+            throw new UnauthenticatedException();
+        }
+
+        User u = userRepository.findById(userDetails.getId())
+                .orElseThrow(NotFoundException::new);
+
+        User uFollowed = userRepository.findById(userId)
+                .orElseThrow(NotFoundException::new);
+
+        List<User> followed = u.getFollowedUsers();
+        List<User> followers = uFollowed.getFollowers();
+
+        if(!followed.contains(uFollowed) && !followers.contains(u)) {
+            followed.add(uFollowed);
+            followers.add(u);
+            userRepository.save(u);
+            userRepository.save(uFollowed);
+        }
     }
 
     public void deleteUser(CustomUserDetails userDetails) {

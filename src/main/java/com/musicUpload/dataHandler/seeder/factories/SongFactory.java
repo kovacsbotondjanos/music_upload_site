@@ -35,7 +35,7 @@ public class SongFactory {
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
             Song song = createSong(users, protectionTypes);
             songs.add(song);
-            songService.saveSong(song);
+            songService.addSong(song);
         });
 
         return songs;

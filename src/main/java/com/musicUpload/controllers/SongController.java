@@ -52,7 +52,7 @@ public class SongController {
                            @RequestParam(name = "image", required = false) MultipartFile image,
                            @RequestParam(name = "song") MultipartFile song) {
 
-        songService.saveSong(
+        songService.addSong(
                 userDetails,
                 protectionType,
                 name,
@@ -68,7 +68,7 @@ public class SongController {
                           @RequestParam(name = "protection_type", required = false) String protectionType,
                           @RequestParam(name = "name", required = false) String name,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
-        songService.updateSong(
+        songService.patchSong(
                 userDetails,
                 id,
                 protectionType,

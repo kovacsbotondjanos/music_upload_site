@@ -49,8 +49,6 @@ public class DeleteSongTest {
     private ProtectionTypeService protectionTypeService;
     @Mock
     private SongCacheManager listenCountJob;
-    @Mock
-    private EntityCacheManager<Song> entityManager;
     private SongService songService;
     private List<Song> songs;
     private final ProtectionType protectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
@@ -64,8 +62,7 @@ public class DeleteSongTest {
                 imageFactory,
                 songFactory,
                 protectionTypeService,
-                listenCountJob,
-                entityManager);
+                listenCountJob);
         songs = List.of(
                 new Song(1L,
                         "",

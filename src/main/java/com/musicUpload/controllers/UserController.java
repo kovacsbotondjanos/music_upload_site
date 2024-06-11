@@ -32,6 +32,13 @@ public class UserController {
         userService.registerUser(user);
     }
 
+    @PostMapping("/follow")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public void followUser(@AuthenticationPrincipal CustomUserDetails userDetails,
+                           @RequestParam(name = "userId") Long userId) {
+        userService.followUser(userDetails, userId);
+    }
+
     @PatchMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void patchUser(@AuthenticationPrincipal CustomUserDetails userDetails,

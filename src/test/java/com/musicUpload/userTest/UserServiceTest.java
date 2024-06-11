@@ -38,7 +38,7 @@ public class UserServiceTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         user = new User(null, null, null, null,
-                "user", List.of(), List.of(), new Auth(), List.of(), List.of(), List.of(), null, null);
+                "user", List.of(), List.of(), new Auth(), List.of(), List.of(), null, null);
         userService = new UserService(userRepository, authService, imageFactory);
     }
 

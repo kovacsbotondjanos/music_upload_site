@@ -123,6 +123,7 @@ public class AlbumService {
         throw new UnauthenticatedException();
     }
 
+    //TODO: pagination
     public List<AlbumDTO> findByNameLike(CustomUserDetails userDetails, String name) {
         List<Album> albums = albumRepository.findByNameLike(name);
         if (userDetails == null) {

@@ -1,5 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
+import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.enums.Privilege;
@@ -115,6 +116,17 @@ public class UserService implements UserDetailsService {
 
         return findById(userDetails.getId()).map(UserDTO::new)
                 .orElseThrow(NotFoundException::new);
+    }
+
+    //TODO: pagination
+    public List<UserDTO> findByNameLike(CustomUserDetails userDetails, String name) {
+        if(userDetails == null) {
+            throw new UnauthenticatedException();
+        }
+        return userRepository.findByNameLike(name)
+                .stream()
+                .map(UserDTO::new)
+                .toList();
     }
 
     public List<User> getUsers() {

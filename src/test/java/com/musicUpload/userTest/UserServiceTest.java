@@ -2,10 +2,9 @@ package com.musicUpload.userTest;
 
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.implementations.Auth;
+import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.dataHandler.services.AuthService;
 import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.exceptions.NotAcceptableException;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -27,8 +26,6 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private AuthService authService;
-    @Mock
     private ImageFactory imageFactory;
 
     private UserService userService;
@@ -38,8 +35,8 @@ public class UserServiceTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         user = new User(null, null, null, null,
-                "user", List.of(), List.of(), new Auth(), List.of(), List.of(), null, null);
-        userService = new UserService(userRepository, authService, imageFactory);
+                "user", List.of(), List.of(), Privilege.USER, List.of(), List.of(), null, null);
+        userService = new UserService(userRepository, imageFactory);
     }
 
     @Test
@@ -81,8 +78,6 @@ public class UserServiceTest {
         //Given
         given(userRepository.findByUsername("user"))
                 .willReturn(Optional.of(new User()));
-        given(authService.getByName("USER"))
-                .willReturn(Optional.of(new Auth()));
         //Then
         user.setEmail("asd@asd.com");
         user.setUsername("user");
@@ -96,8 +91,6 @@ public class UserServiceTest {
         //Given
         given(userRepository.findByEmail("asd@asd.com"))
                 .willReturn(Optional.of(new User()));
-        given(authService.getByName("USER"))
-                .willReturn(Optional.of(new Auth()));
         //Then
         user.setEmail("asd@asd.com");
         user.setUsername("user");

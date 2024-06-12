@@ -40,8 +40,10 @@ public class SongController {
     }
 
     @GetMapping("/random")
-    public List<SongDTO> getRandomSongs() {
-        return songService.getRandomSongs();
+    public List<SongDTO> getRandomSongs(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                        @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+                                        @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
+        return songService.getRecommendedSongs(userDetails, pageNumber, pageSize);
     }
 
     @PostMapping("/add")

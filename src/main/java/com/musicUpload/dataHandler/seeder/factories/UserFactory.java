@@ -3,7 +3,7 @@ package com.musicUpload.dataHandler.seeder.factories;
 import com.github.javafaker.Faker;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.musicUpload.dataHandler.models.implementations.Auth;
+import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.util.ImageFactory;
@@ -16,7 +16,6 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
@@ -48,11 +47,11 @@ public class UserFactory {
         return users;
     }
 
-    public List<User> createUsers(int number, List<Auth> auths) {
+    public List<User> createUsers(int number) {
         List<User> users = new CopyOnWriteArrayList<>();
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
-            User user = createUser(auths);
+            User user = createUser();
             users.add(user);
             userService.registerUser(user);
         });
@@ -60,7 +59,7 @@ public class UserFactory {
         return users;
     }
 
-    public void createAdminFromConfigFile(Auth adminAuth) {
+    public void createAdminFromConfigFile() {
         User admin;
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
@@ -70,7 +69,7 @@ public class UserFactory {
             assert inputStream != null;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
                 admin = gson.fromJson(reader, User.class);
-                admin.setAuthority(adminAuth);
+                admin.setPrivilege(Privilege.ADMIN);
                 userService.registerUser(admin);
             }
         } catch (Exception e) {
@@ -78,7 +77,7 @@ public class UserFactory {
         }
     }
 
-    private User createUser(List<Auth> auths) {
+    private User createUser() {
         Faker faker = new Faker(new Random());
         String firstName = faker.name().firstName();
         String lastName = faker.name().lastName();
@@ -87,9 +86,7 @@ public class UserFactory {
         User user = new User();
         user.setUsername(firstName + " " + lastName);
         user.setEmail(email);
-
-        Optional<Auth> auth = auths.stream().filter(a -> a.getName().equals("USER")).findAny();
-        auth.ifPresent(user::setAuthority);
+        user.setPrivilege(Privilege.USER);
 
         user.setPassword("password");
 

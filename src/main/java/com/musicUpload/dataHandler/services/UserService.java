@@ -2,7 +2,7 @@ package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.implementations.Auth;
+import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
@@ -28,17 +28,14 @@ import java.util.regex.Pattern;
 public class UserService implements UserDetailsService {
     private static final Logger logger = LogManager.getLogger(UserDetailsService.class);
     private final UserRepository userRepository;
-    private final AuthService authService;
     private final ImageFactory imageFactory;
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Autowired
     public UserService(UserRepository userRepository,
-                       AuthService authService,
                        ImageFactory imageFactory) {
         this.userRepository = userRepository;
-        this.authService = authService;
         this.imageFactory = imageFactory;
     }
 
@@ -51,7 +48,7 @@ public class UserService implements UserDetailsService {
                     userObj.getId(),
                     userObj.getUsername(),
                     userObj.getPassword(),
-                    Collections.singletonList(new SimpleGrantedAuthority(userObj.getAuthority().getName())),
+                    Collections.singletonList(new SimpleGrantedAuthority(userObj.getPrivilege().getName())),
                     userObj.getProfilePicture(),
                     userObj.getSongs(),
                     userObj.getAlbums()
@@ -83,10 +80,8 @@ public class UserService implements UserDetailsService {
 
 
         //TODO: This will have to change in the future, bc it can be unsafe
-        if (user.getAuthority() == null) {
-            Auth auth = authService.getByName("USER")
-                    .orElseThrow(NotFoundException::new);
-            user.setAuthority(auth);
+        if (user.getPrivilege() == null) {
+            user.setPrivilege(Privilege.USER);
         }
 
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {

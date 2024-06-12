@@ -1,8 +1,8 @@
 package com.musicUpload.dataHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
-import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.AlbumService;
@@ -26,11 +26,11 @@ public class AlbumFactory {
         this.albumService = albumService;
     }
 
-    public List<Album> createAlbums(int number, List<User> users, List<Song> songs, List<ProtectionType> protectionTypes) {
+    public List<Album> createAlbums(int number, List<User> users, List<Song> songs) {
         List<Album> albums = new CopyOnWriteArrayList<>();
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
-            Album album = createAlbum(users, songs, protectionTypes);
+            Album album = createAlbum(users, songs);
             albumService.saveAlbum(album);
             albums.add(album);
         });
@@ -38,7 +38,7 @@ public class AlbumFactory {
         return albums;
     }
 
-    private Album createAlbum(List<User> users, List<Song> songs, List<ProtectionType> protectionTypes) {
+    private Album createAlbum(List<User> users, List<Song> songs) {
         Album album = new Album();
         Random random = new Random();
 
@@ -47,7 +47,7 @@ public class AlbumFactory {
 
         album.setName(name);
         album.setImage(imageFactory.getRandomImage());
-        album.setProtectionType(protectionTypes.get(random.nextInt(0, Integer.MAX_VALUE) % protectionTypes.size()));
+        album.setProtectionType(ProtectionType.getRandomPrivilege());
 
         User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
         synchronized (user) {

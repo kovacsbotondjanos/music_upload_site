@@ -3,7 +3,7 @@ package com.musicUpload.dataHandler.services;
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
@@ -20,6 +20,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,7 +44,6 @@ public class SongService {
     private final AlbumRepository albumRepository;
     private final ImageFactory imageFactory;
     private final MusicFactory musicFactory;
-    private final ProtectionTypeService protectionTypeService;
     private final SongCacheManager songCacheManager;
 
     @Autowired
@@ -51,14 +52,12 @@ public class SongService {
                        AlbumRepository albumRepository,
                        ImageFactory imageFactory,
                        MusicFactory songFactory,
-                       ProtectionTypeService protectionTypeService,
                        SongCacheManager songCacheManager) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
         this.imageFactory = imageFactory;
         this.musicFactory = songFactory;
-        this.protectionTypeService = protectionTypeService;
         //TODO: create a wrapper class to handle lookup in the cache and db too
         this.songCacheManager = songCacheManager;
     }
@@ -88,9 +87,7 @@ public class SongService {
         Song song = new Song();
         song.setUser(user);
 
-        ProtectionType protection = protectionTypeService.getProtectionTypeByName(protectionType)
-                .orElseThrow(NotFoundException::new);
-        song.setProtectionType(protection);
+        song.setProtectionType(ProtectionType.getByName(protectionType));
 
         song.setName(name);
 
@@ -152,15 +149,19 @@ public class SongService {
         Song song = findById(id)
                 .orElseThrow(NotFoundException::new);
         songCacheManager.addSong(song);
-        if (!song.getProtectionType().getName().equals("PRIVATE") ||
+        if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
             return SongDTO.of(song);
         }
         throw new UnauthenticatedException();
     }
 
-    public List<SongDTO> getRandomSongs() {
-        return songRepository.getRandomSongs().stream()
+    public List<SongDTO> getRecommendedSongs(CustomUserDetails userDetails, int pageNumber, int pageSize) {
+        Pageable page = PageRequest.of(pageNumber, pageSize);
+
+        if(userDetails != null) {
+        }
+        return songRepository.findByProtectionTypeOrderByListenCountDesc(ProtectionType.PUBLIC, page).stream()
                 .peek(songCacheManager::addSong)
                 .map(SongDTO::new)
                 .toList();
@@ -171,13 +172,13 @@ public class SongService {
         if (userDetails == null) {
             return songs.stream()
                     .peek(songCacheManager::addSong)
-                    .filter(s -> s.getProtectionType().getName().equals("PUBLIC")).limit(10)
+                    .filter(s -> s.getProtectionType().equals(ProtectionType.PUBLIC)).limit(10)
                     .map(SongDTO::new)
                     .toList();
         }
         return songs.stream()
                 .peek(songCacheManager::addSong)
-                .filter(s -> s.getProtectionType().getName().equals("PUBLIC")
+                .filter(s -> s.getProtectionType().equals(ProtectionType.PUBLIC)
                         || s.getUser().getId().equals(userDetails.getId()))
                 .limit(10)
                 .map(SongDTO::new)
@@ -189,7 +190,7 @@ public class SongService {
         Song song = songRepository.findByNameHashed(nameHashed)
                 .orElseThrow(NotFoundException::new);
 
-        if (!song.getProtectionType().getName().equals("PRIVATE") ||
+        if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
             try {
                 Path imagePath = path.resolve(song.getNameHashed());
@@ -222,8 +223,7 @@ public class SongService {
                 .orElseThrow(UnauthenticatedException::new);
 
         if (protectionType != null) {
-            Optional<ProtectionType> protectionOpt = protectionTypeService.getProtectionTypeByName(protectionType);
-            protectionOpt.ifPresent(song::setProtectionType);
+            song.setProtectionType(ProtectionType.getByName(protectionType));
         }
 
         if (name != null) {
@@ -266,10 +266,6 @@ public class SongService {
 
         user.getSongs().remove(song);
         userRepository.save(user);
-
-        ProtectionType protectionType = song.getProtectionType();
-        protectionType.getSongs().remove(song);
-        protectionTypeService.save(protectionType);
 
         song.getAlbums().forEach(a -> {
             a.getSongs().remove(song);

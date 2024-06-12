@@ -13,5 +13,4 @@ enable the application to analyze the data later on and recommend songs to the u
 
 Currently, in progress:
 --
-- Albums cache
 - Improve/bugfix the analyzing process

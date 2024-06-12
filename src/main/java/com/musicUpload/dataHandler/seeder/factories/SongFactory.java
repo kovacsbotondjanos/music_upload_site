@@ -1,7 +1,7 @@
 package com.musicUpload.dataHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
-import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.SongService;
@@ -29,19 +29,19 @@ public class SongFactory {
         musicFactory.createMusicDir();
     }
 
-    public List<Song> generateSongs(int number, List<User> users, List<ProtectionType> protectionTypes) {
+    public List<Song> generateSongs(int number, List<User> users) {
         List<Song> songs = new CopyOnWriteArrayList<>();
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
-            Song song = createSong(users, protectionTypes);
+            Song song = createSong(users);
             songs.add(song);
-            songService.saveSong(song);
+            songService.addSong(song);
         });
 
         return songs;
     }
 
-    private Song createSong(List<User> users, List<ProtectionType> protectionTypes) {
+    private Song createSong(List<User> users) {
         Song song = new Song();
         Random random = new Random();
 
@@ -51,7 +51,7 @@ public class SongFactory {
         song.setName(name);
         song.setNameHashed(musicFactory.createSong());
         song.setImage(imageFactory.getRandomImage());
-        song.setProtectionType(protectionTypes.get(random.nextInt(1, Integer.MAX_VALUE) % protectionTypes.size()));
+        song.setProtectionType(ProtectionType.getRandomPrivilege());
         song.setListenCount(faker.number().numberBetween(0L, 1_000_000L));
 
         User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());

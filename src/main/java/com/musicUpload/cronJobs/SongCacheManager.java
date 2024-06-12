@@ -32,7 +32,9 @@ public class SongCacheManager {
     private final Map<Pair<Long, Long>, Long> copyMap;
 
     @Autowired
-    public SongCacheManager(EntityCacheManager<Song> songEntityManager, SongRepository songRepository, UserSongRepository userSongRepository) {
+    public SongCacheManager(EntityCacheManager<Song> songEntityManager,
+                            SongRepository songRepository,
+                            UserSongRepository userSongRepository) {
         this.songEntityManager = songEntityManager;
         this.songRepository = songRepository;
         this.userSongRepository = userSongRepository;

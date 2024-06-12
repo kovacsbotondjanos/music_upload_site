@@ -1,15 +1,13 @@
 package com.musicUpload.songTest;
 
-import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.dataHandler.services.ProtectionTypeService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
@@ -46,14 +44,10 @@ public class DeleteSongTest {
     @Mock
     private MusicFactory songFactory;
     @Mock
-    private ProtectionTypeService protectionTypeService;
-    @Mock
     private SongCacheManager listenCountJob;
-    @Mock
-    private EntityCacheManager<Song> entityManager;
     private SongService songService;
     private List<Song> songs;
-    private final ProtectionType protectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
+    private final ProtectionType protectionType = ProtectionType.PUBLIC;
 
     @BeforeEach
     void onSetUp() {
@@ -63,9 +57,7 @@ public class DeleteSongTest {
                 albumRepository,
                 imageFactory,
                 songFactory,
-                protectionTypeService,
-                listenCountJob,
-                entityManager);
+                listenCountJob);
         songs = List.of(
                 new Song(1L,
                         "",

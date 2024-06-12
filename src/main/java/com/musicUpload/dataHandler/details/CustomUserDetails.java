@@ -52,4 +52,9 @@ public class CustomUserDetails implements UserDetails {
         songs.add(song);
         return songs;
     }
+
+    public List<Album> addAlbum(Album album) {
+        albums.add(album);
+        return albums;
+    }
 }

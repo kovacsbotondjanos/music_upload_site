@@ -1,11 +1,11 @@
 package com.musicUpload.dataHandler.services;
 
+import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.implementations.Auth;
+import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.dataHandler.seeder.factories.UserFactory;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
 import org.apache.logging.log4j.LogManager;
@@ -29,15 +29,14 @@ import java.util.regex.Pattern;
 public class UserService implements UserDetailsService {
     private static final Logger logger = LogManager.getLogger(UserDetailsService.class);
     private final UserRepository userRepository;
-    private final AuthService authService;
     private final ImageFactory imageFactory;
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Autowired
-    public UserService(UserRepository userRepository, AuthService authService, ImageFactory imageFactory) {
+    public UserService(UserRepository userRepository,
+                       ImageFactory imageFactory) {
         this.userRepository = userRepository;
-        this.authService = authService;
         this.imageFactory = imageFactory;
     }
 
@@ -50,7 +49,7 @@ public class UserService implements UserDetailsService {
                     userObj.getId(),
                     userObj.getUsername(),
                     userObj.getPassword(),
-                    Collections.singletonList(new SimpleGrantedAuthority(userObj.getAuthority().getName())),
+                    Collections.singletonList(new SimpleGrantedAuthority(userObj.getPrivilege().getName())),
                     userObj.getProfilePicture(),
                     userObj.getSongs(),
                     userObj.getAlbums()
@@ -82,10 +81,8 @@ public class UserService implements UserDetailsService {
 
 
         //TODO: This will have to change in the future, bc it can be unsafe
-        if (user.getAuthority() == null) {
-            Auth auth = authService.getByName("USER")
-                    .orElseThrow(NotFoundException::new);
-            user.setAuthority(auth);
+        if (user.getPrivilege() == null) {
+            user.setPrivilege(Privilege.USER);
         }
 
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
@@ -93,7 +90,7 @@ public class UserService implements UserDetailsService {
         }
 
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new WrongFormatException("Email already exists");
+            throw new NotAcceptableException("Email already exists");
         }
 
         String image = imageFactory.getRandomImage();
@@ -121,6 +118,17 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(NotFoundException::new);
     }
 
+    //TODO: pagination
+    public List<UserDTO> findByNameLike(CustomUserDetails userDetails, String name) {
+        if(userDetails == null) {
+            throw new UnauthenticatedException();
+        }
+        return userRepository.findByNameLike(name)
+                .stream()
+                .map(UserDTO::new)
+                .toList();
+    }
+
     public List<User> getUsers() {
         return userRepository.findAll();
     }
@@ -140,10 +148,17 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(NotFoundException::new);
 
         if (username != null && !username.isEmpty()) {
+            if(userRepository.findByUsername(username).isPresent()) {
+                throw new NotAcceptableException("Username already exists");
+            }
             user.setUsername(username);
         }
 
         if (email != null) {
+            if (userRepository.findByEmail(email).isPresent()) {
+                throw new NotAcceptableException("Email already exists");
+            }
+
             Pattern p = Pattern.compile(ePattern);
             Matcher m = p.matcher(user.getEmail());
             if (!m.matches()) {
@@ -175,6 +190,29 @@ public class UserService implements UserDetailsService {
         }
 
         userRepository.save(user);
+    }
+
+    public void followUser(CustomUserDetails userDetails,
+                           Long userId) {
+        if(userDetails == null) {
+            throw new UnauthenticatedException();
+        }
+
+        User u = userRepository.findById(userDetails.getId())
+                .orElseThrow(NotFoundException::new);
+
+        User uFollowed = userRepository.findById(userId)
+                .orElseThrow(NotFoundException::new);
+
+        List<User> followed = u.getFollowedUsers();
+        List<User> followers = uFollowed.getFollowers();
+
+        if(!followed.contains(uFollowed) && !followers.contains(u)) {
+            followed.add(uFollowed);
+            followers.add(u);
+            userRepository.save(u);
+            userRepository.save(uFollowed);
+        }
     }
 
     public void deleteUser(CustomUserDetails userDetails) {

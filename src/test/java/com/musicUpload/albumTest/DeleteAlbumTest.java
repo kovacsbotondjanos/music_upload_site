@@ -2,13 +2,12 @@ package com.musicUpload.albumTest;
 
 import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
-import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
-import com.musicUpload.dataHandler.services.ProtectionTypeService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
@@ -31,8 +30,6 @@ public class DeleteAlbumTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private ProtectionTypeService protectionTypeService;
-    @Mock
     private SongService songService;
     @Mock
     private ImageFactory imageFactory;
@@ -48,14 +45,13 @@ public class DeleteAlbumTest {
             "",
             List.of(),
             List.of());
-    private final ProtectionType protectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
+    private final ProtectionType protectionType = ProtectionType.PUBLIC;
 
     @BeforeEach
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
                 userRepository,
-                protectionTypeService,
                 songService,
                 imageFactory,
                 albumEntityManager);

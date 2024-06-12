@@ -40,8 +40,10 @@ public class SongController {
     }
 
     @GetMapping("/random")
-    public List<SongDTO> getRandomSongs() {
-        return songService.getRandomSongs();
+    public List<SongDTO> getRandomSongs(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                        @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+                                        @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
+        return songService.getRecommendedSongs(userDetails, pageNumber, pageSize);
     }
 
     @PostMapping("/add")
@@ -52,7 +54,7 @@ public class SongController {
                            @RequestParam(name = "image", required = false) MultipartFile image,
                            @RequestParam(name = "song") MultipartFile song) {
 
-        songService.saveSong(
+        songService.addSong(
                 userDetails,
                 protectionType,
                 name,
@@ -68,7 +70,7 @@ public class SongController {
                           @RequestParam(name = "protection_type", required = false) String protectionType,
                           @RequestParam(name = "name", required = false) String name,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
-        songService.updateSong(
+        songService.patchSong(
                 userDetails,
                 id,
                 protectionType,

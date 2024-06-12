@@ -3,8 +3,8 @@ package com.musicUpload.dataHandler.services;
 import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
-import com.musicUpload.dataHandler.models.implementations.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -29,25 +29,29 @@ import java.util.UUID;
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final UserRepository userRepository;
-    private final ProtectionTypeService protectionTypeService;
     private final SongService songService;
     private final ImageFactory imageFactory;
-    private final EntityCacheManager<Album> albumEntityManager;
+    private final EntityCacheManager<Album> albumCacheManager;
 
     @Autowired
     public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
-                        ProtectionTypeService protectionTypeService,
                         SongService songService,
-                        ImageFactory imageFactory, EntityCacheManager<Album> albumEntityManager) {
+                        ImageFactory imageFactory,
+                        EntityCacheManager<Album> albumCacheManager) {
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
-        this.protectionTypeService = protectionTypeService;
         this.songService = songService;
         this.imageFactory = imageFactory;
-        this.albumEntityManager = albumEntityManager;
+        this.albumCacheManager = albumCacheManager;
     }
 
-    public void saveAlbum(CustomUserDetails userDetails,
+    public Album saveAlbum(Album album) {
+        Album a = albumRepository.save(album);
+        albumCacheManager.addEntity(a);
+        return a;
+    }
+
+    public Album saveAlbum(CustomUserDetails userDetails,
                           String protectionType,
                           String name,
                           MultipartFile image) {
@@ -61,10 +65,7 @@ public class AlbumService {
 
         Album album = new Album();
 
-        ProtectionType protection = protectionTypeService.getProtectionTypeByName(protectionType)
-                .orElseThrow(NotFoundException::new);
-
-        album.setProtectionType(protection);
+        album.setProtectionType(ProtectionType.getByName(protectionType));
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
@@ -90,12 +91,9 @@ public class AlbumService {
             album.setImage(img);
         }
 
-        Album a = albumRepository.save(album);
-        userDetails.getAlbums().add(a);
-    }
-
-    public Album saveAlbum(Album album) {
-        return albumRepository.save(album);
+        Album a = saveAlbum(album);
+        userDetails.addAlbum(a);
+        return a;
     }
 
     public List<AlbumDTO> getAlbums(CustomUserDetails userDetails) {
@@ -105,24 +103,44 @@ public class AlbumService {
         return userDetails.getAlbums().stream().map(AlbumDTO::new).toList();
     }
 
+    private Optional<Album> findById(Long id) {
+        Optional<Album> a = albumCacheManager.getEntity(id);
+        if(a.isEmpty()){
+            //we only use this once, and if the opt is not empty we put it in the entityManager
+            a = albumRepository.findById(id);
+        }
+        return a;
+    }
+
     public AlbumDTO findById(Long id, CustomUserDetails userDetails) {
         Album album = findById(id)
                 .orElseThrow(NotFoundException::new);
-        if (!album.getProtectionType().getName().equals("PRIVATE") ||
+        albumCacheManager.addEntity(album);
+        if (!album.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && album.getUser().getId().equals(userDetails.getId())) {
             return AlbumDTO.of(album);
         }
         throw new UnauthenticatedException();
     }
 
+    //TODO: pagination
     public List<AlbumDTO> findByNameLike(CustomUserDetails userDetails, String name) {
-        List<AlbumDTO> albums = albumRepository.findByNameLike(name).stream().map(AlbumDTO::new).toList();
+        List<Album> albums = albumRepository.findByNameLike(name);
         if (userDetails == null) {
-            return albums.stream().filter(s -> s.getProtectionType().equals("PUBLIC")).limit(10).toList();
+            return albums.stream()
+                    .peek(albumCacheManager::addEntity)
+                    .map(AlbumDTO::of)
+                    .filter(s -> s.getProtectionType().equals("PUBLIC"))
+                    .limit(10)
+                    .toList();
         }
         return albums.stream()
+                .peek(albumCacheManager::addEntity)
+                .map(AlbumDTO::of)
                 .filter(s -> s.getProtectionType().equals("PUBLIC")
-                        || s.getUserId().equals(userDetails.getId())).limit(10).toList();
+                        || s.getUserId().equals(userDetails.getId()))
+                .limit(10)
+                .toList();
     }
 
     public Album patchAlbum(CustomUserDetails userDetails,
@@ -138,8 +156,7 @@ public class AlbumService {
         Album album = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny()
                 .orElseThrow(UnauthenticatedException::new);
         if (protectionType != null) {
-            Optional<ProtectionType> protectionOpt = protectionTypeService.getProtectionTypeByName(protectionType);
-            protectionOpt.ifPresent(album::setProtectionType);
+            album.setProtectionType(ProtectionType.getByName(protectionType));
         }
 
         if (name != null) {
@@ -163,7 +180,7 @@ public class AlbumService {
         if (songIds != null) {
             songIds.forEach(songId -> {
                 songService.findById(songId).ifPresent(song -> {
-                    if (!song.getProtectionType().getName().equals("PRIVATE")
+                    if (!song.getProtectionType().equals(ProtectionType.PRIVATE)
                             || album.getUser().getSongs().stream()
                             .anyMatch(s -> s.getId().equals(song.getId()))) {
                         album.getSongs().add(song);
@@ -172,7 +189,9 @@ public class AlbumService {
             });
         }
 
-        return albumRepository.save(album);
+        Album a = albumRepository.save(album);
+        albumCacheManager.addEntity(a);
+        return a;
     }
 
     public Album addSongs(CustomUserDetails userDetails,
@@ -184,10 +203,12 @@ public class AlbumService {
 
         Album album = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny()
                 .orElseThrow(UnauthenticatedException::new);
+        albumCacheManager.addEntity(album);
+
         if (songIds != null) {
             songIds.forEach(songId -> {
                 songService.findById(songId).ifPresent(song -> {
-                    if (!song.getProtectionType().getName().equals("PRIVATE")
+                    if (!song.getProtectionType().equals(ProtectionType.PRIVATE)
                             || album.getUser().getSongs().stream()
                             .anyMatch(s -> s.getId().equals(song.getId()))) {
                         album.getSongs().add(song);
@@ -214,19 +235,12 @@ public class AlbumService {
         user.getAlbums().remove(album);
         userRepository.save(user);
 
-        ProtectionType protectionType = album.getProtectionType();
-        protectionType.getAlbums().remove(album);
-        protectionTypeService.save(protectionType);
-
         imageFactory.deleteFile(album.getImage());
 
         albumRepository.delete(album);
         userDetails.getAlbums().remove(album);
+        albumCacheManager.removeEntity(album.getId());
 
         return album;
-    }
-
-    private Optional<Album> findById(Long id) {
-        return albumRepository.findById(id);
     }
 }

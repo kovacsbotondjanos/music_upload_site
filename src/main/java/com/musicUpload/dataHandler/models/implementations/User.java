@@ -3,6 +3,7 @@ package com.musicUpload.dataHandler.models.implementations;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,9 +43,8 @@ public class User implements CustomEntityInterface {
     @JsonIgnore
     private List<Song> songs = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "auth_id")
-    private Auth authority;
+    @Enumerated(EnumType.ORDINAL)
+    private Privilege privilege;
 
     @ManyToMany
     @JoinTable(

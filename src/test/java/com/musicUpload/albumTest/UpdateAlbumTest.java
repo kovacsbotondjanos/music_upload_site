@@ -2,11 +2,12 @@ package com.musicUpload.albumTest;
 
 import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.enums.Privilege;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.*;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
-import com.musicUpload.dataHandler.services.ProtectionTypeService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
@@ -30,8 +31,6 @@ public class UpdateAlbumTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private ProtectionTypeService protectionTypeService;
-    @Mock
     private SongService songService;
     @Mock
     private ImageFactory imageFactory;
@@ -41,8 +40,8 @@ public class UpdateAlbumTest {
     private AlbumService albumService;
     private Album album;
     private Long id;
-    private final ProtectionType publicProtectionType = new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>());
-    private final ProtectionType privateProtectionType = new ProtectionType(1L, "PRIVATE", List.of(), List.of());
+    private final ProtectionType publicProtectionType = ProtectionType.PUBLIC;
+    private final ProtectionType privateProtectionType = ProtectionType.PRIVATE;
     private final CustomUserDetails userDetails = new CustomUserDetails(1L,
             "user1",
             "pwd",
@@ -67,7 +66,6 @@ public class UpdateAlbumTest {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
                 userRepository,
-                protectionTypeService,
                 songService,
                 imageFactory,
                 albumEntityManager);
@@ -75,13 +73,13 @@ public class UpdateAlbumTest {
         album = new Album(id,
                 "",
                 "foo",
-                new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>()),
+                publicProtectionType,
                 new User(),
                 new ArrayList<>(),
                 new Date(),
                 new Date());
         user = new User(1L, null, null, null,
-                "user", List.of(), List.of(), new Auth(), List.of(), List.of(), null, null);
+                "user", List.of(), List.of(), Privilege.USER, List.of(), List.of(), null, null);
     }
 
     @Test
@@ -112,8 +110,6 @@ public class UpdateAlbumTest {
 
     @Test
     void updateProtectionType() {
-        given(protectionTypeService.getProtectionTypeByName("PRIVATE"))
-                .willReturn(Optional.of(privateProtectionType));
         userDetails.setAlbums(List.of(album));
         albumService.patchAlbum(
                 userDetails,

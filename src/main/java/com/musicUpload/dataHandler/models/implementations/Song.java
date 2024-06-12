@@ -1,6 +1,7 @@
 package com.musicUpload.dataHandler.models.implementations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,8 +27,7 @@ public class Song implements CustomEntityInterface {
     private String nameHashed;
     private Long listenCount = 0L;
 
-    @ManyToOne
-    @JoinColumn(name = "protection_id")
+    @Enumerated(EnumType.ORDINAL)
     private ProtectionType protectionType;
 
     @ManyToOne

@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/users")
 @CrossOrigin
@@ -26,10 +28,23 @@ public class UserController {
         return userService.findCurrUser(userDetails);
     }
 
+    @GetMapping("/search/{name}")
+    public List<UserDTO> getSongByNameLike(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                           @PathVariable String name) {
+        return userService.findByNameLike(userDetails, name);
+    }
+
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createUser(@ModelAttribute User user) {
         userService.registerUser(user);
+    }
+
+    @PostMapping("/follow")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public void followUser(@AuthenticationPrincipal CustomUserDetails userDetails,
+                           @RequestParam(name = "userId") Long userId) {
+        userService.followUser(userDetails, userId);
     }
 
     @PatchMapping

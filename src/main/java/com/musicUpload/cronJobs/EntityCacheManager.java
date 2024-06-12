@@ -4,6 +4,7 @@ import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
+@Qualifier
 public class EntityCacheManager<T extends CustomEntityInterface> {
-    private static final Logger logger = LogManager.getLogger(SongCacheManager.class);
+    private static final Logger logger = LogManager.getLogger(EntityCacheManager.class);
     private final ConcurrentMap<Long, EntityWrapper<T>> entityCacheMap = new ConcurrentHashMap<>();
     private final int SCHEDULE = 1000 * 60;
     private final int BASE_REMOVE_SCHEDULE = 1000 * 60;
@@ -59,7 +61,7 @@ public class EntityCacheManager<T extends CustomEntityInterface> {
 
     @Data
     static class EntityWrapper<T extends CustomEntityInterface> {
-        private static final Logger logger = LogManager.getLogger(SongCacheManager.class);
+        private static final Logger logger = LogManager.getLogger(EntityWrapper.class);
         private T entity;
         private long timeStamp;
         private long removeTime;

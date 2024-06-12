@@ -28,7 +28,7 @@ public class UserDTO {
         this.username = user.getUsername();
         this.albums = user.getAlbums().stream().map(Album::getId).toList();
         this.songs = user.getSongs().stream().map(Song::getId).toList();
-        this.authority = user.getAuthority().getName();
+        this.authority = user.getPrivilege().getName();
         this.followers = user.getFollowers().stream().map(User::getId).toList();
         this.followedUsers = user.getFollowedUsers().stream().map(User::getId).toList();
         this.createdAt = user.getCreatedAt();

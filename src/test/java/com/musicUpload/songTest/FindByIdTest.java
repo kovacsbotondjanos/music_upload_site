@@ -1,16 +1,14 @@
 package com.musicUpload.songTest;
 
-import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
-import com.musicUpload.dataHandler.models.implementations.ProtectionType;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.dataHandler.services.ProtectionTypeService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -42,16 +40,12 @@ public class FindByIdTest {
     @Mock
     private MusicFactory songFactory;
     @Mock
-    private ProtectionTypeService protectionTypeService;
-    @Mock
     private SongCacheManager listenCountJob;
-    @Mock
-    private EntityCacheManager<Song> entityManager;
 
     private SongService songService;
     private Song song;
     private Long id;
-    private final ProtectionType privateprotectionType = new ProtectionType(1L, "PRIVATE", List.of(), List.of());
+    private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
     private final CustomUserDetails userDetails = new CustomUserDetails(1L,
             "user1",
             "pwd",
@@ -68,16 +62,14 @@ public class FindByIdTest {
                 albumRepository,
                 imageFactory,
                 songFactory,
-                protectionTypeService,
-                listenCountJob,
-                entityManager);
+                listenCountJob);
         id = 1L;
         song = new Song(id,
                 "",
                 "foo",
                 "",
                 1L,
-                new ProtectionType(1L, "PUBLIC", new ArrayList<>(), new ArrayList<>()),
+                ProtectionType.PUBLIC,
                 new User(),
                 new ArrayList<>(),
                 new Date(),

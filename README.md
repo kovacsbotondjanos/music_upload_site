@@ -18,3 +18,4 @@ Currently, in progress:
 - Improve/bugfix the cache system
 - Try to improve the efficiency and number of db transactions
 - Create a better algorithm to calculate cacheIndex for songs
+- Review and improve thread safety and general thread usage

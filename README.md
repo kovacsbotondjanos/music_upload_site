@@ -14,6 +14,12 @@ queried it will be cached for an amount of time calculated based on the number o
 When a user listens to a song it will be stored in the database, writing them into the db in batches with a scheduled job.
 This will enable the application to analyze the data later on and recommend songs to the users based on their listen history
 
+Songs and albums have 3 visibility types: PUBLIC, PRIVATE, PROTECTED. Public songs/albums are accessible by everyone, protected songs/albums
+are accessible by only ones with the link, private songs/albums are only accessible by the user
+
+There are 3 types of account: ADMIN, USER, PREMIUM_USER. There are no special admin features implemented yet, in the future 
+this will change(f.e.: delete songs/albums/users, access to private songs/albums, etc.)
+
 A table called user_recommendation is updated at midnight every day with a scheduled method. The method first looks at 
 the listen history of users, creates graph nodes out of the data, then connects the nodes by same user nodes and by same song nodes.
 Then for every song a user listened to we'll get all the users who listened to the same song and go through the songs they listened

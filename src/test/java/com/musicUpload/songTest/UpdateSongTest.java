@@ -9,6 +9,7 @@ import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.SongService;
+import com.musicUpload.dataHandler.services.UserRecommendationService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
@@ -39,6 +40,8 @@ public class UpdateSongTest {
     private MusicFactory songFactory;
     @Mock
     private SongCacheManager listenCountJob;
+    @Mock
+    private UserRecommendationService userRecommendationService;
 
     private SongService songService;
     private Song song;
@@ -53,7 +56,8 @@ public class UpdateSongTest {
                 albumRepository,
                 imageFactory,
                 songFactory,
-                listenCountJob);
+                listenCountJob,
+                userRecommendationService);
         id = 1L;
         song = new Song(id,
                 "",

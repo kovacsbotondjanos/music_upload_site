@@ -9,6 +9,7 @@ import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.SongService;
+import com.musicUpload.dataHandler.services.UserRecommendationService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
@@ -45,6 +46,8 @@ public class DeleteSongTest {
     private MusicFactory songFactory;
     @Mock
     private SongCacheManager listenCountJob;
+    @Mock
+    private UserRecommendationService userRecommendationService;
     private SongService songService;
     private List<Song> songs;
     private final ProtectionType protectionType = ProtectionType.PUBLIC;
@@ -57,7 +60,8 @@ public class DeleteSongTest {
                 albumRepository,
                 imageFactory,
                 songFactory,
-                listenCountJob);
+                listenCountJob,
+                userRecommendationService);
         songs = List.of(
                 new Song(1L,
                         "",

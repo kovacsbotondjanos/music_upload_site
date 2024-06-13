@@ -126,19 +126,21 @@ public class AlbumService {
     //TODO: pagination
     public List<AlbumDTO> findByNameLike(CustomUserDetails userDetails, String name) {
         List<Album> albums = albumRepository.findByNameLike(name);
+
         if (userDetails == null) {
             return albums.stream()
                     .peek(albumCacheManager::addEntity)
+                    .filter(a -> a.getProtectionType().equals(ProtectionType.PUBLIC))
                     .map(AlbumDTO::of)
-                    .filter(s -> s.getProtectionType().equals("PUBLIC"))
                     .limit(10)
                     .toList();
         }
+
         return albums.stream()
                 .peek(albumCacheManager::addEntity)
+                .filter(a -> a.getProtectionType().equals(ProtectionType.PUBLIC)
+                        || a.getUser().getId().equals(userDetails.getId()))
                 .map(AlbumDTO::of)
-                .filter(s -> s.getProtectionType().equals("PUBLIC")
-                        || s.getUserId().equals(userDetails.getId()))
                 .limit(10)
                 .toList();
     }

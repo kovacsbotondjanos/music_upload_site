@@ -52,9 +52,9 @@ public class AlbumService {
     }
 
     public Album saveAlbum(CustomUserDetails userDetails,
-                          String protectionType,
-                          String name,
-                          MultipartFile image) {
+                           String protectionType,
+                           String name,
+                           MultipartFile image) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -105,7 +105,7 @@ public class AlbumService {
 
     private Optional<Album> findById(Long id) {
         Optional<Album> a = albumCacheManager.getEntity(id);
-        if(a.isEmpty()){
+        if (a.isEmpty()) {
             //we only use this once, and if the opt is not empty we put it in the entityManager
             a = albumRepository.findById(id);
         }

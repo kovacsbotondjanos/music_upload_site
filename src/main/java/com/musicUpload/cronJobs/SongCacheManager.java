@@ -68,8 +68,8 @@ public class SongCacheManager {
     @Scheduled(fixedRate = SCHEDULE)
     public void saveReport() {
         copyMap.putAll(songListensBuffer.entrySet().stream()
-                        .filter(e -> songListensBuffer.remove(e.getKey(), e.getValue()))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                .filter(e -> songListensBuffer.remove(e.getKey(), e.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         //TODO: look into this, it is possible that this can lead to data loss, if a request arrives after the copy and before the clear
         // but this might not even be a big enough issue to worry about, bc listenCount will never be accurate
         songListensBuffer.clear();
@@ -83,10 +83,9 @@ public class SongCacheManager {
                 copyMap.entrySet().stream()
                         .parallel()
                         .forEach(e -> {
-                            if(songsToSave.containsKey(e.getKey().getFirst())) {
+                            if (songsToSave.containsKey(e.getKey().getFirst())) {
                                 songsToSave.put(e.getKey().getFirst(), songsToSave.get(e.getKey().getFirst()) + e.getValue());
-                            }
-                            else {
+                            } else {
                                 songsToSave.put(e.getKey().getFirst(), e.getValue());
                             }
 
@@ -94,9 +93,9 @@ public class SongCacheManager {
                             Date firstDate = Date.from(date.withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
                             Date lastDate = Date.from(date.withDayOfMonth(date.lengthOfMonth()).atStartOfDay(ZoneId.systemDefault()).toInstant());
                             var userListenOpt = userSongRepository.findBySongIdAndUserIdAndCreatedAtBetween(e.getKey().getFirst(),
-                                                                                                         e.getKey().getSecond(),
-                                                                                                         firstDate,
-                                                                                                         lastDate);
+                                    e.getKey().getSecond(),
+                                    firstDate,
+                                    lastDate);
 
                             userListenOpt.ifPresentOrElse(
                                     u -> {
@@ -104,10 +103,10 @@ public class SongCacheManager {
                                         userListensToSave.add(u);
                                     },
                                     () -> {
-                                        if(e.getKey().getSecond() != null) {
+                                        if (e.getKey().getSecond() != null) {
                                             userListensToSave.add(new UserSong(e.getKey().getFirst(),
-                                                                               e.getKey().getSecond(),
-                                                                               e.getValue()));
+                                                    e.getKey().getSecond(),
+                                                    e.getValue()));
                                         }
                                     }
                             );

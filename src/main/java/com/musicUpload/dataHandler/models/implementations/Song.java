@@ -65,10 +65,10 @@ public class Song implements CustomEntityInterface {
     }
 
     public long getCacheIndex() {
-        if(listenCount == 0) {
+        if (listenCount == 0) {
             return 0;
         }
         //I take the 100 base log of the listen count to determine how long i have to cache the song, the cap is one hour
-        return (long)(Math.min(1000 * 60 * 60, 100 * Math.log(listenCount) / Math.log(100)) * Math.sqrt(listenCount));
+        return (long) (Math.min(1000 * 60 * 60, 100 * Math.log(listenCount) / Math.log(100)) * Math.sqrt(listenCount));
     }
 }

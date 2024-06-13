@@ -10,9 +10,10 @@ import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 
 @Service
@@ -27,7 +28,7 @@ public class AlbumFactory {
     }
 
     public List<Album> createAlbums(int number, List<User> users, List<Song> songs) {
-        List<Album> albums = new CopyOnWriteArrayList<>();
+        List<Album> albums = Collections.synchronizedList(new ArrayList<>());
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
             Album album = createAlbum(users, songs);

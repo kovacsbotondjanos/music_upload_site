@@ -1,6 +1,5 @@
 package com.musicUpload.dataHandler.services;
 
-import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.enums.Privilege;
@@ -120,7 +119,7 @@ public class UserService implements UserDetailsService {
 
     //TODO: pagination
     public List<UserDTO> findByNameLike(CustomUserDetails userDetails, String name) {
-        if(userDetails == null) {
+        if (userDetails == null) {
             throw new UnauthenticatedException();
         }
         return userRepository.findByNameLike(name)
@@ -148,7 +147,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(NotFoundException::new);
 
         if (username != null && !username.isEmpty()) {
-            if(userRepository.findByUsername(username).isPresent()) {
+            if (userRepository.findByUsername(username).isPresent()) {
                 throw new NotAcceptableException("Username already exists");
             }
             user.setUsername(username);
@@ -194,7 +193,7 @@ public class UserService implements UserDetailsService {
 
     public void followUser(CustomUserDetails userDetails,
                            Long userId) {
-        if(userDetails == null) {
+        if (userDetails == null) {
             throw new UnauthenticatedException();
         }
 
@@ -207,7 +206,7 @@ public class UserService implements UserDetailsService {
         List<User> followed = u.getFollowedUsers();
         List<User> followers = uFollowed.getFollowers();
 
-        if(!followed.contains(uFollowed) && !followers.contains(u)) {
+        if (!followed.contains(uFollowed) && !followers.contains(u)) {
             followed.add(uFollowed);
             followers.add(u);
             userRepository.save(u);

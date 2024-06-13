@@ -55,11 +55,11 @@ public class AlbumController {
     @PatchMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public AlbumDTO patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                           @PathVariable Long id,
-                           @RequestParam(name = "protection_type", required = false) String protectionType,
-                           @RequestParam(name = "song_id", required = false) List<Long> songIds,
-                           @RequestParam(name = "name", required = false) String name,
-                           @RequestParam(name = "image", required = false) MultipartFile image) {
+                               @PathVariable Long id,
+                               @RequestParam(name = "protection_type", required = false) String protectionType,
+                               @RequestParam(name = "song_id", required = false) List<Long> songIds,
+                               @RequestParam(name = "name", required = false) String name,
+                               @RequestParam(name = "image", required = false) MultipartFile image) {
         return AlbumDTO.of(albumService.patchAlbum(
                 userDetails,
                 id,
@@ -73,8 +73,8 @@ public class AlbumController {
     @PatchMapping("/add-songs/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public AlbumDTO addSongs(@AuthenticationPrincipal CustomUserDetails userDetails,
-                         @PathVariable Long id,
-                         @RequestParam(name = "song_id", required = false) List<Long> songIds) {
+                             @PathVariable Long id,
+                             @RequestParam(name = "song_id", required = false) List<Long> songIds) {
         return AlbumDTO.of(albumService.addSongs(
                 userDetails,
                 id,

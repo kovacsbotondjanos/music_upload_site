@@ -45,6 +45,7 @@ public class SongService {
     private final ImageFactory imageFactory;
     private final MusicFactory musicFactory;
     private final SongCacheManager songCacheManager;
+    private final UserRecommendationService userRecommendationService;
 
     @Autowired
     public SongService(SongRepository songRepository,
@@ -52,7 +53,7 @@ public class SongService {
                        AlbumRepository albumRepository,
                        ImageFactory imageFactory,
                        MusicFactory songFactory,
-                       SongCacheManager songCacheManager) {
+                       SongCacheManager songCacheManager, UserRecommendationService userRecommendationService) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
@@ -60,6 +61,7 @@ public class SongService {
         this.musicFactory = songFactory;
         //TODO: create a wrapper class to handle lookup in the cache and db too
         this.songCacheManager = songCacheManager;
+        this.userRecommendationService = userRecommendationService;
     }
 
     public Song addSong(Song song) {
@@ -156,11 +158,13 @@ public class SongService {
         throw new UnauthenticatedException();
     }
 
-    public List<SongDTO> getRecommendedSongs(CustomUserDetails userDetails, int pageNumber, int pageSize) {
+    public List<SongDTO> getRecommendedSongs(CustomUserDetails userDetails,
+                                             int pageNumber,
+                                             int pageSize) {
         Pageable page = PageRequest.of(pageNumber, pageSize);
 
-        if(userDetails != null) {
-            //TODO: return the recommended songs for the use
+        if (userDetails != null) {
+            return userRecommendationService.getRecommendedSongsForUser(userDetails, pageNumber, pageSize);
         }
         return songRepository.findByProtectionTypeOrderByListenCountDesc(ProtectionType.PUBLIC, page).stream()
                 .peek(songCacheManager::addSong)

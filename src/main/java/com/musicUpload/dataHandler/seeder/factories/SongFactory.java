@@ -10,6 +10,8 @@ import com.musicUpload.util.MusicFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -30,7 +32,7 @@ public class SongFactory {
     }
 
     public List<Song> generateSongs(int number, List<User> users) {
-        List<Song> songs = new CopyOnWriteArrayList<>();
+        List<Song> songs = Collections.synchronizedList(new ArrayList<>());
 
         IntStream.range(0, number).parallel().forEachOrdered(__ -> {
             Song song = createSong(users);

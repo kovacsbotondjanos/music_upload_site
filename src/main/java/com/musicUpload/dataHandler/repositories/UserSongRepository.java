@@ -9,5 +9,6 @@ import java.util.Set;
 
 public interface UserSongRepository extends JpaRepository<UserSong, Long> {
     Optional<UserSong> findBySongIdAndUserIdAndCreatedAtBetween(Long songId, Long userId, Date start, Date end);
+
     Set<UserSong> findByCreatedAtGreaterThan(Date start);
 }

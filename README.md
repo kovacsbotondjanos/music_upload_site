@@ -2,6 +2,8 @@
 
 ### Backend for a website similar to Spotify or Soundcloud, where users can create accounts and albums, upload songs and listen to their and other users' music
 
+#### Disclaimer: this project is under development
+
 After starting the application it will automatically check if the database is empty, if yes then it will seed the 
 database with dummy data using Java faker, download pictures for users and song/album covers from a [website](https://picsum.photos/200), create users,
 songs and albums and generate random audio files

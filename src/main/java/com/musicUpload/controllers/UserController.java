@@ -51,7 +51,7 @@ public class UserController {
     @PatchMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void patchUser(@AuthenticationPrincipal CustomUserDetails userDetails,
-                          @RequestBody UserCreateAndPatchDTO userPatch,
+                          @ModelAttribute UserCreateAndPatchDTO userPatch,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
         userService.patchUser(userDetails,
                 userPatch.getUsername(),

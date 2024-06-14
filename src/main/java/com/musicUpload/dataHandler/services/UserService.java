@@ -197,6 +197,10 @@ public class UserService implements UserDetailsService {
             throw new UnauthenticatedException();
         }
 
+        if(userId.equals(userDetails.getId())) {
+            throw new WrongFormatException();
+        }
+
         User u = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
 

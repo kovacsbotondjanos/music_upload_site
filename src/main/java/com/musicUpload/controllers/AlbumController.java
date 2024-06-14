@@ -43,7 +43,7 @@ public class AlbumController {
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                            @RequestBody AlbumCreateAndPatchDTO andCreateDTO,
+                            @ModelAttribute AlbumCreateAndPatchDTO andCreateDTO,
                             @RequestParam(name = "image", required = false) MultipartFile image) {
         albumService.saveAlbum(
                 userDetails,
@@ -56,7 +56,7 @@ public class AlbumController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public AlbumDTO patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                                @PathVariable Long id,
-                               @RequestBody AlbumCreateAndPatchDTO albumPatchDTO,
+                               @ModelAttribute AlbumCreateAndPatchDTO albumPatchDTO,
                                @RequestParam(name = "image", required = false) MultipartFile image) {
         return AlbumDTO.of(albumService.patchAlbum(
                 userDetails,

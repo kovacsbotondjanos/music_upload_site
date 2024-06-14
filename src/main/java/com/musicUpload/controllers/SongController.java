@@ -50,7 +50,7 @@ public class SongController {
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createSong(@AuthenticationPrincipal CustomUserDetails userDetails,
-                           @RequestBody SongCreateAndPatchDTO songCreateAndDTO,
+                           @ModelAttribute SongCreateAndPatchDTO songCreateAndDTO,
                            @RequestParam(name = "image", required = false) MultipartFile image,
                            @RequestParam(name = "song") MultipartFile song) {
 
@@ -67,7 +67,7 @@ public class SongController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void patchSong(@AuthenticationPrincipal CustomUserDetails userDetails,
                           @PathVariable Long id,
-                          @RequestBody SongCreateAndPatchDTO songPatchDTO,
+                          @ModelAttribute SongCreateAndPatchDTO songPatchDTO,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
         songService.patchSong(
                 userDetails,

@@ -1,5 +1,6 @@
 package com.musicUpload.controllers;
 
+import com.musicUpload.dataHandler.DTOs.AlbumCreateAndPatchDTO;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.services.AlbumService;
@@ -42,13 +43,12 @@ public class AlbumController {
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                            @RequestParam(name = "protection_type") String protectionType,
-                            @RequestParam(name = "name") String name,
+                            @ModelAttribute AlbumCreateAndPatchDTO andCreateDTO,
                             @RequestParam(name = "image", required = false) MultipartFile image) {
         albumService.saveAlbum(
                 userDetails,
-                protectionType,
-                name,
+                andCreateDTO.getProtectionType(),
+                andCreateDTO.getName(),
                 image);
     }
 
@@ -56,16 +56,14 @@ public class AlbumController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public AlbumDTO patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                                @PathVariable Long id,
-                               @RequestParam(name = "protection_type", required = false) String protectionType,
-                               @RequestParam(name = "song_id", required = false) List<Long> songIds,
-                               @RequestParam(name = "name", required = false) String name,
+                               @ModelAttribute AlbumCreateAndPatchDTO albumPatchDTO,
                                @RequestParam(name = "image", required = false) MultipartFile image) {
         return AlbumDTO.of(albumService.patchAlbum(
                 userDetails,
                 id,
-                protectionType,
-                songIds,
-                name,
+                albumPatchDTO.getProtectionType(),
+                albumPatchDTO.getSongIds(),
+                albumPatchDTO.getName(),
                 image
         ));
     }

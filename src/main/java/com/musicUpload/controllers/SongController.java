@@ -1,6 +1,7 @@
 package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.SongDTO;
+import com.musicUpload.dataHandler.DTOs.SongCreateAndPatchDTO;
 import com.musicUpload.dataHandler.details.CustomUserDetails;
 import com.musicUpload.dataHandler.services.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,15 +50,14 @@ public class SongController {
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createSong(@AuthenticationPrincipal CustomUserDetails userDetails,
-                           @RequestParam(name = "protection_type") String protectionType,
-                           @RequestParam(name = "name") String name,
+                           @RequestBody SongCreateAndPatchDTO songCreateAndDTO,
                            @RequestParam(name = "image", required = false) MultipartFile image,
                            @RequestParam(name = "song") MultipartFile song) {
 
         songService.addSong(
                 userDetails,
-                protectionType,
-                name,
+                songCreateAndDTO.getProtectionType(),
+                songCreateAndDTO.getName(),
                 image,
                 song
         );
@@ -67,14 +67,13 @@ public class SongController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void patchSong(@AuthenticationPrincipal CustomUserDetails userDetails,
                           @PathVariable Long id,
-                          @RequestParam(name = "protection_type", required = false) String protectionType,
-                          @RequestParam(name = "name", required = false) String name,
+                          @RequestBody SongCreateAndPatchDTO songPatchDTO,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
         songService.patchSong(
                 userDetails,
                 id,
-                protectionType,
-                name,
+                songPatchDTO.getProtectionType(),
+                songPatchDTO.getName(),
                 image
         );
     }

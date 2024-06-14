@@ -97,7 +97,7 @@ public class UpdateAlbumTest {
 
     @Test
     void updateNameTest() {
-        userDetails.setAlbums(List.of(album));
+        userDetails.setAlbums(new ArrayList<>(List.of(album)));
         albumService.patchAlbum(
                 userDetails,
                 1L,
@@ -110,7 +110,7 @@ public class UpdateAlbumTest {
 
     @Test
     void updateProtectionType() {
-        userDetails.setAlbums(List.of(album));
+        userDetails.setAlbums(new ArrayList<>(List.of(album)));
         albumService.patchAlbum(
                 userDetails,
                 1L,
@@ -124,7 +124,7 @@ public class UpdateAlbumTest {
     @Test
     void updateAlbumWithPrivateSongNotOwned() {
         song.setProtectionType(privateProtectionType);
-        userDetails.setAlbums(List.of(album));
+        userDetails.setAlbums(new ArrayList<>(List.of(album)));
         albumService.patchAlbum(userDetails,
                 1L,
                 null,
@@ -136,7 +136,7 @@ public class UpdateAlbumTest {
     @Test
     void updateAlbumWithPublicSongNotOwned() {
         song.setProtectionType(publicProtectionType);
-        userDetails.setAlbums(List.of(album));
+        userDetails.setAlbums(new ArrayList<>(List.of(album)));
         given(songService.findById(1L))
                 .willReturn(Optional.of(song));
         albumService.patchAlbum(userDetails,
@@ -150,7 +150,7 @@ public class UpdateAlbumTest {
     @Test
     void updateAlbumWithPrivateSongOwned() {
         song.setProtectionType(privateProtectionType);
-        userDetails.setAlbums(List.of(album));
+        userDetails.setAlbums(new ArrayList<>(List.of(album)));
         album.setUser(user);
         user.setAlbums(List.of(album));
         user.setSongs(List.of(song));

@@ -42,9 +42,9 @@ public class AlbumController {
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-                            @RequestBody String protectionType,
-                            @RequestBody String name,
-                            @RequestBody MultipartFile image) {
+                            @RequestParam(name = "protection_type") String protectionType,
+                            @RequestParam(name = "name") String name,
+                            @RequestParam(name = "image", required = false) MultipartFile image) {
         albumService.saveAlbum(
                 userDetails,
                 protectionType,
@@ -56,10 +56,10 @@ public class AlbumController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public AlbumDTO patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                                @PathVariable Long id,
-                               @RequestBody String protectionType,
-                               @RequestBody List<Long> songIds,
-                               @RequestBody String name,
-                               @RequestBody MultipartFile image) {
+                               @RequestParam(name = "protection_type", required = false) String protectionType,
+                               @RequestParam(name = "song_id", required = false) List<Long> songIds,
+                               @RequestParam(name = "name", required = false) String name,
+                               @RequestParam(name = "image", required = false) MultipartFile image) {
         return AlbumDTO.of(albumService.patchAlbum(
                 userDetails,
                 id,
@@ -74,7 +74,7 @@ public class AlbumController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public AlbumDTO addSongs(@AuthenticationPrincipal CustomUserDetails userDetails,
                              @PathVariable Long id,
-                             @RequestBody List<Long> songIds) {
+                             @RequestParam(name = "song_id", required = false) List<Long> songIds) {
         return AlbumDTO.of(albumService.addSongs(
                 userDetails,
                 id,

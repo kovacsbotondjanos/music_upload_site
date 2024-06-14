@@ -49,10 +49,10 @@ public class SongController {
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createSong(@AuthenticationPrincipal CustomUserDetails userDetails,
-                           @RequestBody String protectionType,
-                           @RequestBody String name,
-                           @RequestBody MultipartFile image,
-                           @RequestBody MultipartFile song) {
+                           @RequestParam(name = "protection_type") String protectionType,
+                           @RequestParam(name = "name") String name,
+                           @RequestParam(name = "image", required = false) MultipartFile image,
+                           @RequestParam(name = "song") MultipartFile song) {
 
         songService.addSong(
                 userDetails,
@@ -67,9 +67,9 @@ public class SongController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void patchSong(@AuthenticationPrincipal CustomUserDetails userDetails,
                           @PathVariable Long id,
-                          @RequestBody String protectionType,
-                          @RequestBody String name,
-                          @RequestBody MultipartFile image) {
+                          @RequestParam(name = "protection_type", required = false) String protectionType,
+                          @RequestParam(name = "name", required = false) String name,
+                          @RequestParam(name = "image", required = false) MultipartFile image) {
         songService.patchSong(
                 userDetails,
                 id,

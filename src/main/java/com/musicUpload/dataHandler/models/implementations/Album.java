@@ -16,7 +16,7 @@ import java.util.List;
 @ToString(exclude = {"user", "songs"})
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"protectionType", "user", "songs"})
+@EqualsAndHashCode(exclude = {"protectionType", "user", "songs", "createdAt", "updatedAt"})
 public class Album implements CustomEntityInterface {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

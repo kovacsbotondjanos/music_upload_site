@@ -192,6 +192,7 @@ public class AlbumService {
         }
 
         Album a = albumRepository.save(album);
+        userDetails.addAlbum(a);
         albumCacheManager.addEntity(a);
         return a;
     }

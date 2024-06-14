@@ -43,18 +43,18 @@ public class UserController {
     @PostMapping("/follow")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void followUser(@AuthenticationPrincipal CustomUserDetails userDetails,
-                           @RequestParam(name = "userId") Long userId) {
+                           @RequestBody Long userId) {
         userService.followUser(userDetails, userId);
     }
 
     @PatchMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void patchUser(@AuthenticationPrincipal CustomUserDetails userDetails,
-                          @RequestParam(name = "username", required = false) String username,
-                          @RequestParam(name = "email", required = false) String email,
-                          @RequestParam(name = "new_password", required = false) String password,
-                          @RequestParam(name = "old_password", required = false) String oldPassword,
-                          @RequestParam(name = "image", required = false) MultipartFile image) {
+                          @RequestBody String username,
+                          @RequestBody String email,
+                          @RequestBody String password,
+                          @RequestBody String oldPassword,
+                          @RequestBody MultipartFile image) {
         userService.patchUser(userDetails,
                 username,
                 email,

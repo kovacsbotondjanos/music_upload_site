@@ -78,7 +78,6 @@ public class SongService {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
-        System.out.println(protectionType + name);
 
         if (name == null || protectionType == null || songFile == null) {
             throw new WrongFormatException();

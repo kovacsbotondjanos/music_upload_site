@@ -42,27 +42,26 @@ public class RecommendationEngine {
         Set<UserSong> listens = userSongService.findByLastTwoMonths(start);
         Thread deletion = new Thread(userRecommendationRepository::deleteAll);
         deletion.start();
-        logger.info("all connections from last two months: {}", listens);
+        logger.info("all connections from last month: {}", listens);
         //TODO: make this graph more efficient, maybe a general hashmap where we put every song with its connections and then filter it
         Set<GraphNode> graph = Collections.synchronizedSet(listens.stream().map(GraphNode::new).collect(Collectors.toSet()));
         graph.stream().parallel().forEach(node -> {
-            Set<GraphNode> nodesWithSameSong = graph.stream()
+            Set<GraphNode> nodesWithSameSong = Collections.synchronizedSet(graph.stream()
                     .parallel()
                     .filter(n -> n.getUserSong().getSongId().equals(node.getUserSong().getSongId()))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toSet()));
             node.setNodesWithSameSong(nodesWithSameSong);
 
-            Set<GraphNode> nodesWithSameUser = graph.stream()
+            Set<GraphNode> nodesWithSameUser = Collections.synchronizedSet(graph.stream()
                     .parallel()
                     .filter(n -> n.getUserSong().getUserId().equals(node.getUserSong().getUserId()))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toSet()));
             node.setNodesWithSameUser(nodesWithSameUser);
         });
         logger.info("graph node calculation finished");
         Map<Long, Set<Pair<Song, Long>>> userIdAndRecommendations = new ConcurrentHashMap<>();
         graph.stream().parallel().forEach(node -> {
             Long userId = node.getUserSong().getUserId();
-//            Long songId = node.getUserSong().getSongId();
             Set<GraphNode> nodesWithSameSong = node.getNodesWithSameSong();
             nodesWithSameSong.forEach(n -> {
                 n.getNodesWithSameUser().stream()
@@ -106,8 +105,8 @@ public class RecommendationEngine {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        logger.info("userrecommendations calculated");
         userRecommendationRepository.saveAll(recommendations);
+        logger.info("recommendations calculated and saved in the db");
     }
 
     @Data

@@ -79,7 +79,7 @@ public class RecommendationEngine {
                             } else {
                                 songRepository.findById(sId).ifPresent(song -> {
                                     if (song.getProtectionType().equals(ProtectionType.PUBLIC) || song.getUser().getId().equals(userId)) {
-                                        userIdAndRecommendations.put(userId, new HashSet<>(Set.of(Pair.of(song, 1L))));
+                                        userIdAndRecommendations.put(userId, Collections.synchronizedSet(new HashSet<>(Set.of(Pair.of(song, 1L)))));
 
                                     }
                                 });

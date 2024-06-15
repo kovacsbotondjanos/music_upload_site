@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -35,7 +36,7 @@ public class RecommendationEngine {
         this.userRecommendationRepository = userRecommendationRepository;
     }
 
-    @Scheduled(cron = "00 00 00 * * *")
+    @Scheduled(cron = "00 * * * * *")
     public void createRecommendations() {
         Date start = Date.from(LocalDate.now().minusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         Set<UserSong> listens = userSongService.findByLastTwoMonths(start);
@@ -43,25 +44,26 @@ public class RecommendationEngine {
         deletion.start();
         logger.info("all connections from last two months: {}", listens);
         //TODO: make this graph more efficient, maybe a general hashmap where we put every song with its connections and then filter it
-        Set<GraphNode> graph = listens.stream().map(GraphNode::new).collect(Collectors.toSet());
-        graph.forEach(node -> {
+        Set<GraphNode> graph = Collections.synchronizedSet(listens.stream().map(GraphNode::new).collect(Collectors.toSet()));
+        graph.stream().parallel().forEach(node -> {
             Set<GraphNode> nodesWithSameSong = graph.stream()
+                    .parallel()
                     .filter(n -> n.getUserSong().getSongId().equals(node.getUserSong().getSongId()))
                     .collect(Collectors.toSet());
             node.setNodesWithSameSong(nodesWithSameSong);
 
             Set<GraphNode> nodesWithSameUser = graph.stream()
+                    .parallel()
                     .filter(n -> n.getUserSong().getUserId().equals(node.getUserSong().getUserId()))
                     .collect(Collectors.toSet());
             node.setNodesWithSameUser(nodesWithSameUser);
         });
-        Map<Long, Set<Pair<Song, Long>>> userIdAndRecommendations = new HashMap<>();
-        graph.forEach(node -> {
+        logger.info("graph node calculation finished");
+        Map<Long, Set<Pair<Song, Long>>> userIdAndRecommendations = new ConcurrentHashMap<>();
+        graph.stream().parallel().forEach(node -> {
             Long userId = node.getUserSong().getUserId();
-            Long songId = node.getUserSong().getSongId();
-            Set<GraphNode> nodesWithSameSong = graph.stream()
-                    .filter(n -> n.getUserSong().getSongId().equals(songId))
-                    .collect(Collectors.toSet());
+//            Long songId = node.getUserSong().getSongId();
+            Set<GraphNode> nodesWithSameSong = node.getNodesWithSameSong();
             nodesWithSameSong.forEach(n -> {
                 n.getNodesWithSameUser().stream()
                         .filter(s -> !s.getUserSong().getUserId().equals(userId))
@@ -104,6 +106,7 @@ public class RecommendationEngine {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        logger.info("userrecommendations calculated");
         userRecommendationRepository.saveAll(recommendations);
     }
 

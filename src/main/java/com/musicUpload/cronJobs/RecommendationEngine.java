@@ -36,7 +36,7 @@ public class RecommendationEngine {
         this.userRecommendationRepository = userRecommendationRepository;
     }
 
-    @Scheduled(cron = "00 * * * * *")
+    @Scheduled(cron = "00 00 00 * * *")
     public void createRecommendations() {
         Date start = Date.from(LocalDate.now().minusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         Set<UserSong> listens = userSongService.findByLastTwoMonths(start);

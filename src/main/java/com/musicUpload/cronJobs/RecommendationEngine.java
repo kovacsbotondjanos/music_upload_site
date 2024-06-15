@@ -48,7 +48,8 @@ public class RecommendationEngine {
         graph.stream().parallel().forEach(node -> {
             Set<GraphNode> nodesWithSameSong = Collections.synchronizedSet(graph.stream()
                     .parallel()
-                    .filter(n -> n.getUserSong().getSongId().equals(node.getUserSong().getSongId()))
+                    .filter(n -> n.getUserSong().getSongId().equals(node.getUserSong().getSongId()) &&
+                            !n.getUserSong().getUserId().equals(node.getUserSong().getUserId()))
                     .collect(Collectors.toSet()));
             node.setNodesWithSameSong(nodesWithSameSong);
 
@@ -62,10 +63,8 @@ public class RecommendationEngine {
         Map<Long, Set<Pair<Song, Long>>> userIdAndRecommendations = new ConcurrentHashMap<>();
         graph.stream().parallel().forEach(node -> {
             Long userId = node.getUserSong().getUserId();
-            Set<GraphNode> nodesWithSameSong = node.getNodesWithSameSong();
-            nodesWithSameSong.forEach(n -> {
+            node.getNodesWithSameSong().forEach(n -> {
                 n.getNodesWithSameUser().stream()
-                        .filter(s -> !s.getUserSong().getUserId().equals(userId))
                         .map(s -> s.getUserSong().getSongId())
                         .forEach(sId -> {
                             if (userIdAndRecommendations.containsKey(userId)) {
@@ -98,7 +97,7 @@ public class RecommendationEngine {
             IntStream.range(0, sortedList.size()).forEach(i -> recommendations.add(new UserRecommendation(
                     entry.getKey(),
                     sortedList.get(i).getFirst(),
-                    i + 1)));
+                    sortedList.size() - i)));
         });
         try {
             deletion.join();

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -35,36 +36,35 @@ public class RecommendationEngine {
         this.userRecommendationRepository = userRecommendationRepository;
     }
 
-    @Scheduled(cron = "00 00 00 * * *")
+    @Scheduled(cron = "00 * * * * *")
     public void createRecommendations() {
         Date start = Date.from(LocalDate.now().minusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         Set<UserSong> listens = userSongService.findByLastTwoMonths(start);
         Thread deletion = new Thread(userRecommendationRepository::deleteAll);
         deletion.start();
-        logger.info("all connections from last two months: {}", listens);
+        logger.info("all connections from last month: {}", listens);
         //TODO: make this graph more efficient, maybe a general hashmap where we put every song with its connections and then filter it
-        Set<GraphNode> graph = listens.stream().map(GraphNode::new).collect(Collectors.toSet());
-        graph.forEach(node -> {
-            Set<GraphNode> nodesWithSameSong = graph.stream()
-                    .filter(n -> n.getUserSong().getSongId().equals(node.getUserSong().getSongId()))
-                    .collect(Collectors.toSet());
+        Set<GraphNode> graph = Collections.synchronizedSet(listens.stream().map(GraphNode::new).collect(Collectors.toSet()));
+        graph.stream().parallel().forEach(node -> {
+            Set<GraphNode> nodesWithSameSong = Collections.synchronizedSet(graph.stream()
+                    .parallel()
+                    .filter(n -> n.getUserSong().getSongId().equals(node.getUserSong().getSongId()) &&
+                            !n.getUserSong().getUserId().equals(node.getUserSong().getUserId()))
+                    .collect(Collectors.toSet()));
             node.setNodesWithSameSong(nodesWithSameSong);
 
-            Set<GraphNode> nodesWithSameUser = graph.stream()
+            Set<GraphNode> nodesWithSameUser = Collections.synchronizedSet(graph.stream()
+                    .parallel()
                     .filter(n -> n.getUserSong().getUserId().equals(node.getUserSong().getUserId()))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toSet()));
             node.setNodesWithSameUser(nodesWithSameUser);
         });
-        Map<Long, Set<Pair<Song, Long>>> userIdAndRecommendations = new HashMap<>();
-        graph.forEach(node -> {
+        logger.info("graph node calculation finished");
+        Map<Long, Set<Pair<Song, Long>>> userIdAndRecommendations = new ConcurrentHashMap<>();
+        graph.stream().parallel().forEach(node -> {
             Long userId = node.getUserSong().getUserId();
-            Long songId = node.getUserSong().getSongId();
-            Set<GraphNode> nodesWithSameSong = graph.stream()
-                    .filter(n -> n.getUserSong().getSongId().equals(songId))
-                    .collect(Collectors.toSet());
-            nodesWithSameSong.forEach(n -> {
+            node.getNodesWithSameSong().forEach(n -> {
                 n.getNodesWithSameUser().stream()
-                        .filter(s -> !s.getUserSong().getUserId().equals(userId))
                         .map(s -> s.getUserSong().getSongId())
                         .forEach(sId -> {
                             if (userIdAndRecommendations.containsKey(userId)) {
@@ -78,7 +78,7 @@ public class RecommendationEngine {
                             } else {
                                 songRepository.findById(sId).ifPresent(song -> {
                                     if (song.getProtectionType().equals(ProtectionType.PUBLIC) || song.getUser().getId().equals(userId)) {
-                                        userIdAndRecommendations.put(userId, new HashSet<>(Set.of(Pair.of(song, 1L))));
+                                        userIdAndRecommendations.put(userId, Collections.synchronizedSet(new HashSet<>(Set.of(Pair.of(song, 1L)))));
 
                                     }
                                 });
@@ -97,7 +97,7 @@ public class RecommendationEngine {
             IntStream.range(0, sortedList.size()).forEach(i -> recommendations.add(new UserRecommendation(
                     entry.getKey(),
                     sortedList.get(i).getFirst(),
-                    i + 1)));
+                    sortedList.size() - i)));
         });
         try {
             deletion.join();
@@ -105,6 +105,7 @@ public class RecommendationEngine {
             throw new RuntimeException(e);
         }
         userRecommendationRepository.saveAll(recommendations);
+        logger.info("recommendations calculated and saved in the db");
     }
 
     @Data

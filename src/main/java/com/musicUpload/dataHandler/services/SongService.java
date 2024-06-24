@@ -53,7 +53,8 @@ public class SongService {
                        AlbumRepository albumRepository,
                        ImageFactory imageFactory,
                        MusicFactory songFactory,
-                       SongCacheManager songCacheManager, UserRecommendationService userRecommendationService) {
+                       SongCacheManager songCacheManager,
+                       UserRecommendationService userRecommendationService) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
@@ -172,8 +173,12 @@ public class SongService {
                 .toList();
     }
 
-    //TODO: pagination
-    public List<SongDTO> findByNameLike(CustomUserDetails userDetails, String name) {
+    public List<SongDTO> findByNameLike(CustomUserDetails userDetails,
+                                        String name,
+                                        int pageNumber,
+                                        int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        //TODO: pagination!!!
         List<Song> songs = songRepository.findByNameLike(name);
         if (userDetails == null) {
             return songs.stream()

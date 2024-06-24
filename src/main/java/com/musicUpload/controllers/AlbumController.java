@@ -40,7 +40,7 @@ public class AlbumController {
         return albumService.findByNameLike(userDetails, name);
     }
 
-    @PostMapping("/add")
+    @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
                             @ModelAttribute AlbumCreateAndPatchDTO andCreateDTO,

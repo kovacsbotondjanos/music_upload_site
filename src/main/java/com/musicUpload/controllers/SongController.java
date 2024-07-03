@@ -36,8 +36,10 @@ public class SongController {
 
     @GetMapping("/search/{name}")
     public List<SongDTO> getSongByNameLike(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                           @PathVariable String name) {
-        return songService.findByNameLike(userDetails, name);
+                                           @PathVariable String name,
+                                           @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+                                           @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
+        return songService.findByNameLike(userDetails, name, pageNumber, pageSize);
     }
 
     @GetMapping("/random")
@@ -47,7 +49,7 @@ public class SongController {
         return songService.getRecommendedSongs(userDetails, pageNumber, pageSize);
     }
 
-    @PostMapping("/add")
+    @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createSong(@AuthenticationPrincipal CustomUserDetails userDetails,
                            @ModelAttribute SongCreateAndPatchDTO songCreateAndDTO,

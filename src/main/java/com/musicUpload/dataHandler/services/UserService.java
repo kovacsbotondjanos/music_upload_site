@@ -1,7 +1,7 @@
 package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.dataHandler.DTOs.UserDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -44,7 +44,7 @@ public class UserService implements UserDetailsService {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
             var userObj = user.get();
-            return new CustomUserDetails(
+            return new UserDetailsImpl(
                     userObj.getId(),
                     userObj.getUsername(),
                     userObj.getPassword(),
@@ -108,7 +108,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id);
     }
 
-    public UserDTO findCurrUser(CustomUserDetails userDetails) {
+    public UserDTO findCurrUser(UserDetailsImpl userDetails) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -118,7 +118,7 @@ public class UserService implements UserDetailsService {
     }
 
     //TODO: pagination
-    public List<UserDTO> findByNameLike(CustomUserDetails userDetails, String name) {
+    public List<UserDTO> findByNameLike(UserDetailsImpl userDetails, String name) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -132,7 +132,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public void patchUser(CustomUserDetails userDetails,
+    public void patchUser(UserDetailsImpl userDetails,
                           String username,
                           String email,
                           String password,
@@ -191,7 +191,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void followUser(CustomUserDetails userDetails,
+    public void followUser(UserDetailsImpl userDetails,
                            Long userId) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
@@ -218,7 +218,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public void deleteUser(CustomUserDetails userDetails) {
+    public void deleteUser(UserDetailsImpl userDetails) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }

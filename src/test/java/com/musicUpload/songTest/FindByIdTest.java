@@ -2,7 +2,7 @@ package com.musicUpload.songTest;
 
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -49,7 +49,7 @@ public class FindByIdTest {
     private Song song;
     private Long id;
     private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
-    private final CustomUserDetails userDetails = new CustomUserDetails(1L,
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "pwd",
             List.of(),

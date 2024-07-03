@@ -1,7 +1,7 @@
 package com.musicUpload.songTest;
 
 import com.musicUpload.cronJobs.SongCacheManager;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
 public class DeleteSongTest {
-    CustomUserDetails userDetails = new CustomUserDetails(1L,
+    UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "",
             List.of(),

@@ -2,7 +2,7 @@ package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -71,7 +71,7 @@ public class SongService {
         return s;
     }
 
-    public Song addSong(CustomUserDetails userDetails,
+    public Song addSong(UserDetailsImpl userDetails,
                         String protectionType,
                         String name,
                         MultipartFile image,
@@ -130,7 +130,7 @@ public class SongService {
         return s;
     }
 
-    public List<SongDTO> getSongs(CustomUserDetails userDetails) {
+    public List<SongDTO> getSongs(UserDetailsImpl userDetails) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -147,7 +147,7 @@ public class SongService {
         return s;
     }
 
-    public SongDTO findById(CustomUserDetails userDetails,
+    public SongDTO findById(UserDetailsImpl userDetails,
                             Long id) {
         Song song = findById(id)
                 .orElseThrow(NotFoundException::new);
@@ -159,7 +159,7 @@ public class SongService {
         throw new UnauthenticatedException();
     }
 
-    public List<SongDTO> getRecommendedSongs(CustomUserDetails userDetails,
+    public List<SongDTO> getRecommendedSongs(UserDetailsImpl userDetails,
                                              int pageNumber,
                                              int pageSize) {
         Pageable page = PageRequest.of(pageNumber, pageSize);
@@ -173,7 +173,7 @@ public class SongService {
                 .toList();
     }
 
-    public List<SongDTO> findByNameLike(CustomUserDetails userDetails,
+    public List<SongDTO> findByNameLike(UserDetailsImpl userDetails,
                                         String name,
                                         int pageNumber,
                                         int pageSize) {
@@ -196,7 +196,7 @@ public class SongService {
                 .toList();
     }
 
-    public Resource getSongInResourceFormatByNameHashed(CustomUserDetails userDetails, String nameHashed) {
+    public Resource getSongInResourceFormatByNameHashed(UserDetailsImpl userDetails, String nameHashed) {
         Path path = Paths.get(musicPathName);
         Song song = songRepository.findByNameHashed(nameHashed)
                 .orElseThrow(NotFoundException::new);
@@ -221,7 +221,7 @@ public class SongService {
         throw new NotFoundException();
     }
 
-    public void patchSong(CustomUserDetails userDetails,
+    public void patchSong(UserDetailsImpl userDetails,
                           Long id,
                           String protectionType,
                           String name,
@@ -261,7 +261,7 @@ public class SongService {
         }
     }
 
-    public Song deleteSong(CustomUserDetails userDetails,
+    public Song deleteSong(UserDetailsImpl userDetails,
                            Long id) {
         if (userDetails == null) {
             throw new UnauthenticatedException();

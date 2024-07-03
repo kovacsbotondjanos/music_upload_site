@@ -1,7 +1,7 @@
 package com.musicUpload.songTest;
 
 import com.musicUpload.cronJobs.SongCacheManager;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -21,11 +21,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.given;
 
 public class UpdateSongTest {
     @Mock
@@ -46,7 +44,7 @@ public class UpdateSongTest {
     private SongService songService;
     private Song song;
     private Long id;
-    private CustomUserDetails userDetails;
+    private UserDetailsImpl userDetails;
 
     @BeforeEach
     void onSetUp() {
@@ -69,7 +67,7 @@ public class UpdateSongTest {
                 new ArrayList<>(),
                 new Date(),
                 new Date());
-        userDetails = new CustomUserDetails(
+        userDetails = new UserDetailsImpl(
                 1L,
                 "",
                 "",

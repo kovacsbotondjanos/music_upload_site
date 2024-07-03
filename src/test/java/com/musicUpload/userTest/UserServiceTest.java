@@ -1,7 +1,7 @@
 package com.musicUpload.userTest;
 
 import com.musicUpload.dataHandler.DTOs.UserDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -108,7 +108,7 @@ public class UserServiceTest {
     @Test
     void findUserWithAuth() {
         //Given
-        CustomUserDetails userDetails = new CustomUserDetails(
+        UserDetailsImpl userDetails = new UserDetailsImpl(
                 1L,
                 null,
                 null,

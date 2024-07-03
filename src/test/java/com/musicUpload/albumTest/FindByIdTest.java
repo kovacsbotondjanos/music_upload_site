@@ -2,7 +2,7 @@ package com.musicUpload.albumTest;
 
 import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 public class FindByIdTest {
-    CustomUserDetails userDetails = new CustomUserDetails(1L,
+    UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "pwd",
             List.of(),

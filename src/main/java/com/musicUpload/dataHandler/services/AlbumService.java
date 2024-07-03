@@ -2,7 +2,7 @@ package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -51,7 +51,7 @@ public class AlbumService {
         return a;
     }
 
-    public Album saveAlbum(CustomUserDetails userDetails,
+    public Album saveAlbum(UserDetailsImpl userDetails,
                            String protectionType,
                            String name,
                            MultipartFile image) {
@@ -96,7 +96,7 @@ public class AlbumService {
         return a;
     }
 
-    public List<AlbumDTO> getAlbums(CustomUserDetails userDetails) {
+    public List<AlbumDTO> getAlbums(UserDetailsImpl userDetails) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -112,7 +112,7 @@ public class AlbumService {
         return a;
     }
 
-    public AlbumDTO findById(Long id, CustomUserDetails userDetails) {
+    public AlbumDTO findById(Long id, UserDetailsImpl userDetails) {
         Album album = findById(id)
                 .orElseThrow(NotFoundException::new);
         albumCacheManager.addEntity(album);
@@ -124,7 +124,7 @@ public class AlbumService {
     }
 
     //TODO: pagination
-    public List<AlbumDTO> findByNameLike(CustomUserDetails userDetails, String name) {
+    public List<AlbumDTO> findByNameLike(UserDetailsImpl userDetails, String name) {
         List<Album> albums = albumRepository.findByNameLike(name);
 
         if (userDetails == null) {
@@ -145,7 +145,7 @@ public class AlbumService {
                 .toList();
     }
 
-    public Album patchAlbum(CustomUserDetails userDetails,
+    public Album patchAlbum(UserDetailsImpl userDetails,
                             Long id,
                             String protectionType,
                             List<Long> songIds,
@@ -197,7 +197,7 @@ public class AlbumService {
         return a;
     }
 
-    public Album addSongs(CustomUserDetails userDetails,
+    public Album addSongs(UserDetailsImpl userDetails,
                           Long id,
                           List<Long> songIds) {
         if (userDetails == null) {
@@ -222,7 +222,7 @@ public class AlbumService {
         return albumRepository.save(album);
     }
 
-    public Album deleteAlbum(CustomUserDetails userDetails,
+    public Album deleteAlbum(UserDetailsImpl userDetails,
                              Long id) {
         if (userDetails == null) {
             throw new UnauthenticatedException();

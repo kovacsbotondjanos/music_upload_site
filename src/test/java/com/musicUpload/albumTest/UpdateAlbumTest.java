@@ -1,7 +1,7 @@
 package com.musicUpload.albumTest;
 
 import com.musicUpload.cronJobs.EntityCacheManager;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.*;
@@ -42,7 +42,7 @@ public class UpdateAlbumTest {
     private Long id;
     private final ProtectionType publicProtectionType = ProtectionType.PUBLIC;
     private final ProtectionType privateProtectionType = ProtectionType.PRIVATE;
-    private final CustomUserDetails userDetails = new CustomUserDetails(1L,
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "pwd",
             List.of(),

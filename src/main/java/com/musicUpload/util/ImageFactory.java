@@ -1,6 +1,7 @@
 package com.musicUpload.util;
 
-import lombok.Data;
+import com.musicUpload.dataHandler.services.MinioService;
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-@Data
 @Service
 public class ImageFactory {
     private static final Logger logger = LogManager.getLogger(ImageFactory.class);
+    @Getter
     private final String dirName = System.getProperty("user.dir") + FileSystems.getDefault().getSeparator() + "images";
+    private final MinioService minioService;
+
+    public ImageFactory(MinioService minioService) {
+        this.minioService = minioService;
+    }
 
     public void deleteFile(String fileName) {
         File f = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
@@ -68,7 +74,9 @@ public class ImageFactory {
                 }
 
                 byte[] imageBytes = outputStream.toByteArray();
-                return saveFile(new ByteArrayInputStream(imageBytes));
+//                return saveFile(new ByteArrayInputStream(imageBytes));
+                return minioService.uploadImage(new ByteArrayInputStream(imageBytes),
+                        imageBytes.length);
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

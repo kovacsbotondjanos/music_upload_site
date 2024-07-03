@@ -1,6 +1,6 @@
 package com.musicUpload.controllers;
 
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.services.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -47,7 +47,7 @@ public class ResourceController {
     }
 
     @GetMapping("/music/{nameHashed}")
-    public ResponseEntity<Resource> getSong(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<Resource> getSong(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                             @PathVariable String nameHashed) {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("audio/mpeg"))

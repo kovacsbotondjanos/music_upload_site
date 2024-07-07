@@ -9,6 +9,7 @@ import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -45,6 +46,8 @@ public class FindByIdTest {
     private ImageFactory imageFactory;
     @Mock
     private EntityCacheManager<Album> albumEntityManager;
+    @Mock
+    private MinioService minioService;
     private AlbumService albumService;
     private Album album;
     private Long id;
@@ -54,10 +57,11 @@ public class FindByIdTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
-                userRepository,
-                songService,
-                imageFactory,
-                albumEntityManager);
+                                        userRepository,
+                                        songService,
+                                        imageFactory,
+                                        albumEntityManager,
+                                        minioService);
         id = 1L;
         album = new Album(id,
                 "",

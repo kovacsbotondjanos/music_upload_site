@@ -8,6 +8,7 @@ import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.services.UserRecommendationService;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -40,6 +41,8 @@ public class UpdateSongTest {
     private SongCacheManager listenCountJob;
     @Mock
     private UserRecommendationService userRecommendationService;
+    @Mock
+    private MinioService minioService;
 
     private SongService songService;
     private Song song;
@@ -50,12 +53,13 @@ public class UpdateSongTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         songService = new SongService(songRepository,
-                userRepository,
-                albumRepository,
-                imageFactory,
-                songFactory,
-                listenCountJob,
-                userRecommendationService);
+                                      userRepository,
+                                      albumRepository,
+                                      imageFactory,
+                                      songFactory,
+                                      listenCountJob,
+                                      userRecommendationService,
+                                      minioService);
         id = 1L;
         song = new Song(id,
                 "",

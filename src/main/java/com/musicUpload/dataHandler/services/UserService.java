@@ -29,14 +29,17 @@ public class UserService implements UserDetailsService {
     private static final Logger logger = LogManager.getLogger(UserDetailsService.class);
     private final UserRepository userRepository;
     private final ImageFactory imageFactory;
+    private final MinioService minioService;
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Autowired
     public UserService(UserRepository userRepository,
-                       ImageFactory imageFactory) {
+                       ImageFactory imageFactory,
+                       MinioService minioService) {
         this.userRepository = userRepository;
         this.imageFactory = imageFactory;
+        this.minioService = minioService;
     }
 
     @Override
@@ -177,15 +180,8 @@ public class UserService implements UserDetailsService {
             if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new UnprocessableException();
             }
-
-            try {
-                imageFactory.deleteFile(user.getProfilePicture());
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
-                user.setProfilePicture(hashedFileName);
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-            }
+            minioService.deleteImage(user.getProfilePicture());
+            user.setProfilePicture(minioService.uploadImage(image));
         }
 
         userRepository.save(user);
@@ -224,6 +220,7 @@ public class UserService implements UserDetailsService {
         }
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
+        minioService.deleteImage(user.getProfilePicture());
         userRepository.delete(user);
     }
 

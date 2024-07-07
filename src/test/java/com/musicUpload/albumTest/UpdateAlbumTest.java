@@ -8,6 +8,7 @@ import com.musicUpload.dataHandler.models.implementations.*;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
@@ -36,6 +37,8 @@ public class UpdateAlbumTest {
     private ImageFactory imageFactory;
     @Mock
     private EntityCacheManager<Album> albumEntityManager;
+    @Mock
+    private MinioService minioService;
 
     private AlbumService albumService;
     private Album album;
@@ -65,10 +68,11 @@ public class UpdateAlbumTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
-                userRepository,
-                songService,
-                imageFactory,
-                albumEntityManager);
+                                        userRepository,
+                                        songService,
+                                        imageFactory,
+                                        albumEntityManager,
+                                        minioService);
         id = 1L;
         album = new Album(id,
                 "",

@@ -32,17 +32,20 @@ public class AlbumService {
     private final SongService songService;
     private final ImageFactory imageFactory;
     private final EntityCacheManager<Album> albumCacheManager;
+    private final MinioService minioService;
 
     @Autowired
     public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
                         SongService songService,
                         ImageFactory imageFactory,
-                        EntityCacheManager<Album> albumCacheManager) {
+                        EntityCacheManager<Album> albumCacheManager,
+                        MinioService minioService) {
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
         this.songService = songService;
         this.imageFactory = imageFactory;
         this.albumCacheManager = albumCacheManager;
+        this.minioService = minioService;
     }
 
     public Album saveAlbum(Album album) {
@@ -75,17 +78,10 @@ public class AlbumService {
         album.setName(name);
 
         if (image != null && !image.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
-                    throw new UnprocessableException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                imageFactory.deleteFile(album.getImage());
-                album.setImage(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new UnprocessableException();
             }
+            album.setImage(minioService.uploadImage(image));
         } else {
             String img = imageFactory.getRandomImage();
             album.setImage(img);
@@ -166,17 +162,11 @@ public class AlbumService {
         }
 
         if (image != null && !image.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
-                    throw new UnprocessableException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                imageFactory.deleteFile(album.getImage());
-                album.setImage(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new UnprocessableException();
             }
+            minioService.deleteImage(album.getImage());
+            album.setImage(minioService.uploadImage(image));
         }
 
         if (songIds != null) {
@@ -238,7 +228,7 @@ public class AlbumService {
         user.getAlbums().remove(album);
         userRepository.save(user);
 
-        imageFactory.deleteFile(album.getImage());
+        minioService.deleteImage(album.getImage());
 
         albumRepository.delete(album);
         userDetails.getAlbums().remove(album);

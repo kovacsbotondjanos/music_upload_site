@@ -27,9 +27,8 @@ public class UserFactory {
     private final UserService userService;
 
     @Autowired
-    public UserFactory(ImageFactory imageFactory, UserService userService) {
+    public UserFactory(UserService userService) {
         this.userService = userService;
-        imageFactory.createImagesDir();
     }
 
     public List<User> createFollow(List<User> users) {

@@ -5,6 +5,7 @@ import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.exceptions.NotAcceptableException;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -27,6 +28,8 @@ public class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private ImageFactory imageFactory;
+    @Mock
+    private MinioService minioService;
 
     private UserService userService;
     private User user;
@@ -36,7 +39,9 @@ public class UserServiceTest {
         MockitoAnnotations.initMocks(this);
         user = new User(null, null, null, null,
                 "user", List.of(), List.of(), Privilege.USER, List.of(), List.of(), null, null);
-        userService = new UserService(userRepository, imageFactory);
+        userService = new UserService(userRepository,
+                                      imageFactory,
+                                      minioService);
     }
 
     @Test

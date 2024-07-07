@@ -46,6 +46,7 @@ public class SongService {
     private final MusicFactory musicFactory;
     private final SongCacheManager songCacheManager;
     private final UserRecommendationService userRecommendationService;
+    private final MinioService minioService;
 
     @Autowired
     public SongService(SongRepository songRepository,
@@ -54,7 +55,8 @@ public class SongService {
                        ImageFactory imageFactory,
                        MusicFactory songFactory,
                        SongCacheManager songCacheManager,
-                       UserRecommendationService userRecommendationService) {
+                       UserRecommendationService userRecommendationService,
+                       MinioService minioService) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
@@ -63,6 +65,7 @@ public class SongService {
         //TODO: create a wrapper class to handle lookup in the cache and db too
         this.songCacheManager = songCacheManager;
         this.userRecommendationService = userRecommendationService;
+        this.minioService = minioService;
     }
 
     public Song addSong(Song song) {
@@ -95,17 +98,10 @@ public class SongService {
         song.setName(name);
 
         if (image != null && !image.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
-                    throw new UnprocessableException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                imageFactory.deleteFile(song.getImage());
-                song.setImage(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new UnprocessableException();
             }
+            song.setImage(minioService.uploadImage(image));
         } else {
             String img = imageFactory.getRandomImage();
             song.setImage(img);
@@ -242,17 +238,11 @@ public class SongService {
         }
 
         if (image != null && !image.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
-                    throw new WrongFormatException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                imageFactory.deleteFile(song.getImage());
-                song.setImage(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new WrongFormatException();
             }
+            minioService.deleteImage(song.getImage());
+            song.setImage(minioService.uploadImage(image));
         }
         synchronized (songCacheManager.getCopyMap()) {
             logger.info("lock for song with id {} starts, because update", song.getId());
@@ -284,7 +274,7 @@ public class SongService {
         });
 
         songRepository.delete(song);
-        imageFactory.deleteFile(song.getImage());
+        minioService.deleteImage(song.getImage());
         musicFactory.deleteFile(song.getNameHashed());
 
         synchronized (songCacheManager.getCopyMap()) {

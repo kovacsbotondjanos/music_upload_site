@@ -18,27 +18,18 @@ import com.musicUpload.util.MusicFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class SongService {
     private static final Logger logger = LogManager.getLogger(SongService.class);
-    private final String musicPathName = "music" + FileSystems.getDefault().getSeparator();
     private final SongRepository songRepository;
     private final UserRepository userRepository;
     private final AlbumRepository albumRepository;
@@ -185,27 +176,15 @@ public class SongService {
                 .toList();
     }
 
-    public Resource getSongInResourceFormatByNameHashed(UserDetailsImpl userDetails, String nameHashed) {
-        Path path = Paths.get(musicPathName);
+    public String getSong(UserDetailsImpl userDetails, String nameHashed) {
         Song song = songRepository.findByNameHashed(nameHashed)
                 .orElseThrow(NotFoundException::new);
 
         if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
-            try {
-                Path imagePath = path.resolve(song.getNameHashed());
-                Resource resource = new UrlResource(imagePath.toUri());
-
-                if (resource.exists()) {
-                    songCacheManager.addListenToSong(song.getId(), userDetails);
-                    songCacheManager.addSong(song);
-                    return resource;
-                } else {
-                    throw new NotFoundException();
-                }
-            } catch (IOException e) {
-                throw new NotFoundException();
-            }
+            songCacheManager.addListenToSong(song.getId(), userDetails);
+            songCacheManager.addSong(song);
+            return minioService.getSong(nameHashed);
         }
         throw new NotFoundException();
     }

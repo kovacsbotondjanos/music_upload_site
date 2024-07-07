@@ -1,7 +1,8 @@
 package com.musicUpload.dataHandler.services;
 
 import io.minio.*;
-import io.minio.errors.*;
+import io.minio.errors.MinioException;
+import io.minio.http.Method;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class MinioService {
@@ -31,6 +33,9 @@ public class MinioService {
 
     @Value("${songPrefixToRemove}")
     private String songPrefix;
+
+    @Value("${linkExpirationTime}")
+    private int expirationTime;
 
     @Autowired
     public MinioService(MinioClient minioClient) {
@@ -53,11 +58,35 @@ public class MinioService {
         deleteFile(name, imageBucket);
     }
 
-    private void deleteFile(String name, String bucketName) {
+    public String getImage(String name) {
+        return getUrlToContent(name, imageBucket);
+    }
+
+    public String getSong(String name) {
+        return getUrlToContent(name, songBucket);
+    }
+
+    private void deleteFile(String name,
+                            String bucketName) {
         try {
             minioClient.removeObject(RemoveObjectArgs.builder()
                     .bucket(bucketName)
                     .object(name)
+                    .build());
+        } catch (MinioException | InvalidKeyException |
+                 IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getUrlToContent(String name,
+                                   String bucketName) {
+        try {
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .bucket(bucketName)
+                    .method(Method.GET)
+                    .object(name)
+                    .expiry(expirationTime, TimeUnit.SECONDS)
                     .build());
         } catch (MinioException | InvalidKeyException |
                  IOException | NoSuchAlgorithmException e) {
@@ -83,7 +112,7 @@ public class MinioService {
                             -1)
                     .contentType(file.getContentType())
                     .build());
-            return fileName + "." + file.getContentType().substring(prefixToRemove.length());
+            return fileName;
         } catch (MinioException | NoSuchAlgorithmException |
                  InvalidKeyException | IOException e) {
             //TODO: handle this better lol

@@ -108,17 +108,10 @@ public class SongService {
         }
 
         if (!songFile.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(songFile.getContentType()).contains("audio")) {
-                    throw new UnprocessableException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".mp3";
-                songFile.transferTo(new File(musicFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                musicFactory.deleteFile(song.getNameHashed());
-                song.setNameHashed(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(songFile.getContentType()).contains("audio")) {
                 throw new UnprocessableException();
             }
+            song.setNameHashed(minioService.uploadSong(songFile));
         }
 
         Song s = addSong(song);
@@ -275,7 +268,7 @@ public class SongService {
 
         songRepository.delete(song);
         minioService.deleteImage(song.getImage());
-        musicFactory.deleteFile(song.getNameHashed());
+        minioService.deleteSong(song.getNameHashed());
 
         synchronized (songCacheManager.getCopyMap()) {
             logger.info("lock for song with id {} starts, because deletion", song.getId());

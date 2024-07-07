@@ -1,9 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.*;
 import io.minio.errors.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,17 +26,23 @@ public class MinioService {
     @Value("${minio.pictureBucketName}")
     private String imageBucket;
 
+    @Value("${imagePrefixToRemove}")
+    private String imagePrefix;
+
+    @Value("${songPrefixToRemove}")
+    private String songPrefix;
+
     @Autowired
     public MinioService(MinioClient minioClient) {
         this.minioClient = minioClient;
     }
 
     public String uploadSong(MultipartFile file) {
-        return uploadFile(file, songBucket);
+        return uploadFile(file, songBucket, songPrefix);
     }
 
     public String uploadImage(MultipartFile file) {
-        return uploadFile(file, imageBucket);
+        return uploadFile(file, imageBucket, imagePrefix);
     }
 
     public void deleteSong(String name) {
@@ -51,11 +54,20 @@ public class MinioService {
     }
 
     private void deleteFile(String name, String bucketName) {
-
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(name)
+                    .build());
+        } catch (MinioException | InvalidKeyException |
+                 IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String uploadFile(MultipartFile file,
-                              String bucketName) {
+                              String bucketName,
+                              String prefixToRemove) {
         try {
             boolean isExist = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!isExist) {
@@ -71,9 +83,9 @@ public class MinioService {
                             -1)
                     .contentType(file.getContentType())
                     .build());
-            return fileName + "." + file.getContentType();
-        } catch (ErrorResponseException | NoSuchAlgorithmException | InsufficientDataException | InternalException |
-                 InvalidKeyException | InvalidResponseException | IOException | ServerException | XmlParserException e) {
+            return fileName + "." + file.getContentType().substring(prefixToRemove.length());
+        } catch (MinioException | NoSuchAlgorithmException |
+                 InvalidKeyException | IOException e) {
             //TODO: handle this better lol
             logger.error(e.getMessage());
             throw new RuntimeException(e);

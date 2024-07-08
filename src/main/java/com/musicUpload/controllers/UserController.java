@@ -2,7 +2,7 @@ package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.UserCreateAndPatchDTO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +25,12 @@ public class UserController {
     }
 
     @GetMapping
-    public UserDTO getCurrUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public UserDTO getCurrUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return userService.findCurrUser(userDetails);
     }
 
     @GetMapping("/search/{name}")
-    public List<UserDTO> getSongByNameLike(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public List<UserDTO> getSongByNameLike(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                            @PathVariable String name) {
         return userService.findByNameLike(userDetails, name);
     }
@@ -43,14 +43,14 @@ public class UserController {
 
     @PostMapping("/follow")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void followUser(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public void followUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                            @RequestParam(name = "userId") Long userId) {
         userService.followUser(userDetails, userId);
     }
 
     @PatchMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void patchUser(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public void patchUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                           @ModelAttribute UserCreateAndPatchDTO userPatch,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
         userService.patchUser(userDetails,
@@ -63,7 +63,7 @@ public class UserController {
 
     @DeleteMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public void deleteUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.deleteUser(userDetails);
     }
 }

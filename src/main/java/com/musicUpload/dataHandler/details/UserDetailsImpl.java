@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
-public class CustomUserDetails implements UserDetails {
+public class UserDetailsImpl implements UserDetails {
     private final Long id;
     private final String username;
     @JsonIgnore
@@ -27,8 +27,8 @@ public class CustomUserDetails implements UserDetails {
     private boolean credentialsNonExpired;
     private boolean enabled;
 
-    public CustomUserDetails(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities,
-                             String profilePicture, List<Song> songs, List<Album> albums) {
+    public UserDetailsImpl(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities,
+                           String profilePicture, List<Song> songs, List<Album> albums) {
         this.id = id;
         this.username = username;
         this.password = password;

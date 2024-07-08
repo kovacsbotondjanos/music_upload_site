@@ -2,7 +2,7 @@ package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -17,13 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AlbumService {
@@ -32,17 +28,20 @@ public class AlbumService {
     private final SongService songService;
     private final ImageFactory imageFactory;
     private final EntityCacheManager<Album> albumCacheManager;
+    private final MinioService minioService;
 
     @Autowired
     public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
                         SongService songService,
                         ImageFactory imageFactory,
-                        EntityCacheManager<Album> albumCacheManager) {
+                        EntityCacheManager<Album> albumCacheManager,
+                        MinioService minioService) {
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
         this.songService = songService;
         this.imageFactory = imageFactory;
         this.albumCacheManager = albumCacheManager;
+        this.minioService = minioService;
     }
 
     public Album saveAlbum(Album album) {
@@ -51,7 +50,7 @@ public class AlbumService {
         return a;
     }
 
-    public Album saveAlbum(CustomUserDetails userDetails,
+    public Album saveAlbum(UserDetailsImpl userDetails,
                            String protectionType,
                            String name,
                            MultipartFile image) {
@@ -75,17 +74,10 @@ public class AlbumService {
         album.setName(name);
 
         if (image != null && !image.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
-                    throw new UnprocessableException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                imageFactory.deleteFile(album.getImage());
-                album.setImage(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new UnprocessableException();
             }
+            album.setImage(minioService.uploadImage(image));
         } else {
             String img = imageFactory.getRandomImage();
             album.setImage(img);
@@ -96,7 +88,7 @@ public class AlbumService {
         return a;
     }
 
-    public List<AlbumDTO> getAlbums(CustomUserDetails userDetails) {
+    public List<AlbumDTO> getAlbums(UserDetailsImpl userDetails) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -112,7 +104,7 @@ public class AlbumService {
         return a;
     }
 
-    public AlbumDTO findById(Long id, CustomUserDetails userDetails) {
+    public AlbumDTO findById(Long id, UserDetailsImpl userDetails) {
         Album album = findById(id)
                 .orElseThrow(NotFoundException::new);
         albumCacheManager.addEntity(album);
@@ -124,7 +116,7 @@ public class AlbumService {
     }
 
     //TODO: pagination
-    public List<AlbumDTO> findByNameLike(CustomUserDetails userDetails, String name) {
+    public List<AlbumDTO> findByNameLike(UserDetailsImpl userDetails, String name) {
         List<Album> albums = albumRepository.findByNameLike(name);
 
         if (userDetails == null) {
@@ -145,7 +137,7 @@ public class AlbumService {
                 .toList();
     }
 
-    public Album patchAlbum(CustomUserDetails userDetails,
+    public Album patchAlbum(UserDetailsImpl userDetails,
                             Long id,
                             String protectionType,
                             List<Long> songIds,
@@ -166,17 +158,11 @@ public class AlbumService {
         }
 
         if (image != null && !image.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
-                    throw new UnprocessableException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                imageFactory.deleteFile(album.getImage());
-                album.setImage(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new UnprocessableException();
             }
+            minioService.deleteImage(album.getImage());
+            album.setImage(minioService.uploadImage(image));
         }
 
         if (songIds != null) {
@@ -197,7 +183,7 @@ public class AlbumService {
         return a;
     }
 
-    public Album addSongs(CustomUserDetails userDetails,
+    public Album addSongs(UserDetailsImpl userDetails,
                           Long id,
                           List<Long> songIds) {
         if (userDetails == null) {
@@ -222,7 +208,7 @@ public class AlbumService {
         return albumRepository.save(album);
     }
 
-    public Album deleteAlbum(CustomUserDetails userDetails,
+    public Album deleteAlbum(UserDetailsImpl userDetails,
                              Long id) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
@@ -238,7 +224,7 @@ public class AlbumService {
         user.getAlbums().remove(album);
         userRepository.save(user);
 
-        imageFactory.deleteFile(album.getImage());
+        minioService.deleteImage(album.getImage());
 
         albumRepository.delete(album);
         userDetails.getAlbums().remove(album);

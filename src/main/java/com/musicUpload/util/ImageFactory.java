@@ -1,54 +1,23 @@
 package com.musicUpload.util;
 
-import lombok.Data;
+import com.musicUpload.dataHandler.services.MinioService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.UUID;
 
-@Data
 @Service
 public class ImageFactory {
     private static final Logger logger = LogManager.getLogger(ImageFactory.class);
-    private final String dirName = System.getProperty("user.dir") + FileSystems.getDefault().getSeparator() + "images";
+    private final MinioService minioService;
 
-    public void deleteFile(String fileName) {
-        File f = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
-        if (f.delete()) {
-            logger.info("{} deleted", f.getName());
-        }
-    }
-
-    public void createImagesDir() {
-        try {
-            Path dir = Path.of(dirName);
-            if (Files.notExists(dir)) {
-                Files.createDirectories(dir);
-            }
-        } catch (IOException ioe) {
-            logger.error(ioe.getMessage());
-        }
-    }
-
-    public String saveFile(ByteArrayInputStream byteArrayInputStream) throws IOException, NullPointerException {
-        BufferedImage bufferedImage = ImageIO.read(byteArrayInputStream);
-        if (bufferedImage == null) {
-            throw new NullPointerException("Could not create image from byte array.");
-        }
-
-        String fileName = UUID.randomUUID() + ".jpg";
-        File outputFile = new File(dirName + FileSystems.getDefault().getSeparator() + fileName);
-        ImageIO.write(bufferedImage, "jpg", outputFile);
-        return fileName;
+    public ImageFactory(MinioService minioService) {
+        this.minioService = minioService;
     }
 
     public String getRandomImage() {
@@ -68,7 +37,11 @@ public class ImageFactory {
                 }
 
                 byte[] imageBytes = outputStream.toByteArray();
-                return saveFile(new ByteArrayInputStream(imageBytes));
+                MultipartFile multipartFile = new MockMultipartFile("image",
+                                                                    "",
+                                                                    "image/jpeg",
+                                                                    imageBytes);
+                return minioService.uploadImage(multipartFile);
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

@@ -1,13 +1,14 @@
 package com.musicUpload.albumTest;
 
 import com.musicUpload.cronJobs.EntityCacheManager;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
@@ -35,10 +36,12 @@ public class DeleteAlbumTest {
     private ImageFactory imageFactory;
     @Mock
     private EntityCacheManager<Album> albumEntityManager;
+    @Mock
+    private MinioService minioService;
 
     private AlbumService albumService;
     private List<Album> albums;
-    private final CustomUserDetails userDetails = new CustomUserDetails(1L,
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "pwd",
             List.of(),
@@ -51,10 +54,11 @@ public class DeleteAlbumTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
-                userRepository,
-                songService,
-                imageFactory,
-                albumEntityManager);
+                                        userRepository,
+                                        songService,
+                                        imageFactory,
+                                        albumEntityManager,
+                                        minioService);
         albums = List.of(
                 new Album(1L,
                         "",

@@ -6,7 +6,6 @@ import com.google.gson.GsonBuilder;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserService;
-import com.musicUpload.util.ImageFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +26,8 @@ public class UserFactory {
     private final UserService userService;
 
     @Autowired
-    public UserFactory(ImageFactory imageFactory, UserService userService) {
+    public UserFactory(UserService userService) {
         this.userService = userService;
-        imageFactory.createImagesDir();
     }
 
     public List<User> createFollow(List<User> users) {

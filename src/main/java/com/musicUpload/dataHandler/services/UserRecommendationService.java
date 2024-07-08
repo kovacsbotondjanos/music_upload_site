@@ -1,7 +1,7 @@
 package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.UserRecommendation;
 import com.musicUpload.dataHandler.repositories.SongRepository;
@@ -25,7 +25,7 @@ public class UserRecommendationService {
         this.songRepository = songRepository;
     }
 
-    public List<SongDTO> getRecommendedSongsForUser(CustomUserDetails userDetails,
+    public List<SongDTO> getRecommendedSongsForUser(UserDetailsImpl userDetails,
                                                     int pageNumber,
                                                     int pageSize) {
         if (userDetails == null) {

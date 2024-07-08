@@ -2,13 +2,14 @@ package com.musicUpload.songTest;
 
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.services.UserRecommendationService;
 import com.musicUpload.exceptions.NotFoundException;
@@ -44,12 +45,14 @@ public class FindByIdTest {
     private SongCacheManager listenCountJob;
     @Mock
     private UserRecommendationService userRecommendationService;
+    @Mock
+    private MinioService minioService;
 
     private SongService songService;
     private Song song;
     private Long id;
     private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
-    private final CustomUserDetails userDetails = new CustomUserDetails(1L,
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "pwd",
             List.of(),
@@ -61,12 +64,13 @@ public class FindByIdTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         songService = new SongService(songRepository,
-                userRepository,
-                albumRepository,
-                imageFactory,
-                songFactory,
-                listenCountJob,
-                userRecommendationService);
+                                      userRepository,
+                                      albumRepository,
+                                      imageFactory,
+                                      songFactory,
+                                      listenCountJob,
+                                      userRecommendationService,
+                                      minioService);
         id = 1L;
         song = new Song(id,
                 "",

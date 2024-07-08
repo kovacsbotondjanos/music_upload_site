@@ -1,6 +1,6 @@
 package com.musicUpload.cronJobs;
 
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.UserSong;
 import com.musicUpload.dataHandler.repositories.SongRepository;
@@ -42,7 +42,7 @@ public class SongCacheManager {
         this.copyMap = new ConcurrentHashMap<>();
     }
 
-    public void addListenToSong(Long songId, CustomUserDetails userDetails) {
+    public void addListenToSong(Long songId, UserDetailsImpl userDetails) {
         new Thread(() -> {
             Long userId = userDetails == null ? null : userDetails.getId();
             songListensBuffer.merge(Pair.of(songId, userId), 1L, Long::sum);

@@ -2,13 +2,14 @@ package com.musicUpload.albumTest;
 
 import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 public class FindByIdTest {
-    CustomUserDetails userDetails = new CustomUserDetails(1L,
+    UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "pwd",
             List.of(),
@@ -45,6 +46,8 @@ public class FindByIdTest {
     private ImageFactory imageFactory;
     @Mock
     private EntityCacheManager<Album> albumEntityManager;
+    @Mock
+    private MinioService minioService;
     private AlbumService albumService;
     private Album album;
     private Long id;
@@ -54,10 +57,11 @@ public class FindByIdTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
-                userRepository,
-                songService,
-                imageFactory,
-                albumEntityManager);
+                                        userRepository,
+                                        songService,
+                                        imageFactory,
+                                        albumEntityManager,
+                                        minioService);
         id = 1L;
         album = new Album(id,
                 "",

@@ -1,13 +1,14 @@
 package com.musicUpload.songTest;
 
 import com.musicUpload.cronJobs.SongCacheManager;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.services.UserRecommendationService;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -27,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
 public class DeleteSongTest {
-    CustomUserDetails userDetails = new CustomUserDetails(1L,
+    UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "",
             List.of(),
@@ -48,6 +49,9 @@ public class DeleteSongTest {
     private SongCacheManager listenCountJob;
     @Mock
     private UserRecommendationService userRecommendationService;
+    @Mock
+    private MinioService minioService;
+
     private SongService songService;
     private List<Song> songs;
     private final ProtectionType protectionType = ProtectionType.PUBLIC;
@@ -56,12 +60,13 @@ public class DeleteSongTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         songService = new SongService(songRepository,
-                userRepository,
-                albumRepository,
-                imageFactory,
-                songFactory,
-                listenCountJob,
-                userRecommendationService);
+                                      userRepository,
+                                      albumRepository,
+                                      imageFactory,
+                                      songFactory,
+                                      listenCountJob,
+                                      userRecommendationService,
+                                      minioService);
         songs = List.of(
                 new Song(1L,
                         "",

@@ -2,7 +2,7 @@ package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.AlbumCreateAndPatchDTO;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.services.AlbumService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,25 +24,25 @@ public class AlbumController {
     }
 
     @GetMapping
-    public List<AlbumDTO> getAlbums(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public List<AlbumDTO> getAlbums(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return albumService.getAlbums(userDetails);
     }
 
     @GetMapping("/{id}")
-    public AlbumDTO getAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public AlbumDTO getAlbum(@AuthenticationPrincipal UserDetailsImpl userDetails,
                              @PathVariable Long id) {
         return albumService.findById(id, userDetails);
     }
 
     @GetMapping("/search/{name}")
-    public List<AlbumDTO> getAlbumByNameLike(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public List<AlbumDTO> getAlbumByNameLike(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                              @PathVariable String name) {
         return albumService.findByNameLike(userDetails, name);
     }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public void createAlbum(@AuthenticationPrincipal UserDetailsImpl userDetails,
                             @ModelAttribute AlbumCreateAndPatchDTO andCreateDTO,
                             @RequestParam(name = "image", required = false) MultipartFile image) {
         albumService.saveAlbum(
@@ -54,7 +54,7 @@ public class AlbumController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public AlbumDTO patchAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public AlbumDTO patchAlbum(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                @PathVariable Long id,
                                @ModelAttribute AlbumCreateAndPatchDTO albumPatchDTO,
                                @RequestParam(name = "image", required = false) MultipartFile image) {
@@ -70,7 +70,7 @@ public class AlbumController {
 
     @PatchMapping("/add-songs/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public AlbumDTO addSongs(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public AlbumDTO addSongs(@AuthenticationPrincipal UserDetailsImpl userDetails,
                              @PathVariable Long id,
                              @RequestParam(name = "song_id", required = false) List<Long> songIds) {
         return AlbumDTO.of(albumService.addSongs(
@@ -82,7 +82,7 @@ public class AlbumController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public void deleteAlbum(@AuthenticationPrincipal UserDetailsImpl userDetails,
                             @PathVariable Long id) {
         albumService.deleteAlbum(userDetails, id);
     }

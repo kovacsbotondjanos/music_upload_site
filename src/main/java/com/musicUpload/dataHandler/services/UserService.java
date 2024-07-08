@@ -1,7 +1,7 @@
 package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.dataHandler.DTOs.UserDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
@@ -18,8 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,14 +27,17 @@ public class UserService implements UserDetailsService {
     private static final Logger logger = LogManager.getLogger(UserDetailsService.class);
     private final UserRepository userRepository;
     private final ImageFactory imageFactory;
+    private final MinioService minioService;
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Autowired
     public UserService(UserRepository userRepository,
-                       ImageFactory imageFactory) {
+                       ImageFactory imageFactory,
+                       MinioService minioService) {
         this.userRepository = userRepository;
         this.imageFactory = imageFactory;
+        this.minioService = minioService;
     }
 
     @Override
@@ -44,7 +45,7 @@ public class UserService implements UserDetailsService {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
             var userObj = user.get();
-            return new CustomUserDetails(
+            return new UserDetailsImpl(
                     userObj.getId(),
                     userObj.getUsername(),
                     userObj.getPassword(),
@@ -108,7 +109,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id);
     }
 
-    public UserDTO findCurrUser(CustomUserDetails userDetails) {
+    public UserDTO findCurrUser(UserDetailsImpl userDetails) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -118,7 +119,7 @@ public class UserService implements UserDetailsService {
     }
 
     //TODO: pagination
-    public List<UserDTO> findByNameLike(CustomUserDetails userDetails, String name) {
+    public List<UserDTO> findByNameLike(UserDetailsImpl userDetails, String name) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -132,7 +133,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public void patchUser(CustomUserDetails userDetails,
+    public void patchUser(UserDetailsImpl userDetails,
                           String username,
                           String email,
                           String password,
@@ -177,21 +178,14 @@ public class UserService implements UserDetailsService {
             if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new UnprocessableException();
             }
-
-            try {
-                imageFactory.deleteFile(user.getProfilePicture());
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + "//" + hashedFileName));
-                user.setProfilePicture(hashedFileName);
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-            }
+            minioService.deleteImage(user.getProfilePicture());
+            user.setProfilePicture(minioService.uploadImage(image));
         }
 
         userRepository.save(user);
     }
 
-    public void followUser(CustomUserDetails userDetails,
+    public void followUser(UserDetailsImpl userDetails,
                            Long userId) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
@@ -218,12 +212,13 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public void deleteUser(CustomUserDetails userDetails) {
+    public void deleteUser(UserDetailsImpl userDetails) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
+        minioService.deleteImage(user.getProfilePicture());
         userRepository.delete(user);
     }
 

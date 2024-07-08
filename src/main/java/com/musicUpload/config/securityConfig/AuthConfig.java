@@ -36,8 +36,7 @@ public class AuthConfig {
                                     "api/v1/users/**",
                                     "api/v1/albums/**",
                                     "api/v1/songs/**",
-                                    "/images/**",
-                                    "music/**",
+                                    "api/v1/files/**",
                                     "/login")
                             .permitAll();
                     registry.anyRequest().authenticated();

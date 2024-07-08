@@ -2,7 +2,7 @@ package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -18,27 +18,18 @@ import com.musicUpload.util.MusicFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class SongService {
     private static final Logger logger = LogManager.getLogger(SongService.class);
-    private final String musicPathName = "music" + FileSystems.getDefault().getSeparator();
     private final SongRepository songRepository;
     private final UserRepository userRepository;
     private final AlbumRepository albumRepository;
@@ -46,6 +37,7 @@ public class SongService {
     private final MusicFactory musicFactory;
     private final SongCacheManager songCacheManager;
     private final UserRecommendationService userRecommendationService;
+    private final MinioService minioService;
 
     @Autowired
     public SongService(SongRepository songRepository,
@@ -54,7 +46,8 @@ public class SongService {
                        ImageFactory imageFactory,
                        MusicFactory songFactory,
                        SongCacheManager songCacheManager,
-                       UserRecommendationService userRecommendationService) {
+                       UserRecommendationService userRecommendationService,
+                       MinioService minioService) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
@@ -63,6 +56,7 @@ public class SongService {
         //TODO: create a wrapper class to handle lookup in the cache and db too
         this.songCacheManager = songCacheManager;
         this.userRecommendationService = userRecommendationService;
+        this.minioService = minioService;
     }
 
     public Song addSong(Song song) {
@@ -71,7 +65,7 @@ public class SongService {
         return s;
     }
 
-    public Song addSong(CustomUserDetails userDetails,
+    public Song addSong(UserDetailsImpl userDetails,
                         String protectionType,
                         String name,
                         MultipartFile image,
@@ -95,34 +89,20 @@ public class SongService {
         song.setName(name);
 
         if (image != null && !image.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
-                    throw new UnprocessableException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                imageFactory.deleteFile(song.getImage());
-                song.setImage(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new UnprocessableException();
             }
+            song.setImage(minioService.uploadImage(image));
         } else {
             String img = imageFactory.getRandomImage();
             song.setImage(img);
         }
 
         if (!songFile.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(songFile.getContentType()).contains("audio")) {
-                    throw new UnprocessableException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".mp3";
-                songFile.transferTo(new File(musicFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                musicFactory.deleteFile(song.getNameHashed());
-                song.setNameHashed(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(songFile.getContentType()).contains("audio")) {
                 throw new UnprocessableException();
             }
+            song.setNameHashed(minioService.uploadSong(songFile));
         }
 
         Song s = addSong(song);
@@ -130,7 +110,7 @@ public class SongService {
         return s;
     }
 
-    public List<SongDTO> getSongs(CustomUserDetails userDetails) {
+    public List<SongDTO> getSongs(UserDetailsImpl userDetails) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -147,7 +127,7 @@ public class SongService {
         return s;
     }
 
-    public SongDTO findById(CustomUserDetails userDetails,
+    public SongDTO findById(UserDetailsImpl userDetails,
                             Long id) {
         Song song = findById(id)
                 .orElseThrow(NotFoundException::new);
@@ -159,7 +139,7 @@ public class SongService {
         throw new UnauthenticatedException();
     }
 
-    public List<SongDTO> getRecommendedSongs(CustomUserDetails userDetails,
+    public List<SongDTO> getRecommendedSongs(UserDetailsImpl userDetails,
                                              int pageNumber,
                                              int pageSize) {
         Pageable page = PageRequest.of(pageNumber, pageSize);
@@ -173,7 +153,7 @@ public class SongService {
                 .toList();
     }
 
-    public List<SongDTO> findByNameLike(CustomUserDetails userDetails,
+    public List<SongDTO> findByNameLike(UserDetailsImpl userDetails,
                                         String name,
                                         int pageNumber,
                                         int pageSize) {
@@ -196,32 +176,20 @@ public class SongService {
                 .toList();
     }
 
-    public Resource getSongInResourceFormatByNameHashed(CustomUserDetails userDetails, String nameHashed) {
-        Path path = Paths.get(musicPathName);
+    public String getSong(UserDetailsImpl userDetails, String nameHashed) {
         Song song = songRepository.findByNameHashed(nameHashed)
                 .orElseThrow(NotFoundException::new);
 
         if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
-            try {
-                Path imagePath = path.resolve(song.getNameHashed());
-                Resource resource = new UrlResource(imagePath.toUri());
-
-                if (resource.exists()) {
-                    songCacheManager.addListenToSong(song.getId(), userDetails);
-                    songCacheManager.addSong(song);
-                    return resource;
-                } else {
-                    throw new NotFoundException();
-                }
-            } catch (IOException e) {
-                throw new NotFoundException();
-            }
+            songCacheManager.addListenToSong(song.getId(), userDetails);
+            songCacheManager.addSong(song);
+            return minioService.getSong(nameHashed);
         }
         throw new NotFoundException();
     }
 
-    public void patchSong(CustomUserDetails userDetails,
+    public void patchSong(UserDetailsImpl userDetails,
                           Long id,
                           String protectionType,
                           String name,
@@ -242,17 +210,11 @@ public class SongService {
         }
 
         if (image != null && !image.isEmpty()) {
-            try {
-                if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
-                    throw new WrongFormatException();
-                }
-                String hashedFileName = UUID.randomUUID() + ".jpg";
-                image.transferTo(new File(imageFactory.getDirName() + FileSystems.getDefault().getSeparator() + hashedFileName));
-                imageFactory.deleteFile(song.getImage());
-                song.setImage(hashedFileName);
-            } catch (IOException ioException) {
+            if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
                 throw new WrongFormatException();
             }
+            minioService.deleteImage(song.getImage());
+            song.setImage(minioService.uploadImage(image));
         }
         synchronized (songCacheManager.getCopyMap()) {
             logger.info("lock for song with id {} starts, because update", song.getId());
@@ -261,7 +223,7 @@ public class SongService {
         }
     }
 
-    public Song deleteSong(CustomUserDetails userDetails,
+    public Song deleteSong(UserDetailsImpl userDetails,
                            Long id) {
         if (userDetails == null) {
             throw new UnauthenticatedException();
@@ -284,8 +246,8 @@ public class SongService {
         });
 
         songRepository.delete(song);
-        imageFactory.deleteFile(song.getImage());
-        musicFactory.deleteFile(song.getNameHashed());
+        minioService.deleteImage(song.getImage());
+        minioService.deleteSong(song.getNameHashed());
 
         synchronized (songCacheManager.getCopyMap()) {
             logger.info("lock for song with id {} starts, because deletion", song.getId());

@@ -2,7 +2,7 @@ package com.musicUpload.dataHandler.models.implementations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
@@ -67,7 +67,7 @@ public class User implements CustomEntityInterface {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    public User(CustomUserDetails userDetails) {
+    public User(UserDetailsImpl userDetails) {
         this.id = userDetails.getId();
         this.username = userDetails.getUsername();
         this.albums = userDetails.getAlbums();

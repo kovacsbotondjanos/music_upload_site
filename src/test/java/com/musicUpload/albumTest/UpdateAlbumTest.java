@@ -1,13 +1,14 @@
 package com.musicUpload.albumTest;
 
 import com.musicUpload.cronJobs.EntityCacheManager;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.*;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
@@ -36,13 +37,15 @@ public class UpdateAlbumTest {
     private ImageFactory imageFactory;
     @Mock
     private EntityCacheManager<Album> albumEntityManager;
+    @Mock
+    private MinioService minioService;
 
     private AlbumService albumService;
     private Album album;
     private Long id;
     private final ProtectionType publicProtectionType = ProtectionType.PUBLIC;
     private final ProtectionType privateProtectionType = ProtectionType.PRIVATE;
-    private final CustomUserDetails userDetails = new CustomUserDetails(1L,
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "pwd",
             List.of(),
@@ -65,10 +68,11 @@ public class UpdateAlbumTest {
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         albumService = new AlbumService(albumRepository,
-                userRepository,
-                songService,
-                imageFactory,
-                albumEntityManager);
+                                        userRepository,
+                                        songService,
+                                        imageFactory,
+                                        albumEntityManager,
+                                        minioService);
         id = 1L;
         album = new Album(id,
                 "",

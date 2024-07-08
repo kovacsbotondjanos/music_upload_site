@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 
 @Service
@@ -28,7 +27,6 @@ public class SongFactory {
         this.imageFactory = imageFactory;
         this.musicFactory = musicFactory;
         this.songService = songService;
-        musicFactory.createMusicDir();
     }
 
     public List<Song> generateSongs(int number, List<User> users) {
@@ -51,7 +49,7 @@ public class SongFactory {
         String name = faker.book().title();
 
         song.setName(name);
-        song.setNameHashed(musicFactory.createSong());
+        song.setNameHashed(musicFactory.generateRandomAudioData());
         song.setImage(imageFactory.getRandomImage());
         song.setProtectionType(ProtectionType.getRandomPrivilege());
         song.setListenCount(faker.number().numberBetween(0L, 1_000_000L));
@@ -62,7 +60,6 @@ public class SongFactory {
             song.setUser(user);
             user.getSongs().add(song);
         }
-
 
         return song;
     }

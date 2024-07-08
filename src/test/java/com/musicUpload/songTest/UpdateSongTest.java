@@ -1,13 +1,14 @@
 package com.musicUpload.songTest;
 
 import com.musicUpload.cronJobs.SongCacheManager;
-import com.musicUpload.dataHandler.details.CustomUserDetails;
+import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.services.UserRecommendationService;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -21,11 +22,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.given;
 
 public class UpdateSongTest {
     @Mock
@@ -42,22 +41,25 @@ public class UpdateSongTest {
     private SongCacheManager listenCountJob;
     @Mock
     private UserRecommendationService userRecommendationService;
+    @Mock
+    private MinioService minioService;
 
     private SongService songService;
     private Song song;
     private Long id;
-    private CustomUserDetails userDetails;
+    private UserDetailsImpl userDetails;
 
     @BeforeEach
     void onSetUp() {
         MockitoAnnotations.initMocks(this);
         songService = new SongService(songRepository,
-                userRepository,
-                albumRepository,
-                imageFactory,
-                songFactory,
-                listenCountJob,
-                userRecommendationService);
+                                      userRepository,
+                                      albumRepository,
+                                      imageFactory,
+                                      songFactory,
+                                      listenCountJob,
+                                      userRecommendationService,
+                                      minioService);
         id = 1L;
         song = new Song(id,
                 "",
@@ -69,7 +71,7 @@ public class UpdateSongTest {
                 new ArrayList<>(),
                 new Date(),
                 new Date());
-        userDetails = new CustomUserDetails(
+        userDetails = new UserDetailsImpl(
                 1L,
                 "",
                 "",

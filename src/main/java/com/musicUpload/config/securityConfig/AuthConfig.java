@@ -21,7 +21,6 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
-@EnableJdbcHttpSession
 public class AuthConfig {
 
     @Autowired

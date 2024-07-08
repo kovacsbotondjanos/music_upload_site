@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.List;
 @ToString(exclude = {"followers", "followedUsers", "albums", "songs"})
 @AllArgsConstructor
 @NoArgsConstructor
-public class User implements CustomEntityInterface {
+public class User implements CustomEntityInterface, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

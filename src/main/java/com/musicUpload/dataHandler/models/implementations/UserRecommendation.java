@@ -21,7 +21,7 @@ public class UserRecommendation implements CustomEntityInterface {
 
     private Long userId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     private Song song;
 
     private int recommendationPosition;
@@ -34,6 +34,12 @@ public class UserRecommendation implements CustomEntityInterface {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    public UserRecommendation(Long userId, Song song, int recommendationPosition) {
+        this.userId = userId;
+        this.song = song;
+        this.recommendationPosition = recommendationPosition;
+    }
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = new Date();
@@ -42,11 +48,5 @@ public class UserRecommendation implements CustomEntityInterface {
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
-    }
-
-    public UserRecommendation(Long userId, Song song, int recommendationPosition) {
-        this.userId = userId;
-        this.song = song;
-        this.recommendationPosition = recommendationPosition;
     }
 }

@@ -1,6 +1,5 @@
 package com.musicUpload.dataHandler.models.implementations;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
@@ -31,33 +30,28 @@ public class User implements CustomEntityInterface, Serializable {
     @Expose
     private String email;
     @Expose
-    @JsonIgnore
     private String password;
     @Expose
     private String username;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Album> albums = new ArrayList<>();
+    transient private List<Album> albums = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Song> songs = new ArrayList<>();
+    transient private List<Song> songs = new ArrayList<>();
 
     @Enumerated(EnumType.ORDINAL)
     private Privilege privilege;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_following",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "followed_user_id")
     )
-    @JsonIgnore
     private List<User> followedUsers = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "followedUsers")
-    @JsonIgnore
+    @ManyToMany(mappedBy = "followedUsers", fetch = FetchType.EAGER)
     private List<User> followers = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)

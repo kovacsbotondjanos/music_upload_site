@@ -2,6 +2,7 @@ package com.musicUpload.dataHandler.repositories;
 
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +26,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     List<Song> findByNameLike(@Param("name") String name);
 
     Optional<Song> findByNameHashed(String name);
+
+    List<Song> findByUser(User user);
 }

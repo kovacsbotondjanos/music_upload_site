@@ -1,6 +1,5 @@
 package com.musicUpload.dataHandler.details;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import lombok.Data;
@@ -14,21 +13,25 @@ import java.util.List;
 public class UserDetailsImpl implements UserDetails {
     private final Long id;
     private final String username;
-    @JsonIgnore
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
     private final String profilePicture;
-    @JsonIgnore
     private List<Song> songs;
-    @JsonIgnore
     private List<Album> albums;
     private boolean accountNonLocked;
     private boolean accountNonExpired;
     private boolean credentialsNonExpired;
     private boolean enabled;
 
-    public UserDetailsImpl(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities,
-                           String profilePicture, List<Song> songs, List<Album> albums) {
+    public UserDetailsImpl(Long id,
+                           String username,
+                           String password,
+                           Collection<? extends GrantedAuthority> authorities,
+                           String profilePicture,
+                           List<Song> songs,
+                           List<Album> albums) {
+        System.out.println("songs" + songs);
+        System.out.println(albums);
         this.id = id;
         this.username = username;
         this.password = password;
@@ -56,5 +59,13 @@ public class UserDetailsImpl implements UserDetails {
     public List<Album> addAlbum(Album album) {
         albums.add(album);
         return albums;
+    }
+
+    public void removeSong(Song song) {
+        songs.remove(song);
+    }
+
+    public void removeAlbum(Album album) {
+        albums.remove(album);
     }
 }

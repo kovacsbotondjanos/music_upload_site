@@ -3,7 +3,10 @@ package com.musicUpload.userTest;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
+import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
+import com.musicUpload.dataHandler.repositories.AlbumRepository;
+import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.UserService;
@@ -30,6 +33,10 @@ public class UserServiceTest {
     private ImageFactory imageFactory;
     @Mock
     private MinioService minioService;
+    @Mock
+    private SongRepository songRepository;
+    @Mock
+    private AlbumRepository albumRepository;
 
     private UserService userService;
     private User user;
@@ -40,6 +47,8 @@ public class UserServiceTest {
         user = new User(null, null, null, null,
                 "user", List.of(), List.of(), Privilege.USER, List.of(), List.of(), null, null);
         userService = new UserService(userRepository,
+                                      songRepository,
+                                      albumRepository,
                                       imageFactory,
                                       minioService);
     }

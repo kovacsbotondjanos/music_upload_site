@@ -27,26 +27,28 @@ public class AlbumService {
     private final UserRepository userRepository;
     private final SongService songService;
     private final ImageFactory imageFactory;
-    private final EntityCacheManager<Album> albumCacheManager;
+//    private final EntityCacheManager<Album> albumCacheManager;
     private final MinioService minioService;
+    private final SessionService sessionService;
 
     @Autowired
     public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
                         SongService songService,
                         ImageFactory imageFactory,
                         EntityCacheManager<Album> albumCacheManager,
-                        MinioService minioService) {
+                        MinioService minioService, SessionService sessionService) {
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
         this.songService = songService;
         this.imageFactory = imageFactory;
-        this.albumCacheManager = albumCacheManager;
+//        this.albumCacheManager = albumCacheManager;
         this.minioService = minioService;
+        this.sessionService = sessionService;
     }
 
     public Album saveAlbum(Album album) {
         Album a = albumRepository.save(album);
-        albumCacheManager.addEntity(a);
+//        albumCacheManager.addEntity(a);
         return a;
     }
 
@@ -84,7 +86,8 @@ public class AlbumService {
         }
 
         Album a = saveAlbum(album);
-        userDetails.addAlbum(a);
+//        userDetails.addAlbum(a);
+        sessionService.addAlbum(a);
         return a;
     }
 
@@ -96,18 +99,18 @@ public class AlbumService {
     }
 
     private Optional<Album> findById(Long id) {
-        Optional<Album> a = albumCacheManager.getEntity(id);
-        if (a.isEmpty()) {
+//        Optional<Album> a = albumCacheManager.getEntity(id);
+//        if (a.isEmpty()) {
             //we only use this once, and if the opt is not empty we put it in the entityManager
-            a = albumRepository.findById(id);
-        }
-        return a;
+            return albumRepository.findById(id);
+//        }
+//        return a;
     }
 
     public AlbumDTO findById(Long id, UserDetailsImpl userDetails) {
         Album album = findById(id)
                 .orElseThrow(NotFoundException::new);
-        albumCacheManager.addEntity(album);
+//        albumCacheManager.addEntity(album);
         if (!album.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && album.getUser().getId().equals(userDetails.getId())) {
             return AlbumDTO.of(album);
@@ -121,7 +124,7 @@ public class AlbumService {
 
         if (userDetails == null) {
             return albums.stream()
-                    .peek(albumCacheManager::addEntity)
+//                    .peek(albumCacheManager::addEntity)
                     .filter(a -> a.getProtectionType().equals(ProtectionType.PUBLIC))
                     .map(AlbumDTO::of)
                     .limit(10)
@@ -129,7 +132,7 @@ public class AlbumService {
         }
 
         return albums.stream()
-                .peek(albumCacheManager::addEntity)
+//                .peek(albumCacheManager::addEntity)
                 .filter(a -> a.getProtectionType().equals(ProtectionType.PUBLIC)
                         || a.getUser().getId().equals(userDetails.getId()))
                 .map(AlbumDTO::of)
@@ -177,10 +180,10 @@ public class AlbumService {
             });
         }
 
-        Album a = albumRepository.save(album);
-        userDetails.addAlbum(a);
-        albumCacheManager.addEntity(a);
-        return a;
+        return albumRepository.save(album);
+//        userDetails.addAlbum(a);
+//        albumCacheManager.addEntity(a);
+//        return a;
     }
 
     public Album addSongs(UserDetailsImpl userDetails,
@@ -192,7 +195,7 @@ public class AlbumService {
 
         Album album = userDetails.getAlbums().stream().filter(a -> a.getId().equals(id)).findAny()
                 .orElseThrow(UnauthenticatedException::new);
-        albumCacheManager.addEntity(album);
+//        albumCacheManager.addEntity(album);
 
         if (songIds != null) {
             songIds.forEach(songId -> {
@@ -217,18 +220,24 @@ public class AlbumService {
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
 
-        Album album = user.getAlbums().stream()
+        Album album = userDetails.getAlbums()
+                .stream()
                 .filter(a -> a.getId().equals(id)).findAny()
                 .orElseThrow(UnauthenticatedException::new);
+
+//        Album album = user.getAlbums().stream()
+//                .filter(a -> a.getId().equals(id)).findAny()
+//                .orElseThrow(UnauthenticatedException::new);
 
         user.getAlbums().remove(album);
         userRepository.save(user);
 
         minioService.deleteImage(album.getImage());
-
+        sessionService.deleteAlbum(album);
         albumRepository.delete(album);
-        userDetails.getAlbums().remove(album);
-        albumCacheManager.removeEntity(album.getId());
+
+//        userDetails.getAlbums().remove(album);
+//        albumCacheManager.removeEntity(album.getId());
 
         return album;
     }

@@ -30,8 +30,6 @@ public class UserDetailsImpl implements UserDetails {
                            String profilePicture,
                            List<Song> songs,
                            List<Album> albums) {
-        System.out.println("songs" + songs);
-        System.out.println(albums);
         this.id = id;
         this.username = username;
         this.password = password;

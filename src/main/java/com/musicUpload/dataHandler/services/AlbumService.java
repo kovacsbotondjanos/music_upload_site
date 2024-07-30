@@ -233,8 +233,8 @@ public class AlbumService {
         userRepository.save(user);
 
         minioService.deleteImage(album.getImage());
-        sessionService.deleteAlbum(album);
         albumRepository.delete(album);
+        sessionService.deleteAlbum(album);
 
 //        userDetails.getAlbums().remove(album);
 //        albumCacheManager.removeEntity(album.getId());

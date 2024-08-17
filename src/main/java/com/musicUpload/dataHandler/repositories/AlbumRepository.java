@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AlbumRepository extends JpaRepository<Album, Long> {
     @Query(value = "SELECT * " +
@@ -21,4 +22,6 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     List<Album> findByNameLike(@Param("name") String name);
 
     List<Album> findByUser(User user);
+
+    Optional<Album> findByUserAndId(User user, Long id);
 }

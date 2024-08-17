@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserCreateAndPatchDTO {
-    private String username;
-    private String email;
-    private String password;
-    private String oldPassword;
+public class SongDAO {
+    private String protectionType;
+    private String name;
 }

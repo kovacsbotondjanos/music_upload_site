@@ -34,37 +34,26 @@ public class SongService {
     private final UserRepository userRepository;
     private final AlbumRepository albumRepository;
     private final ImageFactory imageFactory;
-    private final MusicFactory musicFactory;
-//    private final SongCacheManager songCacheManager;
     private final UserRecommendationService userRecommendationService;
     private final MinioService minioService;
-    private final SessionService sessionService;
 
     @Autowired
     public SongService(SongRepository songRepository,
                        UserRepository userRepository,
                        AlbumRepository albumRepository,
                        ImageFactory imageFactory,
-                       MusicFactory songFactory,
-                       SongCacheManager songCacheManager,
                        UserRecommendationService userRecommendationService,
-                       MinioService minioService, SessionService sessionService) {
+                       MinioService minioService) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
         this.imageFactory = imageFactory;
-        this.musicFactory = songFactory;
-        //TODO: create a wrapper class to handle lookup in the cache and db too
-//        this.songCacheManager = songCacheManager;
         this.userRecommendationService = userRecommendationService;
         this.minioService = minioService;
-        this.sessionService = sessionService;
     }
 
     public Song addSong(Song song) {
-        Song s = songRepository.save(song);
-//        songCacheManager.addSong(s);
-        return s;
+        return songRepository.save(song);
     }
 
     public Song addSong(UserDetailsImpl userDetails,
@@ -80,6 +69,8 @@ public class SongService {
             throw new WrongFormatException();
         }
 
+        //we might assume that a user is authenticated and authorized at this point,
+        //I'll might change this in the future, it might be overkill
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(UnauthenticatedException::new);
 
@@ -107,10 +98,7 @@ public class SongService {
             song.setNameHashed(minioService.uploadSong(songFile));
         }
 
-        Song s = addSong(song);
-//        userDetails.addSong(s);
-        sessionService.addSong(s);
-        return s;
+        return addSong(song);
     }
 
     public List<SongDTO> getSongs(UserDetailsImpl userDetails) {
@@ -118,23 +106,20 @@ public class SongService {
             throw new UnauthenticatedException();
         }
 
-        return userDetails.getSongs().stream().map(SongDTO::new).toList();
+        User u = userRepository.findById(userDetails.getId())
+                .orElseThrow(UnauthenticatedException::new);
+
+        return songRepository.findByUser(u).stream().map(SongDTO::new).toList();
     }
 
     public Optional<Song> findById(Long id) {
-//        Optional<Song> s = songCacheManager.getSong(id);
-//        if (s.isEmpty()) {
-            //we only use this once, and if the opt is not empty we put it in the entityManager
-            return songRepository.findById(id);
-//        }
-//        return s;
+        return songRepository.findById(id);
     }
 
     public SongDTO findById(UserDetailsImpl userDetails,
                             Long id) {
         Song song = findById(id)
                 .orElseThrow(NotFoundException::new);
-//        songCacheManager.addSong(song);
         if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
             return SongDTO.of(song);
@@ -151,7 +136,6 @@ public class SongService {
             return userRecommendationService.getRecommendedSongsForUser(userDetails, pageNumber, pageSize);
         }
         return songRepository.findByProtectionTypeOrderByListenCountDesc(ProtectionType.PUBLIC, page).stream()
-//                .peek(songCacheManager::addSong)
                 .map(SongDTO::new)
                 .toList();
     }
@@ -165,13 +149,11 @@ public class SongService {
         List<Song> songs = songRepository.findByNameLike(name);
         if (userDetails == null) {
             return songs.stream()
-//                    .peek(songCacheManager::addSong)
                     .filter(s -> s.getProtectionType().equals(ProtectionType.PUBLIC)).limit(10)
                     .map(SongDTO::new)
                     .toList();
         }
         return songs.stream()
-//                .peek(songCacheManager::addSong)
                 .filter(s -> s.getProtectionType().equals(ProtectionType.PUBLIC)
                         || s.getUser().getId().equals(userDetails.getId()))
                 .limit(10)
@@ -185,8 +167,6 @@ public class SongService {
 
         if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
-//            songCacheManager.addListenToSong(song.getId(), userDetails);
-//            songCacheManager.addSong(song);
             return minioService.getSong(nameHashed);
         }
         throw new NotFoundException();
@@ -201,7 +181,10 @@ public class SongService {
             throw new UnauthenticatedException();
         }
 
-        Song song = userDetails.getSongs().stream().filter(s -> s.getId().equals(id)).findAny()
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(UnauthenticatedException::new);
+
+        Song song = songRepository.findByUserAndId(user, id)
                 .orElseThrow(UnauthenticatedException::new);
 
         if (protectionType != null) {
@@ -219,11 +202,6 @@ public class SongService {
             minioService.deleteImage(song.getImage());
             song.setImage(minioService.uploadImage(image));
         }
-//        synchronized (songCacheManager.getCopyMap()) {
-//            logger.info("lock for song with id {} starts, because update", song.getId());
-//            songCacheManager.addSong(songRepository.save(song));
-//            logger.info("lock for song with id {} ends, because update", song.getId());
-//        }
     }
 
     public Song deleteSong(UserDetailsImpl userDetails,
@@ -248,17 +226,9 @@ public class SongService {
             albumRepository.save(a);
         });
 
-        sessionService.deleteSong(song);
         songRepository.delete(song);
         minioService.deleteImage(song.getImage());
         minioService.deleteSong(song.getNameHashed());
-
-//        synchronized (songCacheManager.getCopyMap()) {
-//            logger.info("lock for song with id {} starts, because deletion", song.getId());
-//            userDetails.getSongs().remove(song);
-//            songCacheManager.removeSong(song.getId());
-//            logger.info("lock for song with id {} ends, because deletion", song.getId());
-//        }
 
         return song;
     }

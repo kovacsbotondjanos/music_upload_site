@@ -28,4 +28,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     Optional<Song> findByNameHashed(String name);
 
     List<Song> findByUser(User user);
+
+    Optional<Song> findByUserAndId(User user, Long id);
 }

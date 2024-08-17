@@ -1,6 +1,6 @@
 package com.musicUpload.controllers;
 
-import com.musicUpload.dataHandler.DTOs.AlbumCreateAndPatchDTO;
+import com.musicUpload.dataHandler.DTOs.AlbumDAO;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.services.AlbumService;
@@ -43,7 +43,7 @@ public class AlbumController {
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createAlbum(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                            @ModelAttribute AlbumCreateAndPatchDTO andCreateDTO,
+                            @ModelAttribute AlbumDAO andCreateDTO,
                             @RequestParam(name = "image", required = false) MultipartFile image) {
         albumService.saveAlbum(
                 userDetails,
@@ -56,7 +56,7 @@ public class AlbumController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public AlbumDTO patchAlbum(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                @PathVariable Long id,
-                               @ModelAttribute AlbumCreateAndPatchDTO albumPatchDTO,
+                               @ModelAttribute AlbumDAO albumPatchDTO,
                                @RequestParam(name = "image", required = false) MultipartFile image) {
         return AlbumDTO.of(albumService.patchAlbum(
                 userDetails,

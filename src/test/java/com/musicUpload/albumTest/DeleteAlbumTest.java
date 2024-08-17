@@ -45,9 +45,7 @@ public class DeleteAlbumTest {
             "user1",
             "pwd",
             List.of(),
-            "",
-            List.of(),
-            List.of());
+            "");
     private final ProtectionType protectionType = ProtectionType.PUBLIC;
 
     @BeforeEach
@@ -57,7 +55,6 @@ public class DeleteAlbumTest {
                                         userRepository,
                                         songService,
                                         imageFactory,
-                                        albumEntityManager,
                                         minioService);
         albums = List.of(
                 new Album(1L,
@@ -95,9 +92,12 @@ public class DeleteAlbumTest {
     @Test
     void canDeleteOtherUsersAlbum() {
         //Given
-        userDetails.setAlbums(List.of(albums.get(0)));
+        User u = new User(userDetails);
         given(userRepository.findById(1L))
-                .willReturn(Optional.of(new User(userDetails)));
+                .willReturn(Optional.of(u));
+        given(albumRepository.findByUserAndId(u, 2L))
+                .willReturn(Optional.empty());
+
         //Then
         assertThrows(UnauthenticatedException.class,
                 () -> albumService.deleteAlbum(userDetails, 2L));
@@ -106,12 +106,12 @@ public class DeleteAlbumTest {
     @Test
     void canDeleteOwnAlbumWithAuth() {
         //Given
-        userDetails.setAlbums(new ArrayList<>(List.of(albums.get(0))));
+//        userDetails.setAlbums(new ArrayList<>(List.of(albums.get(0))));
         given(userRepository.findById(1L))
                 .willReturn(Optional.of(new User(userDetails)));
         Album a = albumService.deleteAlbum(userDetails, 1L);
         //Then
         assertEquals(albums.get(0), a);
-        assertFalse(userDetails.getAlbums().contains(a));
+//        assertFalse(userDetails.getAlbums().contains(a));
     }
 }

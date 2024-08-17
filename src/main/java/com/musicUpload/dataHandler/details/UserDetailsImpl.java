@@ -16,8 +16,6 @@ public class UserDetailsImpl implements UserDetails {
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
     private final String profilePicture;
-    private List<Song> songs;
-    private List<Album> albums;
     private boolean accountNonLocked;
     private boolean accountNonExpired;
     private boolean credentialsNonExpired;
@@ -27,16 +25,12 @@ public class UserDetailsImpl implements UserDetails {
                            String username,
                            String password,
                            Collection<? extends GrantedAuthority> authorities,
-                           String profilePicture,
-                           List<Song> songs,
-                           List<Album> albums) {
+                           String profilePicture) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
         this.profilePicture = profilePicture;
-        this.songs = songs;
-        this.albums = albums;
         //TODO: implement these functionalities in the future
         this.accountNonLocked = true;
         this.accountNonExpired = true;
@@ -49,21 +43,4 @@ public class UserDetailsImpl implements UserDetails {
         return authorities.stream().toList();
     }
 
-    public List<Song> addSong(Song song) {
-        songs.add(song);
-        return songs;
-    }
-
-    public List<Album> addAlbum(Album album) {
-        albums.add(album);
-        return albums;
-    }
-
-    public void removeSong(Song song) {
-        songs.remove(song);
-    }
-
-    public void removeAlbum(Album album) {
-        albums.remove(album);
-    }
 }

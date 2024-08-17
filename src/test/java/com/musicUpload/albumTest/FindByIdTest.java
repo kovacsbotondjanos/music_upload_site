@@ -33,9 +33,7 @@ public class FindByIdTest {
             "user1",
             "pwd",
             List.of(),
-            "",
-            List.of(),
-            List.of());
+            "");
     @Mock
     private AlbumRepository albumRepository;
     @Mock
@@ -60,7 +58,6 @@ public class FindByIdTest {
                                         userRepository,
                                         songService,
                                         imageFactory,
-                                        albumEntityManager,
                                         minioService);
         id = 1L;
         album = new Album(id,
@@ -88,7 +85,7 @@ public class FindByIdTest {
     void canFindByIdNonExistingWithAuthAlbum() {
         //Given
         album.setId(2L);
-        userDetails.setAlbums(List.of(album));
+//        userDetails.setAlbums(List.of(album));
         given(albumRepository.findById(id))
                 .willReturn(Optional.empty());
         //Then
@@ -112,7 +109,7 @@ public class FindByIdTest {
         //Given
         album.setProtectionType(privateprotectionType);
         album.setUser(new User(userDetails));
-        userDetails.setAlbums(List.of(album));
+//        userDetails.setAlbums(List.of(album));
         given(albumRepository.findById(id))
                 .willReturn(Optional.of(album));
         //When

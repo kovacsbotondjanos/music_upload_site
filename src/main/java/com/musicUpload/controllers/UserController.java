@@ -1,6 +1,6 @@
 package com.musicUpload.controllers;
 
-import com.musicUpload.dataHandler.DTOs.UserCreateAndPatchDTO;
+import com.musicUpload.dataHandler.DTOs.UserDAO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -51,7 +51,7 @@ public class UserController {
     @PatchMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void patchUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                          @ModelAttribute UserCreateAndPatchDTO userPatch,
+                          @ModelAttribute UserDAO userPatch,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
         userService.patchUser(userDetails,
                 userPatch.getUsername(),

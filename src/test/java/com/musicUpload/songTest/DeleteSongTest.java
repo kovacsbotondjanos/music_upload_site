@@ -32,9 +32,7 @@ public class DeleteSongTest {
             "user1",
             "",
             List.of(),
-            "",
-            List.of(),
-            List.of());
+            "");
     @Mock
     private SongRepository songRepository;
     @Mock
@@ -63,8 +61,6 @@ public class DeleteSongTest {
                                       userRepository,
                                       albumRepository,
                                       imageFactory,
-                                      songFactory,
-                                      listenCountJob,
                                       userRecommendationService,
                                       minioService);
         songs = List.of(
@@ -109,7 +105,7 @@ public class DeleteSongTest {
     @Test
     void canDeleteOtherUserSongWithAuth() {
         //Given
-        userDetails.setSongs(List.of(songs.get(0)));
+//        userDetails.setSongs(List.of(songs.get(0)));
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(new User(userDetails)));
         //Then
@@ -120,12 +116,12 @@ public class DeleteSongTest {
     @Test
     void canDeleteOwnSongWithAuth() {
         //Given
-        userDetails.setSongs(new ArrayList<>(List.of(songs.get(0))));
+//        userDetails.setSongs(new ArrayList<>(List.of(songs.get(0))));
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(new User(userDetails)));
         //Then
         Song s = songService.deleteSong(userDetails, 1L);
         assertEquals(songs.get(0), s);
-        assertFalse(userDetails.getSongs().contains(s));
+//        assertFalse(userDetails.getSongs().contains(s));
     }
 }

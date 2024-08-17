@@ -40,7 +40,7 @@ public class User implements CustomEntityInterface, Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     transient private List<Song> songs = new ArrayList<>();
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private Privilege privilege;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -65,8 +65,6 @@ public class User implements CustomEntityInterface, Serializable {
     public User(UserDetailsImpl userDetails) {
         this.id = userDetails.getId();
         this.username = userDetails.getUsername();
-        this.albums = userDetails.getAlbums();
-        this.songs = userDetails.getSongs();
         this.profilePicture = userDetails.getProfilePicture();
         this.password = userDetails.getPassword();
     }

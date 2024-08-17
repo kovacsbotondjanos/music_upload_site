@@ -1,6 +1,5 @@
 package com.musicUpload.songTest;
 
-import com.musicUpload.cronJobs.SongCacheManager;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
@@ -13,9 +12,10 @@ import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.services.UserRecommendationService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
-import com.musicUpload.util.MusicFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -38,28 +38,19 @@ public class UpdateSongTest {
     @Mock
     private ImageFactory imageFactory;
     @Mock
-    private MusicFactory songFactory;
-    @Mock
-    private SongCacheManager listenCountJob;
-    @Mock
     private UserRecommendationService userRecommendationService;
     @Mock
     private MinioService minioService;
-
+    @InjectMocks
     private SongService songService;
     private Song song;
     private Long id;
     private UserDetailsImpl userDetails;
+    private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
-        MockitoAnnotations.initMocks(this);
-        songService = new SongService(songRepository,
-                                      userRepository,
-                                      albumRepository,
-                                      imageFactory,
-                                      userRecommendationService,
-                                      minioService);
+        autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
         song = new Song(id,
                 "",
@@ -77,6 +68,11 @@ public class UpdateSongTest {
                 "",
                 new ArrayList<>(),
                 "");
+    }
+
+    @AfterEach
+    void closeMocks() throws Exception {
+        autoCloseable.close();
     }
 
     @Test

@@ -12,8 +12,10 @@ import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -39,6 +41,7 @@ public class DeleteAlbumTest {
     @Mock
     private MinioService minioService;
 
+    @InjectMocks
     private AlbumService albumService;
     private List<Album> albums;
     private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
@@ -47,15 +50,11 @@ public class DeleteAlbumTest {
             List.of(),
             "");
     private final ProtectionType protectionType = ProtectionType.PUBLIC;
+    private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
-        MockitoAnnotations.initMocks(this);
-        albumService = new AlbumService(albumRepository,
-                                        userRepository,
-                                        songService,
-                                        imageFactory,
-                                        minioService);
+        autoCloseable = MockitoAnnotations.openMocks(this);
         albums = List.of(
                 new Album(1L,
                         "",
@@ -81,6 +80,11 @@ public class DeleteAlbumTest {
                         new ArrayList<>(),
                         new Date(),
                         new Date()));
+    }
+
+    @AfterEach
+    void closeMocks() throws Exception{
+        autoCloseable.close();
     }
 
     @Test

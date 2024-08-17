@@ -1,21 +1,18 @@
 package com.musicUpload.albumTest;
 
-import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
-import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
-import com.musicUpload.dataHandler.services.MinioService;
-import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
-import com.musicUpload.util.ImageFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -36,29 +33,17 @@ public class FindByIdTest {
             "");
     @Mock
     private AlbumRepository albumRepository;
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private SongService songService;
-    @Mock
-    private ImageFactory imageFactory;
-    @Mock
-    private EntityCacheManager<Album> albumEntityManager;
-    @Mock
-    private MinioService minioService;
+
+    @InjectMocks
     private AlbumService albumService;
     private Album album;
     private Long id;
     private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
+    private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
-        MockitoAnnotations.initMocks(this);
-        albumService = new AlbumService(albumRepository,
-                                        userRepository,
-                                        songService,
-                                        imageFactory,
-                                        minioService);
+        autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
         album = new Album(id,
                 "",
@@ -68,6 +53,11 @@ public class FindByIdTest {
                 new ArrayList<>(),
                 new Date(),
                 new Date());
+    }
+
+    @AfterEach
+    void closeMocks() throws Exception{
+        autoCloseable.close();
     }
 
     @Test
@@ -85,7 +75,6 @@ public class FindByIdTest {
     void canFindByIdNonExistingWithAuthAlbum() {
         //Given
         album.setId(2L);
-//        userDetails.setAlbums(List.of(album));
         given(albumRepository.findById(id))
                 .willReturn(Optional.empty());
         //Then
@@ -109,7 +98,6 @@ public class FindByIdTest {
         //Given
         album.setProtectionType(privateprotectionType);
         album.setUser(new User(userDetails));
-//        userDetails.setAlbums(List.of(album));
         given(albumRepository.findById(id))
                 .willReturn(Optional.of(album));
         //When

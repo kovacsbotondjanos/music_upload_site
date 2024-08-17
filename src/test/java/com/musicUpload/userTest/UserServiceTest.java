@@ -127,8 +127,6 @@ public class UserServiceTest {
                 null,
                 null,
                 null,
-                null,
-                null,
                 null
         );
         given(userRepository.findById(1L))

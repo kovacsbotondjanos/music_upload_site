@@ -21,7 +21,9 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.BDDMockito.given;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,8 +58,6 @@ public class UpdateSongTest {
                                       userRepository,
                                       albumRepository,
                                       imageFactory,
-                                      songFactory,
-                                      listenCountJob,
                                       userRecommendationService,
                                       minioService);
         id = 1L;
@@ -76,9 +76,7 @@ public class UpdateSongTest {
                 "",
                 "",
                 new ArrayList<>(),
-                "",
-                List.of(song),
-                new ArrayList<>());
+                "");
     }
 
     @Test
@@ -94,6 +92,11 @@ public class UpdateSongTest {
 
     @Test
     void updateOtherUsersSong() {
+        User u = new User(userDetails);
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(u));
+        given(songRepository.findByUserAndId(u, 2L))
+                .willReturn(Optional.empty());
         assertThrows(UnauthenticatedException.class,
                 () -> songService.patchSong(
                         userDetails,
@@ -105,6 +108,11 @@ public class UpdateSongTest {
 
     @Test
     void updateNameTest() {
+        User u = new User(userDetails);
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(u));
+        given(songRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(song));
         songService.patchSong(userDetails,
                 1L,
                 null,
@@ -116,6 +124,11 @@ public class UpdateSongTest {
 
     @Test
     void updateProtectionTest() {
+        User u = new User(userDetails);
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(u));
+        given(songRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(song));
         songService.patchSong(userDetails,
                 1L,
                 "PROTECTED",

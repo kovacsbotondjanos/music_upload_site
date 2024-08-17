@@ -42,10 +42,6 @@ public class DeleteSongTest {
     @Mock
     private ImageFactory imageFactory;
     @Mock
-    private MusicFactory songFactory;
-    @Mock
-    private SongCacheManager listenCountJob;
-    @Mock
     private UserRecommendationService userRecommendationService;
     @Mock
     private MinioService minioService;
@@ -105,9 +101,11 @@ public class DeleteSongTest {
     @Test
     void canDeleteOtherUserSongWithAuth() {
         //Given
-//        userDetails.setSongs(List.of(songs.get(0)));
+        User u = new User(userDetails);
         given(userRepository.findById(userDetails.getId()))
-                .willReturn(Optional.of(new User(userDetails)));
+                .willReturn(Optional.of(u));
+        given(songRepository.findByUserAndId(u, 2L))
+                .willReturn(Optional.empty());
         //Then
         assertThrows(UnauthenticatedException.class,
                 () -> songService.deleteSong(userDetails, 2L));
@@ -116,12 +114,14 @@ public class DeleteSongTest {
     @Test
     void canDeleteOwnSongWithAuth() {
         //Given
-//        userDetails.setSongs(new ArrayList<>(List.of(songs.get(0))));
+        User u = new User(userDetails);
         given(userRepository.findById(userDetails.getId()))
-                .willReturn(Optional.of(new User(userDetails)));
+                .willReturn(Optional.of(u));
+        given(songRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(songs.get(0)));
         //Then
         Song s = songService.deleteSong(userDetails, 1L);
         assertEquals(songs.get(0), s);
-//        assertFalse(userDetails.getSongs().contains(s));
+        assertFalse(u.getSongs().contains(s));
     }
 }

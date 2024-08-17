@@ -106,12 +106,14 @@ public class DeleteAlbumTest {
     @Test
     void canDeleteOwnAlbumWithAuth() {
         //Given
-//        userDetails.setAlbums(new ArrayList<>(List.of(albums.get(0))));
+        User u = new User(userDetails);
+        given(albumRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(albums.get(0)));
         given(userRepository.findById(1L))
-                .willReturn(Optional.of(new User(userDetails)));
+                .willReturn(Optional.of(u));
         Album a = albumService.deleteAlbum(userDetails, 1L);
         //Then
         assertEquals(albums.get(0), a);
-//        assertFalse(userDetails.getAlbums().contains(a));
+        assertFalse(u.getAlbums().contains(a));
     }
 }

@@ -213,9 +213,7 @@ public class SongService {
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
 
-        Song song = user.getSongs().stream()
-                .filter(s -> s.getId().equals(id))
-                .findAny()
+        Song song = songRepository.findByUserAndId(user, id)
                 .orElseThrow(UnauthenticatedException::new);
 
         user.getSongs().remove(song);

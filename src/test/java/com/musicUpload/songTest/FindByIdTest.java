@@ -56,9 +56,7 @@ public class FindByIdTest {
             "user1",
             "pwd",
             List.of(),
-            "",
-            List.of(),
-            List.of());
+            "");
 
     @BeforeEach
     void onSetUp() {
@@ -67,8 +65,6 @@ public class FindByIdTest {
                                       userRepository,
                                       albumRepository,
                                       imageFactory,
-                                      songFactory,
-                                      listenCountJob,
                                       userRecommendationService,
                                       minioService);
         id = 1L;
@@ -100,7 +96,7 @@ public class FindByIdTest {
         //Given
         song.setId(2L);
         song.setUser(new User(userDetails));
-        userDetails.setSongs(List.of(song));
+//        userDetails.setSongs(List.of(song));
         given(songRepository.findById(id))
                 .willReturn(Optional.empty());
         //Then
@@ -124,7 +120,7 @@ public class FindByIdTest {
         //Given
         song.setProtectionType(privateprotectionType);
         song.setUser(new User(userDetails));
-        userDetails.setSongs(List.of(song));
+//        userDetails.setSongs(List.of(song));
         given(songRepository.findById(id))
                 .willReturn(Optional.of(song));
         //When

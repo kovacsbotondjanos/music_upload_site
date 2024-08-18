@@ -16,8 +16,10 @@ import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -48,6 +50,7 @@ public class FindByIdTest {
     @Mock
     private MinioService minioService;
 
+    @InjectMocks
     private SongService songService;
     private Song song;
     private Long id;
@@ -57,16 +60,11 @@ public class FindByIdTest {
             "pwd",
             List.of(),
             "");
+    private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
-        MockitoAnnotations.initMocks(this);
-        songService = new SongService(songRepository,
-                                      userRepository,
-                                      albumRepository,
-                                      imageFactory,
-                                      userRecommendationService,
-                                      minioService);
+        autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
         song = new Song(id,
                 "",
@@ -78,6 +76,11 @@ public class FindByIdTest {
                 new ArrayList<>(),
                 new Date(),
                 new Date());
+    }
+
+    @AfterEach
+    void closeMocks() throws Exception {
+        autoCloseable.close();
     }
 
     @Test

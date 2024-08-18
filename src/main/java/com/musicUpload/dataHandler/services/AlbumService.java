@@ -92,7 +92,7 @@ public class AlbumService {
     }
 
     private Optional<Album> findById(Long id) {
-            return albumRepository.findById(id);
+        return albumRepository.findById(id);
     }
 
     public AlbumDTO findById(Long id, UserDetailsImpl userDetails) {

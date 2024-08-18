@@ -3,8 +3,6 @@ package com.musicUpload.dataHandler.services;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
-import com.musicUpload.dataHandler.models.implementations.Album;
-import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
@@ -14,7 +12,6 @@ import com.musicUpload.util.ImageFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,7 +19,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +59,7 @@ public class UserService implements UserDetailsService {
                 user.getUsername(),
                 user.getPassword(),
                 Collections.singletonList(
-                    user.getPrivilege()
+                        user.getPrivilege()
                 ),
                 user.getProfilePicture()
         );
@@ -197,7 +197,7 @@ public class UserService implements UserDetailsService {
             throw new UnauthenticatedException();
         }
 
-        if(userId.equals(userDetails.getId())) {
+        if (userId.equals(userDetails.getId())) {
             throw new WrongFormatException();
         }
 

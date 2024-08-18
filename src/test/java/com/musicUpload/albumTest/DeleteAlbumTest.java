@@ -28,6 +28,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
 public class DeleteAlbumTest {
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
+            "user1",
+            "pwd",
+            List.of(),
+            "");
+    private final ProtectionType protectionType = ProtectionType.PUBLIC;
     @Mock
     private AlbumRepository albumRepository;
     @Mock
@@ -40,16 +46,9 @@ public class DeleteAlbumTest {
     private EntityCacheManager<Album> albumEntityManager;
     @Mock
     private MinioService minioService;
-
     @InjectMocks
     private AlbumService albumService;
     private List<Album> albums;
-    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
-            "user1",
-            "pwd",
-            List.of(),
-            "");
-    private final ProtectionType protectionType = ProtectionType.PUBLIC;
     private AutoCloseable autoCloseable;
 
     @BeforeEach
@@ -83,7 +82,7 @@ public class DeleteAlbumTest {
     }
 
     @AfterEach
-    void closeMocks() throws Exception{
+    void closeMocks() throws Exception {
         autoCloseable.close();
     }
 

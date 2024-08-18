@@ -33,6 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 public class FindByIdTest {
+    private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
+            "user1",
+            "pwd",
+            List.of(),
+            "");
     @Mock
     private SongRepository songRepository;
     @Mock
@@ -49,17 +55,10 @@ public class FindByIdTest {
     private UserRecommendationService userRecommendationService;
     @Mock
     private MinioService minioService;
-
     @InjectMocks
     private SongService songService;
     private Song song;
     private Long id;
-    private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
-    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
-            "user1",
-            "pwd",
-            List.of(),
-            "");
     private AutoCloseable autoCloseable;
 
     @BeforeEach

@@ -2,7 +2,9 @@ package com.musicUpload.dataHandler.seeder;
 
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
-import com.musicUpload.dataHandler.seeder.factories.*;
+import com.musicUpload.dataHandler.seeder.factories.AlbumFactory;
+import com.musicUpload.dataHandler.seeder.factories.SongFactory;
+import com.musicUpload.dataHandler.seeder.factories.UserFactory;
 import com.musicUpload.dataHandler.services.UserService;
 import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;

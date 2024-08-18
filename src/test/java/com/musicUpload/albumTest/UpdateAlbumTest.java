@@ -3,7 +3,9 @@ package com.musicUpload.albumTest;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.enums.ProtectionType;
-import com.musicUpload.dataHandler.models.implementations.*;
+import com.musicUpload.dataHandler.models.implementations.Album;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
@@ -28,21 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 public class UpdateAlbumTest {
-    @Mock
-    private AlbumRepository albumRepository;
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private SongService songService;
-    @Mock
-    private ImageFactory imageFactory;
-    @Mock
-    private MinioService minioService;
-
-    @InjectMocks
-    private AlbumService albumService;
-    private Album album;
-    private Long id;
     private final ProtectionType publicProtectionType = ProtectionType.PUBLIC;
     private final ProtectionType privateProtectionType = ProtectionType.PRIVATE;
     private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
@@ -50,7 +37,6 @@ public class UpdateAlbumTest {
             "pwd",
             List.of(),
             "");
-    private User user;
     private final Song song = new Song(1L,
             "",
             "foo",
@@ -61,6 +47,21 @@ public class UpdateAlbumTest {
             new ArrayList<>(),
             new Date(),
             new Date());
+    @Mock
+    private AlbumRepository albumRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private SongService songService;
+    @Mock
+    private ImageFactory imageFactory;
+    @Mock
+    private MinioService minioService;
+    @InjectMocks
+    private AlbumService albumService;
+    private Album album;
+    private Long id;
+    private User user;
     private AutoCloseable autoCloseable;
 
     @BeforeEach
@@ -80,7 +81,7 @@ public class UpdateAlbumTest {
     }
 
     @AfterEach
-    void closeMocks() throws Exception{
+    void closeMocks() throws Exception {
         autoCloseable.close();
     }
 

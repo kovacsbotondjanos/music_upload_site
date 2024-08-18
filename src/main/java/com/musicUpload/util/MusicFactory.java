@@ -37,9 +37,9 @@ public class MusicFactory {
         }
 
         MultipartFile multipartFile = new MockMultipartFile("song",
-                                                            "",
-                                                            "audio/mp3",
-                                                            audioData);
+                "",
+                "audio/mp3",
+                audioData);
         return minioService.uploadSong(multipartFile);
     }
 }

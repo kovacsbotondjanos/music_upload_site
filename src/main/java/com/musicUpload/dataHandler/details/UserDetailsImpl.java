@@ -1,13 +1,10 @@
 package com.musicUpload.dataHandler.details;
 
-import com.musicUpload.dataHandler.models.implementations.Album;
-import com.musicUpload.dataHandler.models.implementations.Song;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
 @Data
 public class UserDetailsImpl implements UserDetails {

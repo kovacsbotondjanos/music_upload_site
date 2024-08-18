@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
 public class DeleteSongTest {
+    private final ProtectionType protectionType = ProtectionType.PUBLIC;
     UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "",
@@ -36,11 +37,9 @@ public class DeleteSongTest {
     private UserRepository userRepository;
     @Mock
     private MinioService minioService;
-
     @InjectMocks
     private SongService songService;
     private List<Song> songs;
-    private final ProtectionType protectionType = ProtectionType.PUBLIC;
     private AutoCloseable autoCloseable;
 
     @BeforeEach
@@ -80,7 +79,7 @@ public class DeleteSongTest {
     }
 
     @AfterEach
-    void closeMocks() throws Exception{
+    void closeMocks() throws Exception {
         autoCloseable.close();
     }
 

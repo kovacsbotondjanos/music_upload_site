@@ -32,6 +32,12 @@ public class UserSong implements CustomEntityInterface {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    public UserSong(Long songId, Long userId, Long listenCount) {
+        this.userId = userId;
+        this.songId = songId;
+        this.listenCount = listenCount;
+    }
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = new Date();
@@ -40,11 +46,5 @@ public class UserSong implements CustomEntityInterface {
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
-    }
-
-    public UserSong(Long songId, Long userId, Long listenCount) {
-        this.userId = userId;
-        this.songId = songId;
-        this.listenCount = listenCount;
     }
 }

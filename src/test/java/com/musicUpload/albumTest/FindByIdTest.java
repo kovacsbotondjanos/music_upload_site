@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 public class FindByIdTest {
+    private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
     UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "pwd",
@@ -33,12 +34,10 @@ public class FindByIdTest {
             "");
     @Mock
     private AlbumRepository albumRepository;
-
     @InjectMocks
     private AlbumService albumService;
     private Album album;
     private Long id;
-    private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
     private AutoCloseable autoCloseable;
 
     @BeforeEach
@@ -56,7 +55,7 @@ public class FindByIdTest {
     }
 
     @AfterEach
-    void closeMocks() throws Exception{
+    void closeMocks() throws Exception {
         autoCloseable.close();
     }
 

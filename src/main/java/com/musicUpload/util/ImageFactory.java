@@ -7,7 +7,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -38,9 +39,9 @@ public class ImageFactory {
 
                 byte[] imageBytes = outputStream.toByteArray();
                 MultipartFile multipartFile = new MockMultipartFile("image",
-                                                                    "",
-                                                                    "image/jpeg",
-                                                                    imageBytes);
+                        "",
+                        "image/jpeg",
+                        imageBytes);
                 return minioService.uploadImage(multipartFile);
             }
         } catch (Exception e) {

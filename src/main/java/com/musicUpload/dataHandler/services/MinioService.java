@@ -28,12 +28,6 @@ public class MinioService {
     @Value("${minio.pictureBucketName}")
     private String imageBucket;
 
-    @Value("${imagePrefixToRemove}")
-    private String imagePrefix;
-
-    @Value("${songPrefixToRemove}")
-    private String songPrefix;
-
     @Value("${linkExpirationTime}")
     private int expirationTime;
 
@@ -43,11 +37,11 @@ public class MinioService {
     }
 
     public String uploadSong(MultipartFile file) {
-        return uploadFile(file, songBucket, songPrefix);
+        return uploadFile(file, songBucket);
     }
 
     public String uploadImage(MultipartFile file) {
-        return uploadFile(file, imageBucket, imagePrefix);
+        return uploadFile(file, imageBucket);
     }
 
     public void deleteSong(String name) {
@@ -95,8 +89,7 @@ public class MinioService {
     }
 
     private String uploadFile(MultipartFile file,
-                              String bucketName,
-                              String prefixToRemove) {
+                              String bucketName) {
         try {
             boolean isExist = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!isExist) {

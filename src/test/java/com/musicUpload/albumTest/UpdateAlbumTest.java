@@ -1,10 +1,11 @@
 package com.musicUpload.albumTest;
 
-import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.enums.ProtectionType;
-import com.musicUpload.dataHandler.models.implementations.*;
+import com.musicUpload.dataHandler.models.implementations.Album;
+import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
@@ -12,8 +13,10 @@ import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -27,32 +30,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 public class UpdateAlbumTest {
-    @Mock
-    private AlbumRepository albumRepository;
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private SongService songService;
-    @Mock
-    private ImageFactory imageFactory;
-    @Mock
-    private EntityCacheManager<Album> albumEntityManager;
-    @Mock
-    private MinioService minioService;
-
-    private AlbumService albumService;
-    private Album album;
-    private Long id;
     private final ProtectionType publicProtectionType = ProtectionType.PUBLIC;
     private final ProtectionType privateProtectionType = ProtectionType.PRIVATE;
     private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
             "pwd",
             List.of(),
-            "",
-            List.of(),
-            List.of());
-    private User user;
+            "");
     private final Song song = new Song(1L,
             "",
             "foo",
@@ -63,16 +47,26 @@ public class UpdateAlbumTest {
             new ArrayList<>(),
             new Date(),
             new Date());
+    @Mock
+    private AlbumRepository albumRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private SongService songService;
+    @Mock
+    private ImageFactory imageFactory;
+    @Mock
+    private MinioService minioService;
+    @InjectMocks
+    private AlbumService albumService;
+    private Album album;
+    private Long id;
+    private User user;
+    private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
-        MockitoAnnotations.initMocks(this);
-        albumService = new AlbumService(albumRepository,
-                                        userRepository,
-                                        songService,
-                                        imageFactory,
-                                        albumEntityManager,
-                                        minioService);
+        autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
         album = new Album(id,
                 "",
@@ -86,6 +80,11 @@ public class UpdateAlbumTest {
                 "user", List.of(), List.of(), Privilege.USER, List.of(), List.of(), null, null);
     }
 
+    @AfterEach
+    void closeMocks() throws Exception {
+        autoCloseable.close();
+    }
+
     @Test
     void updateAlbumWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
@@ -94,14 +93,17 @@ public class UpdateAlbumTest {
 
     @Test
     void updateOtherUsersAlbum() {
-        userDetails.setAlbums(List.of(album));
         assertThrows(UnauthenticatedException.class,
                 () -> albumService.patchAlbum(userDetails, 2L, null, null, null, null));
     }
 
     @Test
     void updateNameTest() {
-        userDetails.setAlbums(new ArrayList<>(List.of(album)));
+        User u = new User(userDetails);
+        given(albumRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(album));
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(u));
         albumService.patchAlbum(
                 userDetails,
                 1L,
@@ -114,7 +116,11 @@ public class UpdateAlbumTest {
 
     @Test
     void updateProtectionType() {
-        userDetails.setAlbums(new ArrayList<>(List.of(album)));
+        User u = new User(userDetails);
+        given(albumRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(album));
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(u));
         albumService.patchAlbum(
                 userDetails,
                 1L,
@@ -128,7 +134,11 @@ public class UpdateAlbumTest {
     @Test
     void updateAlbumWithPrivateSongNotOwned() {
         song.setProtectionType(privateProtectionType);
-        userDetails.setAlbums(new ArrayList<>(List.of(album)));
+        User u = new User(userDetails);
+        given(albumRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(album));
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(u));
         albumService.patchAlbum(userDetails,
                 1L,
                 null,
@@ -140,7 +150,11 @@ public class UpdateAlbumTest {
     @Test
     void updateAlbumWithPublicSongNotOwned() {
         song.setProtectionType(publicProtectionType);
-        userDetails.setAlbums(new ArrayList<>(List.of(album)));
+        User u = new User(userDetails);
+        given(albumRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(album));
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(u));
         given(songService.findById(1L))
                 .willReturn(Optional.of(song));
         albumService.patchAlbum(userDetails,
@@ -154,7 +168,11 @@ public class UpdateAlbumTest {
     @Test
     void updateAlbumWithPrivateSongOwned() {
         song.setProtectionType(privateProtectionType);
-        userDetails.setAlbums(new ArrayList<>(List.of(album)));
+        User u = new User(userDetails);
+        given(albumRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(album));
+        given(userRepository.findById(userDetails.getId()))
+                .willReturn(Optional.of(u));
         album.setUser(user);
         user.setAlbums(List.of(album));
         user.setSongs(List.of(song));

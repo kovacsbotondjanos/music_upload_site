@@ -16,8 +16,10 @@ import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.ImageFactory;
 import com.musicUpload.util.MusicFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -31,6 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 public class FindByIdTest {
+    private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
+            "user1",
+            "pwd",
+            List.of(),
+            "");
     @Mock
     private SongRepository songRepository;
     @Mock
@@ -47,30 +55,15 @@ public class FindByIdTest {
     private UserRecommendationService userRecommendationService;
     @Mock
     private MinioService minioService;
-
+    @InjectMocks
     private SongService songService;
     private Song song;
     private Long id;
-    private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
-    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
-            "user1",
-            "pwd",
-            List.of(),
-            "",
-            List.of(),
-            List.of());
+    private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
-        MockitoAnnotations.initMocks(this);
-        songService = new SongService(songRepository,
-                                      userRepository,
-                                      albumRepository,
-                                      imageFactory,
-                                      songFactory,
-                                      listenCountJob,
-                                      userRecommendationService,
-                                      minioService);
+        autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
         song = new Song(id,
                 "",
@@ -82,6 +75,11 @@ public class FindByIdTest {
                 new ArrayList<>(),
                 new Date(),
                 new Date());
+    }
+
+    @AfterEach
+    void closeMocks() throws Exception {
+        autoCloseable.close();
     }
 
     @Test
@@ -100,7 +98,7 @@ public class FindByIdTest {
         //Given
         song.setId(2L);
         song.setUser(new User(userDetails));
-        userDetails.setSongs(List.of(song));
+//        userDetails.setSongs(List.of(song));
         given(songRepository.findById(id))
                 .willReturn(Optional.empty());
         //Then
@@ -124,7 +122,7 @@ public class FindByIdTest {
         //Given
         song.setProtectionType(privateprotectionType);
         song.setUser(new User(userDetails));
-        userDetails.setSongs(List.of(song));
+//        userDetails.setSongs(List.of(song));
         given(songRepository.findById(id))
                 .willReturn(Optional.of(song));
         //When

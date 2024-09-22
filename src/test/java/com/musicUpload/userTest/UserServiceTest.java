@@ -5,14 +5,14 @@ import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.exceptions.NotAcceptableException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.exceptions.WrongFormatException;
-import com.musicUpload.util.ImageFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -26,22 +26,22 @@ import static org.mockito.BDDMockito.given;
 public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private ImageFactory imageFactory;
-    @Mock
-    private MinioService minioService;
 
+    @InjectMocks
     private UserService userService;
     private User user;
+    private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
-        MockitoAnnotations.initMocks(this);
+        autoCloseable = MockitoAnnotations.openMocks(this);
         user = new User(null, null, null, null,
                 "user", List.of(), List.of(), Privilege.USER, List.of(), List.of(), null, null);
-        userService = new UserService(userRepository,
-                                      imageFactory,
-                                      minioService);
+    }
+
+    @AfterEach
+    void closeMocks() throws Exception {
+        autoCloseable.close();
     }
 
     @Test
@@ -115,8 +115,6 @@ public class UserServiceTest {
         //Given
         UserDetailsImpl userDetails = new UserDetailsImpl(
                 1L,
-                null,
-                null,
                 null,
                 null,
                 null,

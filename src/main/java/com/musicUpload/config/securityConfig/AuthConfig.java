@@ -54,7 +54,6 @@ public class AuthConfig {
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "unauthenticated");
                 }).and()
-                //TODO: sessionmanager
                 .build();
     }
 

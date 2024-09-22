@@ -1,11 +1,11 @@
 package com.musicUpload.dataHandler.models.implementations;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"protectionType", "user", "albums", "createdAt", "updatedAt"})
-public class Song implements CustomEntityInterface {
+public class Song implements CustomEntityInterface, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -35,7 +35,6 @@ public class Song implements CustomEntityInterface {
     private User user;
 
     @ManyToMany(mappedBy = "songs", fetch = FetchType.EAGER)
-    @JsonIgnore
     private List<Album> albums = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)

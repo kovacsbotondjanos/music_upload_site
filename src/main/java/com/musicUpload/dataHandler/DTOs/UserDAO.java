@@ -4,13 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AlbumCreateAndPatchDTO {
-    private String protectionType;
-    private String name;
-    private List<Long> songIds;
+public class UserDAO {
+    private String username;
+    private String email;
+    private String password;
+    private String oldPassword;
 }

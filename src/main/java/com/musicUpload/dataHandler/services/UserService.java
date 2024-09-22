@@ -4,13 +4,14 @@ import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
+import com.musicUpload.dataHandler.repositories.AlbumRepository;
+import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,7 +19,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +30,8 @@ import java.util.regex.Pattern;
 public class UserService implements UserDetailsService {
     private static final Logger logger = LogManager.getLogger(UserDetailsService.class);
     private final UserRepository userRepository;
+    private final SongRepository songRepository;
+    private final AlbumRepository albumRepository;
     private final ImageFactory imageFactory;
     private final MinioService minioService;
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
@@ -33,30 +39,30 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     public UserService(UserRepository userRepository,
+                       SongRepository songRepository,
+                       AlbumRepository albumRepository,
                        ImageFactory imageFactory,
                        MinioService minioService) {
         this.userRepository = userRepository;
+        this.songRepository = songRepository;
+        this.albumRepository = albumRepository;
         this.imageFactory = imageFactory;
         this.minioService = minioService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByUsername(username);
-        if (user.isPresent()) {
-            var userObj = user.get();
-            return new UserDetailsImpl(
-                    userObj.getId(),
-                    userObj.getUsername(),
-                    userObj.getPassword(),
-                    Collections.singletonList(new SimpleGrantedAuthority(userObj.getPrivilege().getName())),
-                    userObj.getProfilePicture(),
-                    userObj.getSongs(),
-                    userObj.getAlbums()
-            );
-        } else {
-            throw new UsernameNotFoundException(username);
-        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+        return new UserDetailsImpl(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                Collections.singletonList(
+                        user.getPrivilege()
+                ),
+                user.getProfilePicture()
+        );
     }
 
     public User registerUser(User user) {
@@ -191,7 +197,7 @@ public class UserService implements UserDetailsService {
             throw new UnauthenticatedException();
         }
 
-        if(userId.equals(userDetails.getId())) {
+        if (userId.equals(userDetails.getId())) {
             throw new WrongFormatException();
         }
 

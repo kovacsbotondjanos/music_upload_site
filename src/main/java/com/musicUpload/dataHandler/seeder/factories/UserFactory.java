@@ -1,19 +1,15 @@
 package com.musicUpload.dataHandler.seeder.factories;
 
 import com.github.javafaker.Faker;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,8 +18,16 @@ import java.util.stream.IntStream;
 
 @Service
 public class UserFactory {
-    private static final Logger logger = LogManager.getLogger(UserFactory.class);
     private final UserService userService;
+
+    @Value("${admin.username}")
+    private String adminUserName;
+
+    @Value("${admin.password}")
+    private String adminPassword;
+
+    @Value("${admin.email}")
+    private String adminEmail;
 
     @Autowired
     public UserFactory(UserService userService) {
@@ -59,21 +63,12 @@ public class UserFactory {
     }
 
     public void createAdminFromConfigFile() {
-        User admin;
-        Gson gson = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .create();
-        ClassLoader classLoader = getClass().getClassLoader();
-        try (InputStream inputStream = classLoader.getResourceAsStream("adminConfig.json")) {
-            assert inputStream != null;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                admin = gson.fromJson(reader, User.class);
-                admin.setPrivilege(Privilege.ADMIN);
-                userService.registerUser(admin);
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
+        User admin = new User();
+        admin.setUsername(adminUserName);
+        admin.setPassword(adminPassword);
+        admin.setEmail(adminEmail);
+        admin.setPrivilege(Privilege.ADMIN);
+        userService.registerUser(admin);
     }
 
     private User createUser() {

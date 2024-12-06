@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 @Service
@@ -27,14 +29,18 @@ public class AlbumFactory {
         this.albumService = albumService;
     }
 
-    public List<Album> createAlbums(int number, List<User> users, List<Song> songs) {
+    public List<Album> createAlbums(int number, List<User> users,
+                                    List<Song> songs,
+                                    ExecutorService executorService) {
         List<Album> albums = Collections.synchronizedList(new ArrayList<>());
 
-        IntStream.range(0, number).parallel().forEachOrdered(__ -> {
-            Album album = createAlbum(users, songs);
-            albumService.saveAlbum(album);
-            albums.add(album);
-        });
+        IntStream.range(0, number).parallel().forEachOrdered(__ ->
+            executorService.submit(() -> {
+                Album album = createAlbum(users, songs);
+                albumService.saveAlbum(album);
+                albums.add(album);
+            })
+        );
 
         return albums;
     }

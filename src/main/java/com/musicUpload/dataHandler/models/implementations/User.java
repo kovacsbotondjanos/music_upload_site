@@ -1,6 +1,5 @@
 package com.musicUpload.dataHandler.models.implementations;
 
-import com.google.gson.annotations.Expose;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.CustomEntityInterface;
@@ -27,11 +26,8 @@ public class User implements CustomEntityInterface, Serializable {
     private Long id;
 
     private String profilePicture;
-    @Expose
     private String email;
-    @Expose
     private String password;
-    @Expose
     private String username;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

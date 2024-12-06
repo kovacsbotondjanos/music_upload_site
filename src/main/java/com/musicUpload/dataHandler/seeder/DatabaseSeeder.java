@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class DatabaseSeeder {
@@ -33,19 +35,21 @@ public class DatabaseSeeder {
         this.albumFactory = albumFactory;
     }
 
-    public void seedDatabase() {
-        List<User> users = userFactory.createUsers(10);
-        users = userFactory.createFollow(users);
-        List<Song> songs = songFactory.generateSongs(40, users);
-        albumFactory.createAlbums(20, users, songs);
+    private void seedDatabase(ExecutorService executorService) {
+        List<User> users = userFactory.createUsers(10, executorService);
+        users = userFactory.createFollow(users, executorService);
+        List<Song> songs = songFactory.generateSongs(40, users, executorService);
+        albumFactory.createAlbums(20, users, songs, executorService);
     }
 
     @PostConstruct
     public void seedDatabaseIfEmpty() {
         if (userService.count() == 0) {
-            userFactory.createAdminFromConfigFile();
-            seedDatabase();
-            logger.info("Database seeding completed");
+            try (ExecutorService executorService = Executors.newFixedThreadPool(20)) {
+                userFactory.createAdminFromConfigFile();
+                seedDatabase(executorService);
+                logger.info("Database seeding completed");
+            }
         }
     }
 }

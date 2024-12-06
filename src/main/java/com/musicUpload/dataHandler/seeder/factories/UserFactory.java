@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
 @Service
@@ -34,30 +35,34 @@ public class UserFactory {
         this.userService = userService;
     }
 
-    public List<User> createFollow(List<User> users) {
+    public List<User> createFollow(List<User> users, ExecutorService executorService) {
         Random random = new Random();
 
         users.stream().parallel().forEach(currUser -> {
-            IntStream.range(0, random.nextInt() % users.size()).forEachOrdered(__ -> {
-                User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
-                if (currUser.getFollowedUsers().stream().noneMatch(u -> u.equals(user) || u.equals(currUser))) {
-                    currUser.getFollowedUsers().add(user);
-                }
-            });
+            IntStream.range(0, random.nextInt() % users.size()).forEachOrdered(__ ->
+                executorService.submit(() -> {
+                    User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
+                    if (currUser.getFollowedUsers().stream().noneMatch(u -> u.equals(user) || u.equals(currUser))) {
+                        currUser.getFollowedUsers().add(user);
+                    }
+                })
+            );
             userService.saveUser(currUser);
         });
 
         return users;
     }
 
-    public List<User> createUsers(int number) {
+    public List<User> createUsers(int number, ExecutorService executorService) {
         List<User> users = Collections.synchronizedList(new ArrayList<>());
 
-        IntStream.range(0, number).parallel().forEachOrdered(__ -> {
-            User user = createUser();
-            users.add(user);
-            userService.registerUser(user);
-        });
+        IntStream.range(0, number).parallel().forEachOrdered(__ ->
+            executorService.submit(() -> {
+                User user = createUser();
+                users.add(user);
+                userService.registerUser(user);
+            })
+        );
 
         return users;
     }

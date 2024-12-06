@@ -91,7 +91,7 @@ public class AlbumService {
         return albumRepository.findByUser(user).stream().map(AlbumDTO::new).toList();
     }
 
-    private Optional<Album> findById(Long id) {
+    public Optional<Album> findById(Long id) {
         return albumRepository.findById(id);
     }
 

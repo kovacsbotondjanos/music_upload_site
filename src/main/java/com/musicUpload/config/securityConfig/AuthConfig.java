@@ -9,12 +9,14 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.Collections;
 
@@ -27,38 +29,39 @@ public class AuthConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        //TODO: look into this securityFilterChain, bc i am sure it can be done better and more secure than this
         return httpSecurity
-                .cors().and()
-                .csrf().disable()
-                .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers(
-                                    "api/v1/users/**",
-                                    "api/v1/albums/**",
-                                    "api/v1/songs/**",
-                                    "api/v1/files/**",
-                                    "/login")
-                            .permitAll();
-                    registry.anyRequest().authenticated();
-                })
-                //TODO: maybe this formLogin is not necessary, but i want to keep the success and failure handlers
-                .formLogin(httpSecurityFormLoginConfigurer -> httpSecurityFormLoginConfigurer
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.requestMatchers(
+                                                            "api/v1/users/**",
+                                                            "api/v1/albums/**",
+                                                            "api/v1/songs/**",
+                                                            "api/v1/files/**",
+                                                            "/login")
+                                                    .permitAll()
+                                                    .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
                         .loginProcessingUrl("/login")
                         .successHandler(new LoginSuccessHandler())
                         .failureHandler(new LoginFailureHandler())
-                        .permitAll())
-                .logout(LogoutConfigurer -> LogoutConfigurer
+                        .permitAll()
+                )
+                .logout(logout -> logout
                         .logoutSuccessHandler(new LogoutSuccessHandler())
-                        .permitAll())
-                .httpBasic()
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "unauthenticated");
-                }).and()
+                        .permitAll()
+                )
+                .httpBasic(basic -> basic
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "unauthenticated"))
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // Adjust as needed
                 .build();
     }
 
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         config.setAllowCredentials(true);
@@ -66,7 +69,7 @@ public class AuthConfig {
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
+        return source;
     }
 
     @Bean

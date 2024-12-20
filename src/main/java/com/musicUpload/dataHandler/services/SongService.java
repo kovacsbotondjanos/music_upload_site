@@ -1,5 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
+import com.musicUpload.cronJobs.RecommendationEngine;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
@@ -34,6 +35,7 @@ public class SongService {
     private final ImageFactory imageFactory;
     private final UserRecommendationService userRecommendationService;
     private final MinioService minioService;
+    private final RecommendationEngine recommendationEngine;
 
     @Autowired
     public SongService(SongRepository songRepository,
@@ -41,13 +43,15 @@ public class SongService {
                        AlbumRepository albumRepository,
                        ImageFactory imageFactory,
                        UserRecommendationService userRecommendationService,
-                       MinioService minioService) {
+                       MinioService minioService,
+                       RecommendationEngine recommendationEngine) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
         this.imageFactory = imageFactory;
         this.userRecommendationService = userRecommendationService;
         this.minioService = minioService;
+        this.recommendationEngine = recommendationEngine;
     }
 
     public Song addSong(Song song) {
@@ -133,6 +137,7 @@ public class SongService {
         if (userDetails != null) {
             return userRecommendationService.getRecommendedSongsForUser(userDetails, pageNumber, pageSize);
         }
+        
         return songRepository.findByProtectionTypeOrderByListenCountDesc(ProtectionType.PUBLIC, page).stream()
                 .map(SongDTO::new)
                 .toList();

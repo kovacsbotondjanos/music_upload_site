@@ -1,6 +1,5 @@
 package com.musicUpload.albumTest;
 
-import com.musicUpload.cronJobs.EntityCacheManager;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
@@ -42,8 +41,6 @@ public class DeleteAlbumTest {
     private SongService songService;
     @Mock
     private ImageFactory imageFactory;
-    @Mock
-    private EntityCacheManager<Album> albumEntityManager;
     @Mock
     private MinioService minioService;
     @InjectMocks
@@ -111,12 +108,12 @@ public class DeleteAlbumTest {
         //Given
         User u = new User(userDetails);
         given(albumRepository.findByUserAndId(u, 1L))
-                .willReturn(Optional.of(albums.get(0)));
+                .willReturn(Optional.of(albums.getFirst()));
         given(userRepository.findById(1L))
                 .willReturn(Optional.of(u));
         Album a = albumService.deleteAlbum(userDetails, 1L);
         //Then
-        assertEquals(albums.get(0), a);
+        assertEquals(albums.getFirst(), a);
         assertFalse(u.getAlbums().contains(a));
     }
 }

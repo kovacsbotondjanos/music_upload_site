@@ -1,6 +1,7 @@
 package com.musicUpload.dataHandler.services;
 
-import com.musicUpload.cronJobs.RecommendationEngine;
+import com.musicUpload.cronJobs.SongListenCountUpdateScheduler;
+import com.musicUpload.recommendation.RecommendationEngine;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
@@ -36,6 +37,7 @@ public class SongService {
     private final UserRecommendationService userRecommendationService;
     private final MinioService minioService;
     private final RecommendationEngine recommendationEngine;
+    private final SongListenCountUpdateScheduler songListenCountUpdateScheduler;
 
     @Autowired
     public SongService(SongRepository songRepository,
@@ -44,7 +46,8 @@ public class SongService {
                        ImageFactory imageFactory,
                        UserRecommendationService userRecommendationService,
                        MinioService minioService,
-                       RecommendationEngine recommendationEngine) {
+                       RecommendationEngine recommendationEngine,
+                       SongListenCountUpdateScheduler songListenCountUpdateScheduler) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
@@ -52,6 +55,7 @@ public class SongService {
         this.userRecommendationService = userRecommendationService;
         this.minioService = minioService;
         this.recommendationEngine = recommendationEngine;
+        this.songListenCountUpdateScheduler = songListenCountUpdateScheduler;
     }
 
     public Song addSong(Song song) {
@@ -170,6 +174,7 @@ public class SongService {
 
         if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
+            songListenCountUpdateScheduler.addListenToSong(song.getId(), userDetails);
             return minioService.getSong(nameHashed);
         }
         throw new NotFoundException();

@@ -1,4 +1,4 @@
-package com.musicUpload.cronJobs;
+package com.musicUpload.recommendation;
 
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.Song;
@@ -7,7 +7,6 @@ import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRecommendationRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
-import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.UserSongService;
 import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;

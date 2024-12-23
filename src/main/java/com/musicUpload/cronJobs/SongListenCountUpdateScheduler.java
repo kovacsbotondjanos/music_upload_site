@@ -18,12 +18,10 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 @Service
-public class SongCacheManager {
-    private static final Logger logger = LogManager.getLogger(SongCacheManager.class);
-    private final EntityCacheManager<Song> songEntityManager;
+public class SongListenCountUpdateScheduler {
+    private static final Logger logger = LogManager.getLogger(SongListenCountUpdateScheduler.class);
     private final SongRepository songRepository;
     private final UserSongRepository userSongRepository;
     private final int SCHEDULE = 2 * 1000 * 60;
@@ -32,10 +30,8 @@ public class SongCacheManager {
     private final Map<Pair<Long, Long>, Long> copyMap;
 
     @Autowired
-    public SongCacheManager(EntityCacheManager<Song> songEntityManager,
-                            SongRepository songRepository,
-                            UserSongRepository userSongRepository) {
-        this.songEntityManager = songEntityManager;
+    public SongListenCountUpdateScheduler(SongRepository songRepository,
+                                          UserSongRepository userSongRepository) {
         this.songRepository = songRepository;
         this.userSongRepository = userSongRepository;
         this.songListensBuffer = new ConcurrentHashMap<>();
@@ -47,29 +43,12 @@ public class SongCacheManager {
             Long userId = userDetails == null ? null : userDetails.getId();
             songListensBuffer.merge(Pair.of(songId, userId), 1L, Long::sum);
             logger.info("buffer: {}", songListensBuffer);
-            //I make sure here that the cached data is not stale
-            songEntityManager.getEntity(songId)
-                    .ifPresent(Song::addListen);
         }).start();
-    }
-
-    public void addSong(Song song) {
-        songEntityManager.addEntity(song, song.getCacheIndex());
-    }
-
-    public void removeSong(Long id) {
-        songEntityManager.removeEntity(id);
-    }
-
-    public Optional<Song> getSong(Long id) {
-        return songEntityManager.getEntity(id);
     }
 
     @Scheduled(fixedRate = SCHEDULE)
     public void saveReport() {
-        copyMap.putAll(songListensBuffer.entrySet().stream()
-                .filter(e -> songListensBuffer.remove(e.getKey(), e.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        copyMap.putAll(songListensBuffer);
         //TODO: look into this, it is possible that this can lead to data loss, if a request arrives after the copy and before the clear
         // but this might not even be a big enough issue to worry about, bc listenCount will never be accurate
         songListensBuffer.clear();
@@ -113,9 +92,13 @@ public class SongCacheManager {
                         });
                 List<Song> songList = songsToSave.entrySet().stream().map(entry -> {
                     var s = songRepository.findById(entry.getKey());
-                    s.ifPresent(song -> song.addListen(entry.getValue()));
-                    return s;
-                }).filter(Optional::isPresent).map(Optional::get).toList();
+                    if (s.isPresent()) {
+                        Song song = s.get();
+                        song.addListen(entry.getValue());
+                        return song;
+                    }
+                    return null;
+                }).filter(Objects::nonNull).toList();
                 songRepository.saveAll(songList);
                 userSongRepository.saveAll(userListensToSave);
                 logger.info("lock for songs ends");

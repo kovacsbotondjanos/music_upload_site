@@ -1,6 +1,6 @@
 package com.musicUpload.songTest;
 
-import com.musicUpload.cronJobs.SongCacheManager;
+import com.musicUpload.cronJobs.SongListenCountUpdateScheduler;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
@@ -50,7 +50,7 @@ public class FindByIdTest {
     @Mock
     private MusicFactory songFactory;
     @Mock
-    private SongCacheManager listenCountJob;
+    private SongListenCountUpdateScheduler listenCountJob;
     @Mock
     private UserRecommendationService userRecommendationService;
     @Mock

@@ -9,8 +9,6 @@ import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,7 +26,6 @@ import java.util.regex.Pattern;
 
 @Service
 public class UserService implements UserDetailsService {
-    private static final Logger logger = LogManager.getLogger(UserDetailsService.class);
     private final UserRepository userRepository;
     private final SongRepository songRepository;
     private final AlbumRepository albumRepository;

@@ -1,18 +1,17 @@
 package com.musicUpload;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
+@Slf4j
 public class MusicUploadApplication {
-    private static final Logger logger = LogManager.getLogger(MusicUploadApplication.class);
 
     public static void main(String[] args) {
         SpringApplication.run(MusicUploadApplication.class, args);
-        logger.info("Application started");
+        log.info("Application started");
     }
 }

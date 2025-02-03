@@ -7,8 +7,7 @@ import com.musicUpload.dataHandler.seeder.factories.SongFactory;
 import com.musicUpload.dataHandler.seeder.factories.UserFactory;
 import com.musicUpload.dataHandler.services.UserService;
 import jakarta.annotation.PostConstruct;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +16,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Service
+@Slf4j
 public class DatabaseSeeder {
-    private static final Logger logger = LogManager.getLogger(DatabaseSeeder.class);
     private final UserService userService;
     private final UserFactory userFactory;
     private final SongFactory songFactory;
@@ -48,7 +47,7 @@ public class DatabaseSeeder {
             try (ExecutorService executorService = Executors.newFixedThreadPool(20)) {
                 userFactory.createAdminFromConfigFile();
                 seedDatabase(executorService);
-                logger.info("Database seeding completed");
+                log.info("Database seeding completed");
             }
         }
     }

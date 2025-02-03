@@ -15,8 +15,6 @@ import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.exceptions.UnprocessableException;
 import com.musicUpload.exceptions.WrongFormatException;
 import com.musicUpload.util.ImageFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +27,6 @@ import java.util.Optional;
 
 @Service
 public class SongService {
-    private static final Logger logger = LogManager.getLogger(SongService.class);
     private final SongRepository songRepository;
     private final UserRepository userRepository;
     private final AlbumRepository albumRepository;

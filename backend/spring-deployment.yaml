@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-app
+  template:
+    metadata:
+      labels:
+        app: spring-app
+    spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox
+          command: [ 'sh', '-c', 'until wget --spider --timeout=2 mysql-db:3306; do echo waiting for mysql; sleep 2; done;' ]
+        - name: wait-for-minio
+          image: busybox
+          command: [ 'sh', '-c', 'until wget --spider --timeout=2 minio:9000; do echo waiting for minio; sleep 2; done;' ]
+      containers:
+        - name: spring-app
+          image: kovacsbotondjanos/musicupload-spring-app:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql-db:3306/music?createDatabaseIfNotExist=true
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: ASD123
+            - name: MINIO_DATASOURCE_URL
+              value: minio
+            - name: MINIO_ROOT_USER
+              value: minio99
+            - name: MINIO_ROOT_PASSWORD
+              value: minio123
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-app
+spec:
+  selector:
+    app: spring-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

@@ -3,8 +3,7 @@ package com.musicUpload.dataHandler.services;
 import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.http.Method;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class MinioService {
-    private static final Logger logger = LogManager.getLogger(MinioService.class);
     private final MinioClient minioClient;
 
     @Value("${minio.songBucketName}")
@@ -109,7 +108,7 @@ public class MinioService {
         } catch (MinioException | NoSuchAlgorithmException |
                  InvalidKeyException | IOException e) {
             //TODO: handle this better lol
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }

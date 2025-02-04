@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql-db
+  name: music-upload-mysql-db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql-db
+      app: music-upload-mysql-db
   template:
     metadata:
       labels:
-        app: mysql-db
+        app: music-upload-mysql-db
     spec:
       containers:
-        - name: mysql-db
+        - name: music-upload-mysql-db
           image: mysql:latest
           ports:
             - containerPort: 3306
@@ -28,15 +28,15 @@ spec:
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:
-            claimName: mysql-pvc
+            claimName: music-upload-mysql-db-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql-db
+  name: music-upload-mysql-db-service
 spec:
   selector:
-    app: mysql-db
+    app: music-upload-mysql-db
   ports:
     - protocol: TCP
       port: 3306
@@ -46,7 +46,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mysql-pvc
+  name: music-upload-mysql-db-pvc
 spec:
   accessModes:
     - ReadWriteOnce

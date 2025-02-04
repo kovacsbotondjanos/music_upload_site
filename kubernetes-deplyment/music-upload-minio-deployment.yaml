@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: minio
+  name: music-upload-minio
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: minio
+      app: music-upload-minio
   template:
     metadata:
       labels:
-        app: minio
+        app: music-upload-minio
     spec:
       containers:
-        - name: minio
+        - name: music-upload-minio
           image: quay.io/minio/minio
           args:
             - server
@@ -30,32 +30,36 @@ spec:
               value: minio123
           volumeMounts:
             - mountPath: /data
-              name: minio-storage
+              name: music-upload-minio-storage
       volumes:
-        - name: minio-storage
+        - name: music-upload-minio-storage
           persistentVolumeClaim:
-            claimName: minio-pvc
+            claimName: music-upload-minio-pvc
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: minio
+  name: music-upload-minio-service
 spec:
   selector:
-    app: minio
+    app: music-upload-minio
   ports:
-    - protocol: TCP
+    - name: api
+      protocol: TCP
       port: 9000
       targetPort: 9000
-    - protocol: TCP
+    - name: console
+      protocol: TCP
       port: 9001
       targetPort: 9001
   type: ClusterIP
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: minio-pvc
+  name: music-upload-minio-pvc
 spec:
   accessModes:
     - ReadWriteOnce

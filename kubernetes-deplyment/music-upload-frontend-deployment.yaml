@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: music-upload-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: music-upload-frontend
+  template:
+    metadata:
+      labels:
+        app: music-upload-frontend
+    spec:
+      # initContainers:
+      #   - name: wait-for-backend
+      #     image: busybox
+      #     command: [ 'sh', '-c', 'until nc -z music-upload-backend-service 8080; do echo waiting; sleep 2; done;' ]
+      containers:
+        - name: music-upload-frontend
+          image: kovacsbotondjanos/musicupload-react-app:latest
+          ports:
+            - containerPort: 3000
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-frontend-service
+spec:
+  selector:
+    app: music-upload-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer

@@ -1,38 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spring-app
+  name: music-upload-backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: spring-app
+      app: music-upload-backend
   template:
     metadata:
       labels:
-        app: spring-app
+        app: music-upload-backend
     spec:
       initContainers:
         - name: wait-for-mysql
           image: busybox
-          command: [ 'sh', '-c', 'until wget --spider --timeout=2 mysql-db:3306; do echo waiting for mysql; sleep 2; done;' ]
+          command: [ 'sh', '-c', 'until nc -z music-upload-mysql-db-service 3306; do echo waiting; sleep 2; done;' ]
         - name: wait-for-minio
           image: busybox
-          command: [ 'sh', '-c', 'until wget --spider --timeout=2 minio:9000; do echo waiting for minio; sleep 2; done;' ]
+          command: [ 'sh', '-c', 'until nc -z music-upload-minio-service 9000; do echo waiting; sleep 2; done;' ]
       containers:
-        - name: spring-app
+        - name: music-upload-backend
           image: kovacsbotondjanos/musicupload-spring-app:latest
           ports:
             - containerPort: 8080
+          imagePullPolicy: IfNotPresent
           env:
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql-db:3306/music?createDatabaseIfNotExist=true
+              value: jdbc:mysql://music-upload-mysql-db-service:3306/music?createDatabaseIfNotExist=true
             - name: SPRING_DATASOURCE_USERNAME
               value: root
             - name: SPRING_DATASOURCE_PASSWORD
               value: ASD123
             - name: MINIO_DATASOURCE_URL
-              value: minio
+              value: music-upload-minio-service
             - name: MINIO_ROOT_USER
               value: minio99
             - name: MINIO_ROOT_PASSWORD
@@ -45,12 +46,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: spring-app
+  name: music-upload-backend-service
 spec:
   selector:
-    app: spring-app
+    app: music-upload-backend
   ports:
     - protocol: TCP
       port: 8080
       targetPort: 8080
-  type: ClusterIP
+  type: LoadBalancer

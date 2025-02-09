@@ -70,10 +70,13 @@ public class SongListenCountUpdateScheduler {
                             LocalDate date = LocalDate.now();
                             Date firstDate = Date.from(date.withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
                             Date lastDate = Date.from(date.withDayOfMonth(date.lengthOfMonth()).atStartOfDay(ZoneId.systemDefault()).toInstant());
-                            var userListenOpt = userSongRepository.findBySongIdAndUserIdAndCreatedAtBetween(e.getKey().getFirst(),
+                            var userListenOpt = userSongRepository
+                                .findBySongIdAndUserIdAndCreatedAtBetween(
+                                    e.getKey().getFirst(),
                                     e.getKey().getSecond(),
                                     firstDate,
-                                    lastDate);
+                                    lastDate
+                                );
 
                             userListenOpt.ifPresentOrElse(
                                     u -> {
@@ -82,9 +85,13 @@ public class SongListenCountUpdateScheduler {
                                     },
                                     () -> {
                                         if (e.getKey().getSecond() != null) {
-                                            userListensToSave.add(new UserSong(e.getKey().getFirst(),
-                                                    e.getKey().getSecond(),
-                                                    e.getValue()));
+                                            userListensToSave.add(
+                                                    new UserSong(
+                                                        e.getKey().getFirst(),
+                                                        e.getKey().getSecond(),
+                                                        e.getValue()
+                                                    )
+                                            );
                                         }
                                     }
                             );

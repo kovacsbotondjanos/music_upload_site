@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: music-upload-mysql-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: music-upload-mysql-db
+  template:
+    metadata:
+      labels:
+        app: music-upload-mysql-db
+    spec:
+      containers:
+        - name: music-upload-mysql-db
+          image: mysql:latest
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "ASD123"
+            - name: MYSQL_DATABASE
+              value: "music"
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-storage
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: music-upload-mysql-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: music-upload-mysql-db-service
+spec:
+  selector:
+    app: music-upload-mysql-db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: music-upload-mysql-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

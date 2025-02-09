@@ -1,8 +1,7 @@
 package com.musicUpload.util;
 
 import com.musicUpload.dataHandler.services.MinioService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,8 +12,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @Service
+@Slf4j
 public class ImageFactory {
-    private static final Logger logger = LogManager.getLogger(ImageFactory.class);
     private final MinioService minioService;
 
     public ImageFactory(MinioService minioService) {
@@ -45,7 +44,7 @@ public class ImageFactory {
                 return minioService.uploadImage(multipartFile);
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
         return "";
     }

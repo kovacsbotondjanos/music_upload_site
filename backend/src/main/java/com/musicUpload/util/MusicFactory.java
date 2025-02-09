@@ -1,8 +1,6 @@
 package com.musicUpload.util;
 
 import com.musicUpload.dataHandler.services.MinioService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +11,6 @@ import java.util.Random;
 
 @Service
 public class MusicFactory {
-    private static final Logger logger = LogManager.getLogger(MusicFactory.class);
     private final MinioService minioService;
     private final int durationInSeconds = 60;
     private final int sampleRate = 44100;

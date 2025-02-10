@@ -7,6 +7,7 @@ import com.musicUpload.dataHandler.models.implementations.UserRecommendation;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRecommendationRepository;
 import com.musicUpload.exceptions.UnauthenticatedException;
+import com.musicUpload.recommendation.RecommendationEngine;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,28 @@ import java.util.stream.Collectors;
 public class UserRecommendationService {
     private final UserRecommendationRepository userRecommendationRepository;
     private final SongRepository songRepository;
+    private final RecommendationEngine recommendationEngine;
 
-    public UserRecommendationService(UserRecommendationRepository userRecommendationRepository, SongRepository songRepository) {
+    public UserRecommendationService(UserRecommendationRepository userRecommendationRepository,
+                                     SongRepository songRepository,
+                                     RecommendationEngine recommendationEngine) {
         this.userRecommendationRepository = userRecommendationRepository;
         this.songRepository = songRepository;
+        this.recommendationEngine = recommendationEngine;
+    }
+
+    public List<Long> getRecommendationsForSong(Long songId) {
+        return recommendationEngine.createRecommendationsForSong(songId);
+    }
+
+    public List<Long> getRecommendationsForAlbum(Long albumId) {
+        return recommendationEngine.createRecommendationsForAlbum(albumId);
+    }
+
+    public List<Long> getRecommendationsForUser() {
+        return recommendationEngine.createRecommendationsForAlbum(
+                UserService.getCurrentUserDetails().getId()
+        );
     }
 
     public List<SongDTO> getRecommendedSongsForUser(UserDetailsImpl userDetails,

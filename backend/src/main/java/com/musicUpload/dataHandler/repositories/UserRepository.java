@@ -1,6 +1,7 @@
 package com.musicUpload.dataHandler.repositories;
 
 import com.musicUpload.dataHandler.models.implementations.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,5 +23,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "ELSE 2 " +
             "END, " +
             "username", nativeQuery = true)
-    List<User> findByNameLike(@Param("name") String name);
+    List<User> findByNameLike(@Param("name") String name, Pageable pageable);
 }

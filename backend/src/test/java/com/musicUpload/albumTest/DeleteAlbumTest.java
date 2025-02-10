@@ -86,7 +86,7 @@ public class DeleteAlbumTest {
     @Test
     void canDeleteAlbumWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
-                () -> albumService.deleteAlbum(null, 1L));
+                () -> albumService.deleteAlbum(1L));
     }
 
     @Test

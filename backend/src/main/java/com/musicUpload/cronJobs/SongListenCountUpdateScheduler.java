@@ -48,8 +48,6 @@ public class SongListenCountUpdateScheduler {
     @Scheduled(fixedRate = SCHEDULE)
     public void saveReport() {
         copyMap.putAll(songListensBuffer);
-        //TODO: look into this, it is possible that this can lead to data loss, if a request arrives after the copy and before the clear
-        // but this might not even be a big enough issue to worry about, bc listenCount will never be accurate
         songListensBuffer.clear();
         log.info("{} new listens are being saved into the database", copyMap.size());
         new Thread(() -> {

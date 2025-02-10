@@ -27,8 +27,7 @@ public class ResourceController {
     }
 
     @GetMapping("/music/{name}")
-    public String getSong(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                          @PathVariable String name) {
-        return songService.getSong(userDetails, name);
+    public String getSong(@PathVariable String name) {
+        return songService.getSong(name);
     }
 }

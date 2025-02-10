@@ -88,7 +88,7 @@ public class UpdateAlbumTest {
     @Test
     void updateAlbumWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
-                () -> albumService.patchAlbum(null, null, null, null, null, null));
+                () -> albumService.patchAlbum(null, null, null, null, null));
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
+import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
@@ -13,6 +14,8 @@ import com.musicUpload.exceptions.UnprocessableException;
 import com.musicUpload.exceptions.WrongFormatException;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,18 +27,18 @@ import java.util.Optional;
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final UserRepository userRepository;
-    private final SongService songService;
+    private final SongRepository songRepository;
     private final ImageFactory imageFactory;
     private final MinioService minioService;
 
     @Autowired
     public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
-                        SongService songService,
+                        SongRepository songRepository,
                         ImageFactory imageFactory,
                         MinioService minioService) {
         this.albumRepository = albumRepository;
         this.userRepository = userRepository;
-        this.songService = songService;
+        this.songRepository = songRepository;
         this.imageFactory = imageFactory;
         this.minioService = minioService;
     }
@@ -44,10 +47,10 @@ public class AlbumService {
         return albumRepository.save(album);
     }
 
-    public Album saveAlbum(UserDetailsImpl userDetails,
-                           String protectionType,
+    public Album saveAlbum(String protectionType,
                            String name,
                            MultipartFile image) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -80,7 +83,9 @@ public class AlbumService {
         return saveAlbum(album);
     }
 
-    public List<AlbumDTO> getAlbums(UserDetailsImpl userDetails) {
+    public List<AlbumDTO> getAlbums() {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -91,12 +96,9 @@ public class AlbumService {
         return albumRepository.findByUser(user).stream().map(AlbumDTO::new).toList();
     }
 
-    public Optional<Album> findById(Long id) {
-        return albumRepository.findById(id);
-    }
-
-    public AlbumDTO findById(Long id, UserDetailsImpl userDetails) {
-        Album album = findById(id)
+    public AlbumDTO findById(Long id) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+        Album album = albumRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         if (!album.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && album.getUser().getId().equals(userDetails.getId())) {
@@ -105,32 +107,44 @@ public class AlbumService {
         throw new UnauthenticatedException();
     }
 
-    //TODO: pagination
-    public List<AlbumDTO> findByNameLike(UserDetailsImpl userDetails, String name) {
-        List<Album> albums = albumRepository.findByNameLike(name);
-
-        if (userDetails == null) {
-            return albums.stream()
-                    .filter(a -> a.getProtectionType().equals(ProtectionType.PUBLIC))
-                    .map(AlbumDTO::of)
-                    .limit(10)
-                    .toList();
-        }
-
-        return albums.stream()
-                .filter(a -> a.getProtectionType().equals(ProtectionType.PUBLIC)
-                        || a.getUser().getId().equals(userDetails.getId()))
-                .map(AlbumDTO::of)
-                .limit(10)
-                .toList();
+    public List<AlbumDTO> findByIdsIn(List<Long> ids) {
+        User user = userRepository.findById(UserService.getCurrentUserDetails().getId())
+                .orElseThrow(UnauthenticatedException::new);
+        return albumRepository.findByIdInAndUserOrIdInAndProtectionType(
+                ids,
+                user.getId(),
+                ProtectionType.PUBLIC
+            ).stream()
+            .map(AlbumDTO::of)
+            .toList();
     }
 
-    public Album patchAlbum(UserDetailsImpl userDetails,
-                            Long id,
+    public List<AlbumDTO> findByNameLike(String name, int pageNumber, int pageSize) {
+        Long userId = Optional.ofNullable(
+                UserService.getCurrentUserDetails()
+            )
+            .map(UserDetailsImpl::getId)
+            .orElse(null);
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        return albumRepository.findByNameLike(
+                name,
+                userId,
+                ProtectionType.PUBLIC,
+                pageable
+            )
+            .stream()
+            .map(AlbumDTO::of)
+            .toList();
+    }
+
+    public Album patchAlbum(Long id,
                             String protectionType,
                             List<Long> songIds,
                             String name,
                             MultipartFile image) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -159,7 +173,7 @@ public class AlbumService {
 
         if (songIds != null) {
             songIds.forEach(songId -> {
-                songService.findById(songId).ifPresent(song -> {
+                songRepository.findById(songId).ifPresent(song -> {
                     if (!song.getProtectionType().equals(ProtectionType.PRIVATE)
                             || album.getUser().getSongs().stream()
                             .anyMatch(s -> s.getId().equals(song.getId()))) {
@@ -172,9 +186,9 @@ public class AlbumService {
         return albumRepository.save(album);
     }
 
-    public Album addSongs(UserDetailsImpl userDetails,
-                          Long id,
+    public Album addSongs(Long id,
                           List<Long> songIds) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -187,7 +201,7 @@ public class AlbumService {
 
         if (songIds != null) {
             songIds.forEach(songId -> {
-                songService.findById(songId).ifPresent(song -> {
+                songRepository.findById(songId).ifPresent(song -> {
                     if (!song.getProtectionType().equals(ProtectionType.PRIVATE)
                             || album.getUser().getSongs().stream()
                             .anyMatch(s -> s.getId().equals(song.getId()))) {
@@ -199,8 +213,8 @@ public class AlbumService {
         return albumRepository.save(album);
     }
 
-    public Album deleteAlbum(UserDetailsImpl userDetails,
-                             Long id) {
+    public Album deleteAlbum(Long id) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }

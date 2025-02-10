@@ -10,6 +10,9 @@ import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,8 +30,6 @@ import java.util.regex.Pattern;
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-    private final SongRepository songRepository;
-    private final AlbumRepository albumRepository;
     private final ImageFactory imageFactory;
     private final MinioService minioService;
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
@@ -41,8 +42,6 @@ public class UserService implements UserDetailsService {
                        ImageFactory imageFactory,
                        MinioService minioService) {
         this.userRepository = userRepository;
-        this.songRepository = songRepository;
-        this.albumRepository = albumRepository;
         this.imageFactory = imageFactory;
         this.minioService = minioService;
     }
@@ -60,6 +59,10 @@ public class UserService implements UserDetailsService {
                 ),
                 user.getProfilePicture()
         );
+    }
+
+    public static UserDetailsImpl getCurrentUserDetails() {
+        return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication();
     }
 
     public User registerUser(User user) {
@@ -112,7 +115,9 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id);
     }
 
-    public UserDTO findCurrUser(UserDetailsImpl userDetails) {
+    public UserDTO findCurrUser() {
+        UserDetailsImpl userDetails = getCurrentUserDetails();
+
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -121,12 +126,10 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(NotFoundException::new);
     }
 
-    //TODO: pagination
-    public List<UserDTO> findByNameLike(UserDetailsImpl userDetails, String name) {
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
-        return userRepository.findByNameLike(name)
+    public List<UserDTO> findByNameLike(String name, int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        return userRepository.findByNameLike(name, pageable)
                 .stream()
                 .map(UserDTO::new)
                 .toList();
@@ -136,13 +139,13 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public void patchUser(UserDetailsImpl userDetails,
-                          String username,
+    public void patchUser(String username,
                           String email,
                           String password,
                           String oldPassword,
                           MultipartFile image) {
-        //TODO: return something if these details doesnt match
+        UserDetailsImpl userDetails = getCurrentUserDetails();
+
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -188,8 +191,9 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void followUser(UserDetailsImpl userDetails,
-                           Long userId) {
+    public void followUser(Long userId) {
+        UserDetailsImpl userDetails = getCurrentUserDetails();
+
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -215,7 +219,9 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public void deleteUser(UserDetailsImpl userDetails) {
+    public void deleteUser() {
+        UserDetailsImpl userDetails = getCurrentUserDetails();
+
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }

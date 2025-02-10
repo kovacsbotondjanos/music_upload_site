@@ -10,6 +10,7 @@ import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.dataHandler.services.UserSongService;
 import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
+import com.musicUpload.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -69,11 +70,13 @@ public class RecommendationEngine {
         return songOccurrenceMap;
     }
 
-    public List<Map.Entry<Long, Long>> createRecommendationsForSong(Long songId) {
+    public List<Long> createRecommendationsForSong(Long songId) {
         return getSongsWithOccurrenceCount(songId)
                 .entrySet()
                 .stream()
-                .sorted(Comparator.comparingLong(Map.Entry::getValue))
+                .map(Pair::new)
+                .sorted(Comparator.comparingLong(Pair::getSecond))
+                .map(Pair::getFirst)
                 .toList();
     }
 

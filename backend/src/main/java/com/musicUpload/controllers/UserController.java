@@ -2,12 +2,11 @@ package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.UserDAO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
-import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.models.implementations.User;
+import com.musicUpload.dataHandler.services.UserRecommendationService;
 import com.musicUpload.dataHandler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,21 +17,30 @@ import java.util.List;
 @CrossOrigin
 public class UserController {
     private final UserService userService;
+    private final UserRecommendationService userRecommendationService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService,
+                          UserRecommendationService userRecommendationService) {
         this.userService = userService;
+        this.userRecommendationService = userRecommendationService;
     }
 
     @GetMapping
-    public UserDTO getCurrUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userService.findCurrUser(userDetails);
+    public UserDTO getCurrUser() {
+        return userService.findCurrUser();
     }
 
     @GetMapping("/search/{name}")
-    public List<UserDTO> getSongByNameLike(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                           @PathVariable String name) {
-        return userService.findByNameLike(userDetails, name);
+    public List<UserDTO> getSongByNameLike(@PathVariable String name,
+                                           @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+                                           @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
+        return userService.findByNameLike(name, pageNumber, pageSize);
+    }
+
+    @GetMapping("/recommended")
+    public List<Long> getRecommendedSongs() {
+        return userRecommendationService.getRecommendationsForUser();
     }
 
     @PostMapping("/add")
@@ -43,27 +51,26 @@ public class UserController {
 
     @PostMapping("/follow")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void followUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                           @RequestParam(name = "userId") Long userId) {
-        userService.followUser(userDetails, userId);
+    public void followUser(@RequestParam(name = "userId") Long userId) {
+        userService.followUser(userId);
     }
 
     @PatchMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void patchUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                          @ModelAttribute UserDAO userPatch,
+    public void patchUser(@ModelAttribute UserDAO userPatch,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
-        userService.patchUser(userDetails,
+        userService.patchUser(
                 userPatch.getUsername(),
                 userPatch.getEmail(),
                 userPatch.getPassword(),
                 userPatch.getOldPassword(),
-                image);
+                image
+        );
     }
 
     @DeleteMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        userService.deleteUser(userDetails);
+    public void deleteUser() {
+        userService.deleteUser();
     }
 }

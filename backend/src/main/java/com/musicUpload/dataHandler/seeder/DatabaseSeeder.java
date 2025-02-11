@@ -8,7 +8,9 @@ import com.musicUpload.dataHandler.seeder.factories.UserFactory;
 import com.musicUpload.dataHandler.services.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,7 +43,8 @@ public class DatabaseSeeder {
         albumFactory.createAlbums(20, users, songs, executorService);
     }
 
-    @PostConstruct
+    @Scheduled(initialDelay = 1000)
+    @SchedulerLock(name = "DatabaseSeeder_seedDatabaseIfEmpty", lockAtMostFor = "5m")
     public void seedDatabaseIfEmpty() {
         if (userService.count() == 0) {
             try (ExecutorService executorService = Executors.newFixedThreadPool(20)) {

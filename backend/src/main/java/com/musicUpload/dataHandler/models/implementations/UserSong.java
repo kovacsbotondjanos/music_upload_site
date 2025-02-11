@@ -11,11 +11,14 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = "USERS_SONGS")
+@Table(name = UserSong.NAME)
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"updatedAt", "createdAt"})
 public class UserSong implements CustomEntityInterface {
+
+    public final static String NAME = "USER_SONG";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

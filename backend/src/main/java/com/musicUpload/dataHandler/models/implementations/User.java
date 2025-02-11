@@ -16,11 +16,14 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "USERS")
+@Table(name = User.NAME)
 @ToString(exclude = {"followers", "followedUsers", "albums", "songs"})
 @AllArgsConstructor
 @NoArgsConstructor
 public class User implements CustomEntityInterface, Serializable {
+
+    public final static String NAME = "USER";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

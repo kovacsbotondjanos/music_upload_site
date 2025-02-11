@@ -9,15 +9,19 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
-@Table(name = "SONGS")
+@Table(name = Song.NAME)
 @ToString(exclude = {"user", "albums"})
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"protectionType", "user", "albums", "createdAt", "updatedAt"})
 public class Song implements CustomEntityInterface, Serializable {
+
+    public final static String NAME = "SONG";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -36,6 +40,14 @@ public class Song implements CustomEntityInterface, Serializable {
 
     @ManyToMany(mappedBy = "songs", fetch = FetchType.EAGER)
     private List<Album> albums = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "tag_song",
+            joinColumns = @JoinColumn(name = "song_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")

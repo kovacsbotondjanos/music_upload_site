@@ -39,7 +39,7 @@ public class UserRecommendationService {
     }
 
     public List<Long> getRecommendationsForUser() {
-        return recommendationEngine.createRecommendationsForAlbum(
+        return recommendationEngine.createRecommendationsForUser(
                 UserService.getCurrentUserDetails().getId()
         );
     }

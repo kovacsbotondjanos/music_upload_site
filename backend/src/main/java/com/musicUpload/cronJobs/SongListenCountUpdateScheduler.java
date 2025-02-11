@@ -6,6 +6,7 @@ import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserSongRepository;
 import com.musicUpload.util.Pair;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ public class SongListenCountUpdateScheduler {
     }
 
     @Scheduled(fixedRate = SCHEDULE)
+    @SchedulerLock(name = "SongListenCountUpdateScheduler_saveReport", lockAtMostFor = "2m")
     public void saveReport() {
         Map<Pair<Long, Long>, Long> copyMap;
         synchronized (songListensBuffer) {

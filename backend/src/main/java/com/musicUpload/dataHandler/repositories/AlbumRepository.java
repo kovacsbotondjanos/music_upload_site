@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public interface AlbumRepository extends JpaRepository<Album, Long> {
     @Query(value = "SELECT * " +
-            "FROM albums " +
+            "FROM album " +
             "WHERE name LIKE CONCAT('%', :name, '%') " +
             "AND (user = :userId OR protection_type = :protection_type)" +
             "ORDER BY " +
@@ -21,7 +21,12 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
             "WHEN name LIKE CONCAT(:name, '%') THEN 1 " +
             "ELSE 2 " +
             "END, " +
-            "name", nativeQuery = true)
+            "name",
+           countQuery = "SELECT COUNT(*) " +
+            "FROM album " +
+            "WHERE name LIKE CONCAT('%', :name, '%') " +
+            "AND (user = :userId OR protection_type = :protection_type)",
+           nativeQuery = true)
     List<Album> findByNameLike(
             @Param("name") String name,
             @Param("userId") Long id,
@@ -30,7 +35,7 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     );
 
     @Query(value = "SELECT * " +
-            "FROM albums " +
+            "FROM album " +
             "WHERE id IN :ids " +
             "AND (user = :userId " +
             "OR protection_type = :protection_type)", nativeQuery = true)

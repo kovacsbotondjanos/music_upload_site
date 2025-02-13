@@ -16,7 +16,7 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     List<Song> findByProtectionTypeOrderByListenCountDesc(ProtectionType protectionType, Pageable page);
 
     @Query(value = "SELECT * " +
-            "FROM songs " +
+            "FROM song " +
             "WHERE name LIKE CONCAT('%', :name, '%') " +
             "AND (user = :userId OR protection_type = :protection_type)" +
             "ORDER BY " +
@@ -24,7 +24,12 @@ public interface SongRepository extends JpaRepository<Song, Long> {
             "WHEN name LIKE CONCAT(:name, '%') THEN 1 " +
             "ELSE 2 " +
             "END, " +
-            "name", nativeQuery = true)
+            "name",
+          countQuery = "SELECT COUNT(*) " +
+            "FROM song " +
+            "WHERE name LIKE CONCAT('%', :name, '%') " +
+            "AND (user = :userId OR protection_type = :protection_type)",
+          nativeQuery = true)
     List<Song> findByNameLike(
             @Param("name") String name,
             @Param("userId") Long id,
@@ -33,12 +38,23 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     );
 
     @Query(value = "SELECT * " +
-            "FROM songs " +
+            "FROM song " +
             "WHERE id IN :ids " +
             "AND (user = :userId " +
             "OR protection_type = :protection_type)", nativeQuery = true)
     List<Song> findByIdInAndUserOrIdInAndProtectionType(
             @Param("ids") List<Long> ids,
+            @Param("userId") Long userId,
+            @Param("protection_type") ProtectionType protectionType
+    );
+
+    @Query(value = "SELECT * " +
+            "FROM song " +
+            "WHERE id = :id " +
+            "AND (user = :userId " +
+            "OR protection_type = :protection_type)", nativeQuery = true)
+    Optional<Song> findByIdAndProtectionTypeOrUser(
+            @Param("id") Long id,
             @Param("userId") Long userId,
             @Param("protection_type") ProtectionType protectionType
     );

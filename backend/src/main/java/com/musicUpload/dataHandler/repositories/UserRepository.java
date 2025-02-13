@@ -15,13 +15,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     @Query(value = "SELECT * " +
-            "FROM users " +
+            "FROM user " +
             "WHERE username LIKE CONCAT('%', :name, '%') " +
             "ORDER BY " +
             "CASE " +
             "WHEN username LIKE CONCAT(:name, '%') THEN 1 " +
             "ELSE 2 " +
             "END, " +
-            "username", nativeQuery = true)
+            "username",
+           countQuery = "SELECT COUNT(*) " +
+            "FROM user " +
+            "WHERE username LIKE CONCAT('%', :name, '%')",
+           nativeQuery = true)
     List<User> findByNameLike(@Param("name") String name, Pageable pageable);
 }

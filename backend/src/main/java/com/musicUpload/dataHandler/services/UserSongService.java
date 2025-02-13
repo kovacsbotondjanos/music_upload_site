@@ -21,19 +21,18 @@ public class UserSongService {
         return userSongRepository.findAll();
     }
 
-    public Set<UserSong> getListensForSong(Long songId) {
-        return userSongRepository.findBySongId(songId);
+    public Set<UserSong> getListensForSongAndCreatedAtGreaterThan(Long songId, Date startDate, Date endDate) {
+        return userSongRepository.findBySongIdAndCreatedAtBetween(songId, startDate, endDate);
     }
 
-    public Set<UserSong> getSongsForUsers(Collection<Long> ids) {
-        return userSongRepository.findByUserIdIn(ids);
+    public Set<UserSong> getSongsForUsersAndCreatedAtGreaterThan(Collection<Long> ids,
+                                                                 Collection<Long> tagIds,
+                                                                 Date startDate,
+                                                                 Date endDate) {
+        return userSongRepository.findByUserIdInAndCreatedAtBetween(ids, tagIds, startDate, endDate);
     }
 
-    public Set<UserSong> getSongsForUser(Long userId) {
-        return userSongRepository.findByUserId(userId);
-    }
-
-    public Set<UserSong> findByLastTwoMonths(Date start) {
-        return userSongRepository.findByCreatedAtGreaterThan(start);
+    public Set<UserSong> getSongsForUser(Long userId, Date start, Date end) {
+        return userSongRepository.findByUserIdAndCreatedAtBetween(userId, start, end);
     }
 }

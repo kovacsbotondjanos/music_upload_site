@@ -3,13 +3,14 @@ package com.musicUpload.dataHandler.models.implementations;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
 @Table(name = Tag.NAME)
-@AllArgsConstructor
 @NoArgsConstructor
 public class Tag {
 
@@ -22,7 +23,7 @@ public class Tag {
     private String name;
 
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-    private List<Song> songs;
+    private Set<Song> songs;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
@@ -31,4 +32,16 @@ public class Tag {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    public Tag(String name) {
+        this.name = name;
+    }
+
+    public void addSongs(List<Song> songs) {
+        this.songs.addAll(songs);
+    }
+
+    public void addSongs(Song... songs) {
+        addSongs(Arrays.asList(songs));
+    }
 }

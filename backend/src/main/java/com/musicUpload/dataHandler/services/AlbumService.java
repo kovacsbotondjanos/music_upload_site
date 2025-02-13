@@ -61,7 +61,7 @@ public class AlbumService {
 
         Album album = new Album();
 
-        album.setProtectionType(ProtectionType.getByName(protectionType));
+        album.setProtectionType(ProtectionType.valueOf(protectionType));
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
@@ -156,7 +156,7 @@ public class AlbumService {
                 .orElseThrow(UnauthenticatedException::new);
 
         if (protectionType != null) {
-            album.setProtectionType(ProtectionType.getByName(protectionType));
+            album.setProtectionType(ProtectionType.valueOf(protectionType));
         }
 
         if (name != null) {
@@ -200,15 +200,13 @@ public class AlbumService {
                 .orElseThrow(UnauthenticatedException::new);
 
         if (songIds != null) {
-            songIds.forEach(songId -> {
-                songRepository.findById(songId).ifPresent(song -> {
-                    if (!song.getProtectionType().equals(ProtectionType.PRIVATE)
-                            || album.getUser().getSongs().stream()
-                            .anyMatch(s -> s.getId().equals(song.getId()))) {
-                        album.getSongs().add(song);
-                    }
-                });
-            });
+            songIds.forEach(songId ->
+                songRepository.findByIdAndProtectionTypeOrUser(
+                        id,
+                        user.getId(),
+                        ProtectionType.PUBLIC
+                ).ifPresent(song -> album.getSongs().add(song))
+            );
         }
         return albumRepository.save(album);
     }

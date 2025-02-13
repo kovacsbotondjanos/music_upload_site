@@ -1,7 +1,8 @@
 package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.cronJobs.SongListenCountUpdateScheduler;
-import com.musicUpload.dataHandler.DTOs.AlbumDTO;
+import com.musicUpload.dataHandler.DTOs.SongDAO;
+import com.musicUpload.dataHandler.repositories.TagRepository;
 import com.musicUpload.recommendation.RecommendationEngine;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
@@ -22,9 +23,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SongService {
@@ -36,6 +39,7 @@ public class SongService {
     private final MinioService minioService;
     private final RecommendationEngine recommendationEngine;
     private final SongListenCountUpdateScheduler songListenCountUpdateScheduler;
+    private final TagService tagService;
 
     @Autowired
     public SongService(SongRepository songRepository,
@@ -45,7 +49,8 @@ public class SongService {
                        UserRecommendationService userRecommendationService,
                        MinioService minioService,
                        RecommendationEngine recommendationEngine,
-                       SongListenCountUpdateScheduler songListenCountUpdateScheduler) {
+                       SongListenCountUpdateScheduler songListenCountUpdateScheduler,
+                       TagService tagService) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
@@ -54,14 +59,26 @@ public class SongService {
         this.minioService = minioService;
         this.recommendationEngine = recommendationEngine;
         this.songListenCountUpdateScheduler = songListenCountUpdateScheduler;
+        this.tagService = tagService;
     }
 
     public Song addSong(Song song) {
         return songRepository.save(song);
     }
 
+    public Song addSong(SongDAO song, MultipartFile image, MultipartFile songFile) {
+        return addSong(
+            song.getProtectionType(),
+            song.getName(),
+            song.getTags(),
+            image,
+            songFile
+        );
+    }
+
     public Song addSong(String protectionType,
                         String name,
+                        List<String> tags,
                         MultipartFile image,
                         MultipartFile songFile) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
@@ -82,9 +99,17 @@ public class SongService {
         Song song = new Song();
         song.setUser(user);
 
-        song.setProtectionType(ProtectionType.getByName(protectionType));
+        song.setProtectionType(ProtectionType.valueOf(protectionType));
 
         song.setName(name);
+
+        if (tags.size() > 3) {
+            //when we have more than 3 tags we just get rid of the
+            // rest, there's no need to throw an exception here
+            tags = tags.stream().limit(3).toList();
+        }
+
+        song.addTags(tagService.findByIdsIn(tags));
 
         if (image != null && !image.isEmpty()) {
             if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
@@ -189,9 +214,20 @@ public class SongService {
         throw new NotFoundException();
     }
 
+    public void patchSong(Long id, SongDAO song, MultipartFile image) {
+        patchSong(
+            id,
+            song.getProtectionType(),
+            song.getName(),
+            song.getTags(),
+            image
+        );
+    }
+
     public void patchSong(Long id,
                           String protectionType,
                           String name,
+                          List<String> tags,
                           MultipartFile image) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
 
@@ -206,7 +242,11 @@ public class SongService {
                 .orElseThrow(UnauthenticatedException::new);
 
         if (protectionType != null) {
-            song.setProtectionType(ProtectionType.getByName(protectionType));
+            song.setProtectionType(ProtectionType.valueOf(protectionType));
+        }
+
+        if (tags != null && !tags.isEmpty()) {
+            song.setTags(new HashSet<>(tagService.findByIdsIn(tags)));
         }
 
         if (name != null) {

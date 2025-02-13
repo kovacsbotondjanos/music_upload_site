@@ -72,9 +72,9 @@ public class SongListenCountUpdateScheduler {
                                 songsToSave.put(e.getKey().getFirst(), e.getValue());
                             }
 
-                            //monthly reports of songs
-                            Date firstDate = getFirstDayOfTheMonth();
-                            Date lastDate = getLastDayOfTheMonth();
+                            //daily reports of songs
+                            Date firstDate = getStartOfToday();
+                            Date lastDate = getStartOfTomorrow();
                             //TODO: check if we could fetch by a list of ids here
                             Optional<UserSong> userListenOpt = userSongRepository
                                 .findBySongIdAndUserIdAndCreatedAtBetween(
@@ -121,24 +121,16 @@ public class SongListenCountUpdateScheduler {
         }
     }
 
-    private Date getFirstDayOfTheMonth() {
-        LocalDate date = LocalDate.now();
-        return Date.from(
-            date
-                .withDayOfMonth(1)
-                .atStartOfDay(
-                        ZoneId.systemDefault()
-                ).toInstant()
-        );
+    private Date getStartOfToday() {
+        return Date.from(LocalDate.now()
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant());
     }
 
-    private Date getLastDayOfTheMonth() {
-        LocalDate date = LocalDate.now();
-        return Date.from(
-            date
-                .withDayOfMonth(date.lengthOfMonth())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-        );
+    private Date getStartOfTomorrow() {
+        return Date.from(LocalDate.now()
+            .plusDays(1)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant());
     }
 }

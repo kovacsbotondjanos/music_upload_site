@@ -61,15 +61,14 @@ public class SongController {
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void createSong(@ModelAttribute SongDAO songCreateAndDTO,
+    public void createSong(@ModelAttribute SongDAO songDAO,
                            @RequestParam(name = "image", required = false) MultipartFile image,
                            @RequestParam(name = "song") MultipartFile song) {
 
         songService.addSong(
-                songCreateAndDTO.getProtectionType(),
-                songCreateAndDTO.getName(),
-                image,
-                song
+            songDAO,
+            image,
+            song
         );
     }
 
@@ -79,10 +78,9 @@ public class SongController {
                           @ModelAttribute SongDAO songPatchDTO,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
         songService.patchSong(
-                id,
-                songPatchDTO.getProtectionType(),
-                songPatchDTO.getName(),
-                image
+            id,
+            songPatchDTO,
+            image
         );
     }
 

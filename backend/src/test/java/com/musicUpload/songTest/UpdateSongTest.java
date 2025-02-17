@@ -82,7 +82,9 @@ public class UpdateSongTest {
                         1L,
                         "",
                         "",
-                        null));
+                        null
+                )
+        );
     }
 
     @Test

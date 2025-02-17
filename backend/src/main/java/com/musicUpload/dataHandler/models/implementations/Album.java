@@ -12,12 +12,15 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "ALBUMS")
+@Table(name = Album.NAME)
 @ToString(exclude = {"user", "songs"})
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"protectionType", "user", "songs", "createdAt", "updatedAt"})
 public class Album implements CustomEntityInterface, Serializable {
+
+    public final static String NAME = "ALBUM";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

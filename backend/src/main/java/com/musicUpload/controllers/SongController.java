@@ -2,11 +2,10 @@ package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.SongDAO;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.services.SongService;
+import com.musicUpload.dataHandler.services.UserRecommendationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,73 +16,77 @@ import java.util.List;
 @CrossOrigin
 public class SongController {
     private final SongService songService;
+    private final UserRecommendationService userRecommendationService;
 
     @Autowired
-    public SongController(SongService songService) {
+    public SongController(SongService songService,
+                          UserRecommendationService userRecommendationService) {
         this.songService = songService;
+        this.userRecommendationService = userRecommendationService;
     }
 
     @GetMapping
-    public List<SongDTO> getSongs(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return songService.getSongs(userDetails);
+    public List<SongDTO> getSongs() {
+        return songService.getSongs();
     }
 
     @GetMapping("/{id}")
-    public SongDTO getSongById(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                               @PathVariable Long id) {
-        return songService.findById(userDetails, id);
+    public SongDTO getSongById(@PathVariable Long id) {
+        return songService.findById(id);
+    }
+
+    @GetMapping("/{ids}")
+    public List<SongDTO> getAlbumsIn(@PathVariable List<Long> ids) {
+        return songService.findByIdsIn(ids);
     }
 
     @GetMapping("/search/{name}")
-    public List<SongDTO> getSongByNameLike(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                           @PathVariable String name,
+    public List<SongDTO> getSongByNameLike(@PathVariable String name,
                                            @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
                                            @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
-        return songService.findByNameLike(userDetails, name, pageNumber, pageSize);
+        return songService.findByNameLike(name, pageNumber, pageSize);
     }
 
+    //TODO: get rid of this and introduce other endpoints dedicated to the recommendation algorithm
     @GetMapping("/random")
-    public List<SongDTO> getRandomSongs(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                        @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+    public List<SongDTO> getRandomSongs(@RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
                                         @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
-        return songService.getRecommendedSongs(userDetails, pageNumber, pageSize);
+        return songService.getRecommendedSongs(pageNumber, pageSize);
+    }
+
+    @GetMapping("/recommended/{id}")
+    public List<Long> getRecommendedSongs(@PathVariable Long id) {
+        return userRecommendationService.getRecommendationsForSong(id);
     }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void createSong(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                           @ModelAttribute SongDAO songCreateAndDTO,
+    public void createSong(@ModelAttribute SongDAO songDAO,
                            @RequestParam(name = "image", required = false) MultipartFile image,
                            @RequestParam(name = "song") MultipartFile song) {
 
         songService.addSong(
-                userDetails,
-                songCreateAndDTO.getProtectionType(),
-                songCreateAndDTO.getName(),
-                image,
-                song
+            songDAO,
+            image,
+            song
         );
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void patchSong(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                          @PathVariable Long id,
+    public void patchSong(@PathVariable Long id,
                           @ModelAttribute SongDAO songPatchDTO,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
         songService.patchSong(
-                userDetails,
-                id,
-                songPatchDTO.getProtectionType(),
-                songPatchDTO.getName(),
-                image
+            id,
+            songPatchDTO,
+            image
         );
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteSong(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                           @PathVariable Long id) {
-        songService.deleteSong(userDetails, id);
+    public void deleteSong(@PathVariable Long id) {
+        songService.deleteSong(id);
     }
 }

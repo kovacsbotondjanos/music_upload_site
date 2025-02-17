@@ -9,12 +9,15 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-@Entity(name = "USER_RECOMMENDATION")
+@Entity(name = UserRecommendation.NAME)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"updatedAt", "createdAt"})
 public class UserRecommendation implements CustomEntityInterface {
+
+    public final static String NAME = "USER_RECOMMENDATION";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

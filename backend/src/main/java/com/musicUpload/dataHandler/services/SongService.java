@@ -1,6 +1,8 @@
 package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.cronJobs.SongListenCountUpdateScheduler;
+import com.musicUpload.dataHandler.DTOs.SongDAO;
+import com.musicUpload.dataHandler.repositories.TagRepository;
 import com.musicUpload.recommendation.RecommendationEngine;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
@@ -21,9 +23,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SongService {
@@ -35,6 +39,7 @@ public class SongService {
     private final MinioService minioService;
     private final RecommendationEngine recommendationEngine;
     private final SongListenCountUpdateScheduler songListenCountUpdateScheduler;
+    private final TagService tagService;
 
     @Autowired
     public SongService(SongRepository songRepository,
@@ -44,7 +49,8 @@ public class SongService {
                        UserRecommendationService userRecommendationService,
                        MinioService minioService,
                        RecommendationEngine recommendationEngine,
-                       SongListenCountUpdateScheduler songListenCountUpdateScheduler) {
+                       SongListenCountUpdateScheduler songListenCountUpdateScheduler,
+                       TagService tagService) {
         this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
@@ -53,17 +59,30 @@ public class SongService {
         this.minioService = minioService;
         this.recommendationEngine = recommendationEngine;
         this.songListenCountUpdateScheduler = songListenCountUpdateScheduler;
+        this.tagService = tagService;
     }
 
     public Song addSong(Song song) {
         return songRepository.save(song);
     }
 
-    public Song addSong(UserDetailsImpl userDetails,
-                        String protectionType,
+    public Song addSong(SongDAO song, MultipartFile image, MultipartFile songFile) {
+        return addSong(
+            song.getProtectionType(),
+            song.getName(),
+            song.getTags(),
+            image,
+            songFile
+        );
+    }
+
+    public Song addSong(String protectionType,
                         String name,
+                        List<String> tags,
                         MultipartFile image,
                         MultipartFile songFile) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -80,9 +99,17 @@ public class SongService {
         Song song = new Song();
         song.setUser(user);
 
-        song.setProtectionType(ProtectionType.getByName(protectionType));
+        song.setProtectionType(ProtectionType.valueOf(protectionType));
 
         song.setName(name);
+
+        if (tags.size() > 3) {
+            //when we have more than 3 tags we just get rid of the
+            // rest, there's no need to throw an exception here
+            tags = tags.stream().limit(3).toList();
+        }
+
+        song.addTags(tagService.findByIdsIn(tags));
 
         if (image != null && !image.isEmpty()) {
             if (!Objects.requireNonNull(image.getContentType()).contains("image")) {
@@ -104,7 +131,9 @@ public class SongService {
         return addSong(song);
     }
 
-    public List<SongDTO> getSongs(UserDetailsImpl userDetails) {
+    public List<SongDTO> getSongs() {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -115,13 +144,10 @@ public class SongService {
         return songRepository.findByUser(u).stream().map(SongDTO::new).toList();
     }
 
-    public Optional<Song> findById(Long id) {
-        return songRepository.findById(id);
-    }
+    public SongDTO findById(Long id) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
 
-    public SongDTO findById(UserDetailsImpl userDetails,
-                            Long id) {
-        Song song = findById(id)
+        Song song = songRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
         if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
                 userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
@@ -130,9 +156,23 @@ public class SongService {
         throw new UnauthenticatedException();
     }
 
-    public List<SongDTO> getRecommendedSongs(UserDetailsImpl userDetails,
-                                             int pageNumber,
+    public List<SongDTO> findByIdsIn(List<Long> ids) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(UnauthenticatedException::new);
+        return songRepository.findByIdInAndUserOrIdInAndProtectionType(
+                        ids,
+                        user.getId(),
+                        ProtectionType.PUBLIC
+                ).stream()
+                .map(SongDTO::of)
+                .toList();
+    }
+
+    public List<SongDTO> getRecommendedSongs(int pageNumber,
                                              int pageSize) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
         Pageable page = PageRequest.of(pageNumber, pageSize);
 
         if (userDetails != null) {
@@ -144,28 +184,25 @@ public class SongService {
                 .toList();
     }
 
-    public List<SongDTO> findByNameLike(UserDetailsImpl userDetails,
-                                        String name,
+    public List<SongDTO> findByNameLike(String name,
                                         int pageNumber,
                                         int pageSize) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        //TODO: pagination!!!
-        List<Song> songs = songRepository.findByNameLike(name);
-        if (userDetails == null) {
-            return songs.stream()
-                    .filter(s -> s.getProtectionType().equals(ProtectionType.PUBLIC)).limit(10)
-                    .map(SongDTO::new)
-                    .toList();
-        }
-        return songs.stream()
-                .filter(s -> s.getProtectionType().equals(ProtectionType.PUBLIC)
-                        || s.getUser().getId().equals(userDetails.getId()))
-                .limit(10)
-                .map(SongDTO::new)
-                .toList();
+
+        return songRepository.findByNameLike(
+                name,
+                userDetails.getId(),
+                ProtectionType.PUBLIC,
+                pageable
+            )
+                .stream().map(SongDTO::of).toList();
     }
 
-    public String getSong(UserDetailsImpl userDetails, String nameHashed) {
+    public String getSong(String nameHashed) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+
         Song song = songRepository.findByNameHashed(nameHashed)
                 .orElseThrow(NotFoundException::new);
 
@@ -177,11 +214,23 @@ public class SongService {
         throw new NotFoundException();
     }
 
-    public void patchSong(UserDetailsImpl userDetails,
-                          Long id,
+    public void patchSong(Long id, SongDAO song, MultipartFile image) {
+        patchSong(
+            id,
+            song.getProtectionType(),
+            song.getName(),
+            song.getTags(),
+            image
+        );
+    }
+
+    public void patchSong(Long id,
                           String protectionType,
                           String name,
+                          List<String> tags,
                           MultipartFile image) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }
@@ -193,7 +242,11 @@ public class SongService {
                 .orElseThrow(UnauthenticatedException::new);
 
         if (protectionType != null) {
-            song.setProtectionType(ProtectionType.getByName(protectionType));
+            song.setProtectionType(ProtectionType.valueOf(protectionType));
+        }
+
+        if (tags != null && !tags.isEmpty()) {
+            song.setTags(new HashSet<>(tagService.findByIdsIn(tags)));
         }
 
         if (name != null) {
@@ -209,8 +262,9 @@ public class SongService {
         }
     }
 
-    public Song deleteSong(UserDetailsImpl userDetails,
-                           Long id) {
+    public Song deleteSong(Long id) {
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+
         if (userDetails == null) {
             throw new UnauthenticatedException();
         }

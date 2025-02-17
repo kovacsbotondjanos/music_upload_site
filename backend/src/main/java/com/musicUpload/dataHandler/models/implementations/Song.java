@@ -6,18 +6,19 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Data
-@Table(name = "SONGS")
+@Table(name = Song.NAME)
 @ToString(exclude = {"user", "albums"})
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"protectionType", "user", "albums", "createdAt", "updatedAt"})
 public class Song implements CustomEntityInterface, Serializable {
+
+    public final static String NAME = "SONG";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -37,6 +38,18 @@ public class Song implements CustomEntityInterface, Serializable {
     @ManyToMany(mappedBy = "songs", fetch = FetchType.EAGER)
     private List<Album> albums = new ArrayList<>();
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "tag_song",
+            joinColumns = @JoinColumn(name = "song_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"),
+            indexes = {
+                @Index(name = "idx_song_id", columnList = "song_id"),
+                @Index(name = "idx_tag_id", columnList = "tag_id")
+            }
+    )
+    private Set<Tag> tags;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
@@ -55,12 +68,16 @@ public class Song implements CustomEntityInterface, Serializable {
         createdAt = new Date();
     }
 
-    public void addListen() {
-        listenCount++;
-    }
-
     public void addListen(Long count) {
         listenCount += count;
+    }
+
+    public void addTags(List<Tag> tags) {
+        this.tags.addAll(tags);
+    }
+
+    public void addTags(Tag... tags) {
+        addTags(Arrays.asList(tags));
     }
 
     public long getCacheIndex() {

@@ -1,7 +1,9 @@
 package com.musicUpload.dataHandler.models.implementations;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -12,9 +14,10 @@ import java.util.Set;
 @Data
 @Table(name = Tag.NAME)
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"id", "songs"})
 public class Tag {
 
-    public final static String NAME = "TAG";
+    public final static String NAME = "`TAG`";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,6 +38,16 @@ public class Tag {
 
     public Tag(String name) {
         this.name = name;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = new Date();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Date();
     }
 
     public void addSongs(List<Song> songs) {

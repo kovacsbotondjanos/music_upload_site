@@ -1,4 +1,4 @@
-package com.musicUpload.userTest;
+package unit.userTest;
 
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
@@ -107,7 +107,7 @@ public class UserServiceTest {
     @Test
     void findUserWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
-                () -> userService.findCurrUser(null));
+                () -> userService.findCurrUser());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class UserServiceTest {
         given(userRepository.findById(1L))
                 .willReturn(Optional.of(user));
         //When
-        UserDTO userDTO = userService.findCurrUser(userDetails);
+        UserDTO userDTO = userService.findCurrUser();
         //Then
         assertEquals("user", userDTO.getUsername());
     }
@@ -135,6 +135,6 @@ public class UserServiceTest {
                 .willReturn(Optional.empty());
         //Then
         assertThrows(UnauthenticatedException.class,
-                () -> userService.findCurrUser(null));
+                () -> userService.findCurrUser());
     }
 }

@@ -33,13 +33,13 @@ public class AuthConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.requestMatchers(
-                                                            "api/v1/users/**",
-                                                            "api/v1/albums/**",
-                                                            "api/v1/songs/**",
-                                                            "api/v1/files/**",
-                                                            "/login")
-                                                    .permitAll()
-                                                    .anyRequest().authenticated()
+                                "api/v1/users/**",
+                                "api/v1/albums/**",
+                                "api/v1/songs/**",
+                                "api/v1/files/**",
+                                "/login")
+                        .permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginProcessingUrl("/login")

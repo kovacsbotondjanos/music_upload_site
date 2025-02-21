@@ -17,7 +17,7 @@ import java.util.Date;
 @EqualsAndHashCode(exclude = {"updatedAt", "createdAt"})
 public class UserSong implements CustomEntityInterface {
 
-    public final static String NAME = "USER_SONG";
+    public final static String NAME = "`USER_SONG`";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

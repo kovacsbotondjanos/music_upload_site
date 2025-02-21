@@ -1,5 +1,6 @@
-package com.musicUpload.albumTest;
+package unit.albumTest;
 
+import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.enums.ProtectionType;
@@ -20,10 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,6 +43,7 @@ public class UpdateAlbumTest {
             privateProtectionType,
             new User(),
             new ArrayList<>(),
+            new HashSet<>(),
             new Date(),
             new Date());
     @Mock
@@ -94,7 +93,7 @@ public class UpdateAlbumTest {
     @Test
     void updateOtherUsersAlbum() {
         assertThrows(UnauthenticatedException.class,
-                () -> albumService.patchAlbum(userDetails, 2L, null, null, null, null));
+                () -> albumService.patchAlbum(2L, null, null, null, null));
     }
 
     @Test
@@ -105,7 +104,6 @@ public class UpdateAlbumTest {
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         albumService.patchAlbum(
-                userDetails,
                 1L,
                 null, null,
                 "bar",
@@ -122,7 +120,6 @@ public class UpdateAlbumTest {
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         albumService.patchAlbum(
-                userDetails,
                 1L,
                 "PRIVATE", null,
                 null,
@@ -139,11 +136,12 @@ public class UpdateAlbumTest {
                 .willReturn(Optional.of(album));
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
-        albumService.patchAlbum(userDetails,
+        albumService.patchAlbum(
                 1L,
                 null,
                 List.of(1L),
-                null, null);
+                null, null
+        );
         assertEquals(List.of(), album.getSongs());
     }
 
@@ -156,12 +154,13 @@ public class UpdateAlbumTest {
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         given(songService.findById(1L))
-                .willReturn(Optional.of(song));
-        albumService.patchAlbum(userDetails,
+                .willReturn(SongDTO.of(song));
+        albumService.patchAlbum(
                 1L,
                 null,
                 List.of(1L),
-                null, null);
+                null, null
+        );
         assertEquals(List.of(song), album.getSongs());
     }
 
@@ -177,11 +176,13 @@ public class UpdateAlbumTest {
         user.setAlbums(List.of(album));
         user.setSongs(List.of(song));
         given(songService.findById(1L))
-                .willReturn(Optional.of(song));
-        albumService.patchAlbum(userDetails,
+                .willReturn(SongDTO.of(song));
+        albumService.patchAlbum(
                 1L,
                 null,
                 List.of(1L),
-                null, null);
+                null,
+                null
+        );
     }
 }

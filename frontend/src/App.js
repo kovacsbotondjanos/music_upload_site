@@ -152,7 +152,7 @@ function App() {
   };
 
   const fetchSongs = () => {
-    fetch("http://localhost:8080/api/v1/songs/random", {
+    fetch("http://localhost:8080/api/v1/users/recommended", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -1,10 +1,8 @@
 package com.musicUpload.controllers;
 
-import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

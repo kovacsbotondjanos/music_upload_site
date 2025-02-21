@@ -1,4 +1,4 @@
-package com.musicUpload.albumTest;
+package unit.albumTest;
 
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
@@ -65,7 +65,7 @@ public class FindByIdTest {
         given(albumRepository.findById(id))
                 .willReturn(Optional.of(album));
         //When
-        AlbumDTO albumDTO = albumService.findById(id, null);
+        AlbumDTO albumDTO = albumService.findById(id);
         //Then
         assertEquals("foo", albumDTO.getName());
     }
@@ -78,7 +78,7 @@ public class FindByIdTest {
                 .willReturn(Optional.empty());
         //Then
         assertThrows(NotFoundException.class,
-                () -> albumService.findById(id, userDetails));
+                () -> albumService.findById(id));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class FindByIdTest {
                 .willReturn(Optional.of(album));
         //Then
         assertThrows(UnauthenticatedException.class,
-                () -> albumService.findById(id, null));
+                () -> albumService.findById(id));
     }
 
     @Test
@@ -100,7 +100,7 @@ public class FindByIdTest {
         given(albumRepository.findById(id))
                 .willReturn(Optional.of(album));
         //When
-        AlbumDTO a = albumService.findById(id, userDetails);
+        AlbumDTO a = albumService.findById(id);
         //Then
         assertEquals("foo", a.getName());
     }

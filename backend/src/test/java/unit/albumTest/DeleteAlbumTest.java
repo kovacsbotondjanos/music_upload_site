@@ -1,14 +1,16 @@
-package com.musicUpload.songTest;
+package unit.albumTest;
 
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
-import com.musicUpload.dataHandler.models.implementations.Song;
+import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
-import com.musicUpload.dataHandler.repositories.SongRepository;
+import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
+import com.musicUpload.util.ImageFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,53 +26,51 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
-public class DeleteSongTest {
-    private final ProtectionType protectionType = ProtectionType.PUBLIC;
-    UserDetailsImpl userDetails = new UserDetailsImpl(1L,
+public class DeleteAlbumTest {
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
             "user1",
-            "",
+            "pwd",
             List.of(),
             "");
+    private final ProtectionType protectionType = ProtectionType.PUBLIC;
     @Mock
-    private SongRepository songRepository;
+    private AlbumRepository albumRepository;
     @Mock
     private UserRepository userRepository;
     @Mock
+    private SongService songService;
+    @Mock
+    private ImageFactory imageFactory;
+    @Mock
     private MinioService minioService;
     @InjectMocks
-    private SongService songService;
-    private List<Song> songs;
+    private AlbumService albumService;
+    private List<Album> albums;
     private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
-        songs = List.of(
-                new Song(1L,
+        albums = List.of(
+                new Album(1L,
                         "",
                         "foo",
-                        "",
-                        1L,
                         protectionType,
                         new User(),
                         new ArrayList<>(),
                         new Date(),
                         new Date()),
-                new Song(2L,
+                new Album(2L,
                         "",
                         "bar",
-                        "",
-                        1L,
                         protectionType,
                         new User(),
                         new ArrayList<>(),
                         new Date(),
                         new Date()),
-                new Song(3L,
+                new Album(3L,
                         "",
                         "baz",
-                        "",
-                        1L,
                         protectionType,
                         new User(),
                         new ArrayList<>(),
@@ -83,37 +83,37 @@ public class DeleteSongTest {
         autoCloseable.close();
     }
 
-
     @Test
-    void canDeleteWithoutAuth() {
+    void canDeleteAlbumWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
-                () -> songService.deleteSong(null, 1L));
+                () -> albumService.deleteAlbum(1L));
     }
 
     @Test
-    void canDeleteOtherUserSongWithAuth() {
+    void canDeleteOtherUsersAlbum() {
         //Given
         User u = new User(userDetails);
-        given(userRepository.findById(userDetails.getId()))
+        given(userRepository.findById(1L))
                 .willReturn(Optional.of(u));
-        given(songRepository.findByUserAndId(u, 2L))
+        given(albumRepository.findByUserAndId(u, 2L))
                 .willReturn(Optional.empty());
+
         //Then
         assertThrows(UnauthenticatedException.class,
-                () -> songService.deleteSong(userDetails, 2L));
+                () -> albumService.deleteAlbum(2L));
     }
 
     @Test
-    void canDeleteOwnSongWithAuth() {
+    void canDeleteOwnAlbumWithAuth() {
         //Given
         User u = new User(userDetails);
-        given(userRepository.findById(userDetails.getId()))
+        given(albumRepository.findByUserAndId(u, 1L))
+                .willReturn(Optional.of(albums.getFirst()));
+        given(userRepository.findById(1L))
                 .willReturn(Optional.of(u));
-        given(songRepository.findByUserAndId(u, 1L))
-                .willReturn(Optional.of(songs.get(0)));
+        Album a = albumService.deleteAlbum(1L);
         //Then
-        Song s = songService.deleteSong(userDetails, 1L);
-        assertEquals(songs.get(0), s);
-        assertFalse(u.getSongs().contains(s));
+        assertEquals(albums.getFirst(), a);
+        assertFalse(u.getAlbums().contains(a));
     }
 }

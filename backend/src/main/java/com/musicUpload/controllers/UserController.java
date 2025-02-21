@@ -1,5 +1,6 @@
 package com.musicUpload.controllers;
 
+import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.DTOs.UserDAO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.models.implementations.User;
@@ -39,7 +40,7 @@ public class UserController {
     }
 
     @GetMapping("/recommended")
-    public List<Long> getRecommendedSongs() {
+    public List<SongDTO> getRecommendedSongs() {
         return userRecommendationService.getRecommendationsForUser();
     }
 

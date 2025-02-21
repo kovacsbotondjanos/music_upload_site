@@ -1,7 +1,5 @@
 package com.musicUpload.dataHandler.repositories;
 
-import com.musicUpload.dataHandler.enums.ProtectionType;
-import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.Tag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +12,7 @@ import java.util.Set;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
     @Query(value = "SELECT * " +
-            "FROM tag " +
+            "FROM TAG " +
             "WHERE name LIKE CONCAT('%', :name, '%') " +
             "ORDER BY " +
             "CASE " +
@@ -22,17 +20,17 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
             "ELSE 2 " +
             "END, " +
             "name",
-           countQuery = "SELECT COUNT(*) " +
-            "FROM tag " +
-            "WHERE name LIKE CONCAT('%', :name, '%')",
-           nativeQuery = true)
-    List<Album> findByNameLike(
+            countQuery = "SELECT COUNT(*) " +
+                    "FROM TAG " +
+                    "WHERE name LIKE CONCAT('%', :name, '%')",
+            nativeQuery = true)
+    List<Tag> findByNameLike(
             @Param("name") String name,
             Pageable pageable
     );
 
     @Query(value = "SELECT song_id " +
-            "FROM tag_song " +
+            "FROM TAG_SONG " +
             "WHERE tag_id in :tagIds",
             nativeQuery = true)
     Set<Long> findIdsForTagList(@Param("tagIds") List<Long> tagIds);

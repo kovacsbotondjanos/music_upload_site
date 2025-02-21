@@ -46,6 +46,13 @@ public class UserService implements UserDetailsService {
         this.minioService = minioService;
     }
 
+    public static UserDetailsImpl getCurrentUserDetails() {
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof UserDetailsImpl userDetails) {
+            return userDetails;
+        }
+        return null;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
@@ -59,10 +66,6 @@ public class UserService implements UserDetailsService {
                 ),
                 user.getProfilePicture()
         );
-    }
-
-    public static UserDetailsImpl getCurrentUserDetails() {
-        return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication();
     }
 
     public User registerUser(User user) {

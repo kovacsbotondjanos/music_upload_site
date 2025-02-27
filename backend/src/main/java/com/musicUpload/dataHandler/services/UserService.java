@@ -37,8 +37,6 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     public UserService(UserRepository userRepository,
-                       SongRepository songRepository,
-                       AlbumRepository albumRepository,
                        ImageFactory imageFactory,
                        MinioService minioService) {
         this.userRepository = userRepository;
@@ -47,7 +45,8 @@ public class UserService implements UserDetailsService {
     }
 
     public static UserDetailsImpl getCurrentUserDetails() {
-        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof UserDetailsImpl userDetails) {
+        if (SecurityContextHolder.getContext().getAuthentication() != null &&
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof UserDetailsImpl userDetails) {
             return userDetails;
         }
         return null;

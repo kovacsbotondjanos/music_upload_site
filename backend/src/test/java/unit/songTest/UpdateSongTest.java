@@ -18,6 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +30,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 public class UpdateSongTest {
     @Mock
@@ -41,18 +45,24 @@ public class UpdateSongTest {
     private UserRecommendationService userRecommendationService;
     @Mock
     private MinioService minioService;
+    @Mock
+    private SecurityContext securityContext;
+    @Mock
+    private Authentication authentication;
+    @Mock
+    private UserDetailsImpl userDetails;
     @InjectMocks
     private SongService songService;
     private Song song;
     private Long id;
-    private UserDetailsImpl userDetails;
     private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
-        song = new Song(id,
+        song = new Song(
+                id,
                 "",
                 "foo",
                 "",
@@ -62,13 +72,18 @@ public class UpdateSongTest {
                 new ArrayList<>(),
                 new HashSet<>(),
                 new Date(),
-                new Date());
+                new Date()
+        );
         userDetails = new UserDetailsImpl(
                 1L,
                 "",
                 "",
                 new ArrayList<>(),
-                "");
+                ""
+        );
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
     }
 
     @AfterEach
@@ -102,7 +117,8 @@ public class UpdateSongTest {
                         "",
                         "",
                         new ArrayList<>(),
-                        null));
+                        null)
+        );
     }
 
     @Test

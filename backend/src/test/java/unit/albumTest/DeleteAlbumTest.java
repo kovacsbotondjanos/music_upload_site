@@ -17,6 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,14 +28,21 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 public class DeleteAlbumTest {
-    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(
+            1L,
             "user1",
             "pwd",
             List.of(),
-            "");
+            ""
+    );
     private final ProtectionType protectionType = ProtectionType.PUBLIC;
+    @Mock
+    private SecurityContext securityContext;
+    @Mock
+    private Authentication authentication;
     @Mock
     private AlbumRepository albumRepository;
     @Mock
@@ -52,30 +62,39 @@ public class DeleteAlbumTest {
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         albums = List.of(
-                new Album(1L,
+                new Album(
+                        1L,
                         "",
                         "foo",
                         protectionType,
                         new User(),
                         new ArrayList<>(),
                         new Date(),
-                        new Date()),
-                new Album(2L,
+                        new Date()
+                ),
+                new Album(
+                        2L,
                         "",
                         "bar",
                         protectionType,
                         new User(),
                         new ArrayList<>(),
                         new Date(),
-                        new Date()),
-                new Album(3L,
+                        new Date()
+                ),
+                new Album(
+                        3L,
                         "",
                         "baz",
                         protectionType,
                         new User(),
                         new ArrayList<>(),
                         new Date(),
-                        new Date()));
+                        new Date()
+                )
+        );
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
     }
 
     @AfterEach
@@ -93,6 +112,7 @@ public class DeleteAlbumTest {
     void canDeleteOtherUsersAlbum() {
         //Given
         User u = new User(userDetails);
+        SecurityContextHolder.setContext(securityContext);
         given(userRepository.findById(1L))
                 .willReturn(Optional.of(u));
         given(albumRepository.findByUserAndId(u, 2L))
@@ -101,12 +121,14 @@ public class DeleteAlbumTest {
         //Then
         assertThrows(UnauthenticatedException.class,
                 () -> albumService.deleteAlbum(2L));
+        SecurityContextHolder.clearContext();
     }
 
     @Test
     void canDeleteOwnAlbumWithAuth() {
         //Given
         User u = new User(userDetails);
+        SecurityContextHolder.setContext(securityContext);
         given(albumRepository.findByUserAndId(u, 1L))
                 .willReturn(Optional.of(albums.getFirst()));
         given(userRepository.findById(1L))
@@ -115,5 +137,6 @@ public class DeleteAlbumTest {
         //Then
         assertEquals(albums.getFirst(), a);
         assertFalse(u.getAlbums().contains(a));
+        SecurityContextHolder.clearContext();
     }
 }

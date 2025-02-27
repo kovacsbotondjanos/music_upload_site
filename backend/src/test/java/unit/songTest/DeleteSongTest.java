@@ -15,19 +15,29 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 public class DeleteSongTest {
     private final ProtectionType protectionType = ProtectionType.PUBLIC;
-    UserDetailsImpl userDetails = new UserDetailsImpl(1L,
+    UserDetailsImpl userDetails = new UserDetailsImpl(
+            1L,
             "user1",
             "",
             List.of(),
-            "");
+            ""
+    );
+    @Mock
+    private SecurityContext securityContext;
+    @Mock
+    private Authentication authentication;
     @Mock
     private SongRepository songRepository;
     @Mock
@@ -43,7 +53,8 @@ public class DeleteSongTest {
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         songs = List.of(
-                new Song(1L,
+                new Song(
+                        1L,
                         "",
                         "foo",
                         "",
@@ -53,8 +64,10 @@ public class DeleteSongTest {
                         new ArrayList<>(),
                         new HashSet<>(),
                         new Date(),
-                        new Date()),
-                new Song(2L,
+                        new Date()
+                ),
+                new Song(
+                        2L,
                         "",
                         "bar",
                         "",
@@ -64,8 +77,10 @@ public class DeleteSongTest {
                         new ArrayList<>(),
                         new HashSet<>(),
                         new Date(),
-                        new Date()),
-                new Song(3L,
+                        new Date()
+                ),
+                new Song(
+                        3L,
                         "",
                         "baz",
                         "",
@@ -75,7 +90,11 @@ public class DeleteSongTest {
                         new ArrayList<>(),
                         new HashSet<>(),
                         new Date(),
-                        new Date()));
+                        new Date()
+                )
+        );
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
     }
 
     @AfterEach
@@ -94,6 +113,7 @@ public class DeleteSongTest {
     void canDeleteOtherUserSongWithAuth() {
         //Given
         User u = new User(userDetails);
+        SecurityContextHolder.setContext(securityContext);
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         given(songRepository.findByUserAndId(u, 2L))
@@ -101,12 +121,14 @@ public class DeleteSongTest {
         //Then
         assertThrows(UnauthenticatedException.class,
                 () -> songService.deleteSong(2L));
+        SecurityContextHolder.clearContext();
     }
 
     @Test
     void canDeleteOwnSongWithAuth() {
         //Given
         User u = new User(userDetails);
+        SecurityContextHolder.setContext(securityContext);
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         given(songRepository.findByUserAndId(u, 1L))
@@ -115,5 +137,6 @@ public class DeleteSongTest {
         Song s = songService.deleteSong(1L);
         assertEquals(songs.getFirst(), s);
         assertFalse(u.getSongs().contains(s));
+        SecurityContextHolder.clearContext();
     }
 }

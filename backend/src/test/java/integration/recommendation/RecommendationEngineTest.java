@@ -16,10 +16,8 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -179,6 +177,7 @@ public class RecommendationEngineTest {
     @Test
     @Order(3)
     public void testRecommendationWithSongsWithSameTag() {
+        userSongRepository.deleteAll();
         Song song1 = songRepository.findById(1L).orElseThrow();
         Song song2 = songRepository.findById(2L).orElseThrow();
         //we add two listens
@@ -207,6 +206,40 @@ public class RecommendationEngineTest {
 
         userSongRepository.saveAll(userSongs);
 
-        assertEquals(Set.of(1L, 2L), new HashSet<>(recommendationEngine.createRecommendationsForUser(user2.getId())));
+        assertEquals(
+                List.of(1L, 2L),
+                recommendationEngine.createRecommendationsForUser(user2.getId())
+        );
+    }
+
+    @Test
+    @Order(4)
+    public void testRecommendationForSong() {
+        userSongRepository.deleteAll();
+
+        List<Long> songIds = songRepository.findAll().stream()
+                .map(Song::getId)
+                .limit(5)
+                .collect(Collectors.toCollection(ArrayList::new));
+        List<Long> userIds = userRepository.findAll().stream().map(User::getId).toList();
+
+        userSongRepository.saveAll(
+            userIds.stream().map(id -> new UserSong(1L, id, 1L)).toList()
+        );
+
+        userSongRepository.saveAll(
+            songIds.stream().map(
+                    id -> IntStream.range(0, id.intValue()).mapToObj(
+                            userId -> new UserSong(id, (long) userId+1, 1L)
+                    ).toList()
+            ).flatMap(List::stream).toList()
+        );
+
+       Collections.reverse(songIds);
+
+        assertEquals(
+                songIds.stream().filter(id -> !id.equals(1L)).toList(),
+                recommendationEngine.createRecommendationsForSong(1L)
+        );
     }
 }

@@ -141,8 +141,9 @@ public class RecommendationEngine {
                     ).entrySet()
                     .stream()
                     .map(Pair::new)
-                    .sorted(Comparator.comparingDouble(Pair::getSecond))
+                    .sorted((p1, p2) -> Double.compare(p2.getSecond(), p1.getSecond()))
                     .map(Pair::getFirst)
+                    .filter(id -> !id.equals(songId))
                     .toList();
         }
     }
@@ -190,12 +191,7 @@ public class RecommendationEngine {
             }
         });
 
-        return songOccurrences
-                .entrySet()
-                .stream()
-                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
-                .map(Map.Entry::getKey)
-                .toList();
+        return sortMap(songOccurrences);
     }
 
     public List<Long> createRecommendationsForAlbum(Long albumId) {
@@ -241,10 +237,14 @@ public class RecommendationEngine {
             }
         });
 
+        return sortMap(songOccurrences);
+    }
+
+    private List<Long> sortMap(Map<Long, Double> songOccurrences) {
         return songOccurrences
                 .entrySet()
                 .stream()
-                .sorted(Comparator.comparingDouble(Map.Entry::getValue))
+                .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
     }

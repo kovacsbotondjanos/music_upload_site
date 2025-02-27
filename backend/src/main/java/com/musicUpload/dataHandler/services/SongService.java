@@ -142,8 +142,9 @@ public class SongService {
 
         Song song = songRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
+
         if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
-                userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
+            userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
             return SongDTO.of(song);
         }
         throw new UnauthenticatedException();

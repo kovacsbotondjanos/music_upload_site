@@ -4,8 +4,6 @@ import com.github.javafaker.Faker;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,12 +38,12 @@ public class UserFactory {
 
         users.stream().parallel().forEach(currUser -> {
             IntStream.range(0, random.nextInt() % users.size()).forEachOrdered(__ ->
-                executorService.submit(() -> {
-                    User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
-                    if (currUser.getFollowedUsers().stream().noneMatch(u -> u.equals(user) || u.equals(currUser))) {
-                        currUser.getFollowedUsers().add(user);
-                    }
-                })
+                    executorService.submit(() -> {
+                        User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
+                        if (currUser.getFollowedUsers().stream().noneMatch(u -> u.equals(user) || u.equals(currUser))) {
+                            currUser.getFollowedUsers().add(user);
+                        }
+                    })
             );
             userService.saveUser(currUser);
         });
@@ -57,23 +55,23 @@ public class UserFactory {
         List<User> users = Collections.synchronizedList(new ArrayList<>());
 
         IntStream.range(0, number).parallel().forEachOrdered(__ ->
-            executorService.submit(() -> {
-                User user = createUser();
-                users.add(user);
-                userService.registerUser(user);
-            })
+                executorService.submit(() -> {
+                    User user = createUser();
+                    users.add(user);
+                    userService.registerUser(user);
+                })
         );
 
         return users;
     }
 
-    public void createAdminFromConfigFile() {
+    public User createAdminFromConfigFile() {
         User admin = new User();
         admin.setUsername(adminUserName);
         admin.setPassword(adminPassword);
         admin.setEmail(adminEmail);
         admin.setPrivilege(Privilege.ADMIN);
-        userService.registerUser(admin);
+        return userService.registerUser(admin);
     }
 
     private User createUser() {

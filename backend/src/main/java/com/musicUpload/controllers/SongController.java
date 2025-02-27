@@ -35,7 +35,7 @@ public class SongController {
         return songService.findById(id);
     }
 
-    @GetMapping("/{ids}")
+    @GetMapping("/ids/{ids}")
     public List<SongDTO> getAlbumsIn(@PathVariable List<Long> ids) {
         return songService.findByIdsIn(ids);
     }
@@ -47,15 +47,8 @@ public class SongController {
         return songService.findByNameLike(name, pageNumber, pageSize);
     }
 
-    //TODO: get rid of this and introduce other endpoints dedicated to the recommendation algorithm
-    @GetMapping("/random")
-    public List<SongDTO> getRandomSongs(@RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
-                                        @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
-        return songService.getRecommendedSongs(pageNumber, pageSize);
-    }
-
     @GetMapping("/recommended/{id}")
-    public List<Long> getRecommendedSongs(@PathVariable Long id) {
+    public List<SongDTO> getRecommendedSongs(@PathVariable Long id) {
         return userRecommendationService.getRecommendationsForSong(id);
     }
 
@@ -66,9 +59,9 @@ public class SongController {
                            @RequestParam(name = "song") MultipartFile song) {
 
         songService.addSong(
-            songDAO,
-            image,
-            song
+                songDAO,
+                image,
+                song
         );
     }
 
@@ -78,9 +71,9 @@ public class SongController {
                           @ModelAttribute SongDAO songPatchDTO,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
         songService.patchSong(
-            id,
-            songPatchDTO,
-            image
+                id,
+                songPatchDTO,
+                image
         );
     }
 

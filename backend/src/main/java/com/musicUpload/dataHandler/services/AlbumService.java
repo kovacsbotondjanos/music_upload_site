@@ -43,10 +43,6 @@ public class AlbumService {
         this.minioService = minioService;
     }
 
-    public Album saveAlbum(Album album) {
-        return albumRepository.save(album);
-    }
-
     public Album saveAlbum(String protectionType,
                            String name,
                            MultipartFile image) {
@@ -80,7 +76,7 @@ public class AlbumService {
             album.setImage(img);
         }
 
-        return saveAlbum(album);
+        return albumRepository.save(album);
     }
 
     public List<AlbumDTO> getAlbums() {
@@ -111,32 +107,32 @@ public class AlbumService {
         User user = userRepository.findById(UserService.getCurrentUserDetails().getId())
                 .orElseThrow(UnauthenticatedException::new);
         return albumRepository.findByIdInAndUserOrIdInAndProtectionType(
-                ids,
-                user.getId(),
-                ProtectionType.PUBLIC
-            ).stream()
-            .map(AlbumDTO::of)
-            .toList();
+                        ids,
+                        user.getId(),
+                        ProtectionType.PUBLIC
+                ).stream()
+                .map(AlbumDTO::of)
+                .toList();
     }
 
     public List<AlbumDTO> findByNameLike(String name, int pageNumber, int pageSize) {
         Long userId = Optional.ofNullable(
-                UserService.getCurrentUserDetails()
-            )
-            .map(UserDetailsImpl::getId)
-            .orElse(null);
+                        UserService.getCurrentUserDetails()
+                )
+                .map(UserDetailsImpl::getId)
+                .orElse(null);
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         return albumRepository.findByNameLike(
-                name,
-                userId,
-                ProtectionType.PUBLIC,
-                pageable
-            )
-            .stream()
-            .map(AlbumDTO::of)
-            .toList();
+                        name,
+                        userId,
+                        ProtectionType.PUBLIC,
+                        pageable
+                )
+                .stream()
+                .map(AlbumDTO::of)
+                .toList();
     }
 
     public Album patchAlbum(Long id,
@@ -201,11 +197,11 @@ public class AlbumService {
 
         if (songIds != null) {
             songIds.forEach(songId ->
-                songRepository.findByIdAndProtectionTypeOrUser(
-                        id,
-                        user.getId(),
-                        ProtectionType.PUBLIC
-                ).ifPresent(song -> album.getSongs().add(song))
+                    songRepository.findByIdAndProtectionTypeOrUser(
+                            id,
+                            user.getId(),
+                            ProtectionType.PUBLIC
+                    ).ifPresent(song -> album.getSongs().add(song))
             );
         }
         return albumRepository.save(album);

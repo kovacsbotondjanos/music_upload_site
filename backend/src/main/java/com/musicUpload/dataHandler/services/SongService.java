@@ -2,8 +2,6 @@ package com.musicUpload.dataHandler.services;
 
 import com.musicUpload.cronJobs.SongListenCountUpdateScheduler;
 import com.musicUpload.dataHandler.DTOs.SongDAO;
-import com.musicUpload.dataHandler.repositories.TagRepository;
-import com.musicUpload.recommendation.RecommendationEngine;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
@@ -16,6 +14,7 @@ import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.exceptions.UnprocessableException;
 import com.musicUpload.exceptions.WrongFormatException;
+import com.musicUpload.recommendation.RecommendationEngine;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -26,8 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class SongService {
@@ -62,17 +59,13 @@ public class SongService {
         this.tagService = tagService;
     }
 
-    public Song addSong(Song song) {
-        return songRepository.save(song);
-    }
-
     public Song addSong(SongDAO song, MultipartFile image, MultipartFile songFile) {
         return addSong(
-            song.getProtectionType(),
-            song.getName(),
-            song.getTags(),
-            image,
-            songFile
+                song.getProtectionType(),
+                song.getName(),
+                song.getTags(),
+                image,
+                songFile
         );
     }
 
@@ -128,7 +121,7 @@ public class SongService {
             song.setNameHashed(minioService.uploadSong(songFile));
         }
 
-        return addSong(song);
+        return songRepository.save(song);
     }
 
     public List<SongDTO> getSongs() {
@@ -149,8 +142,9 @@ public class SongService {
 
         Song song = songRepository.findById(id)
                 .orElseThrow(NotFoundException::new);
+
         if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
-                userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
+            userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
             return SongDTO.of(song);
         }
         throw new UnauthenticatedException();
@@ -159,28 +153,14 @@ public class SongService {
     public List<SongDTO> findByIdsIn(List<Long> ids) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
 
-        User user = userRepository.findById(userDetails.getId())
-                .orElseThrow(UnauthenticatedException::new);
+        Long userId = userDetails != null ? userDetails.getId() : 0L;
+
         return songRepository.findByIdInAndUserOrIdInAndProtectionType(
                         ids,
-                        user.getId(),
+                        userId,
                         ProtectionType.PUBLIC
                 ).stream()
                 .map(SongDTO::of)
-                .toList();
-    }
-
-    public List<SongDTO> getRecommendedSongs(int pageNumber,
-                                             int pageSize) {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
-        Pageable page = PageRequest.of(pageNumber, pageSize);
-
-        if (userDetails != null) {
-            return userRecommendationService.getRecommendedSongsForUser(userDetails, pageNumber, pageSize);
-        }
-        
-        return songRepository.findByProtectionTypeOrderByListenCountDesc(ProtectionType.PUBLIC, page).stream()
-                .map(SongDTO::new)
                 .toList();
     }
 
@@ -192,11 +172,11 @@ public class SongService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         return songRepository.findByNameLike(
-                name,
-                userDetails.getId(),
-                ProtectionType.PUBLIC,
-                pageable
-            )
+                        name,
+                        userDetails.getId(),
+                        ProtectionType.PUBLIC,
+                        pageable
+                )
                 .stream().map(SongDTO::of).toList();
     }
 
@@ -216,11 +196,11 @@ public class SongService {
 
     public void patchSong(Long id, SongDAO song, MultipartFile image) {
         patchSong(
-            id,
-            song.getProtectionType(),
-            song.getName(),
-            song.getTags(),
-            image
+                id,
+                song.getProtectionType(),
+                song.getName(),
+                song.getTags(),
+                image
         );
     }
 

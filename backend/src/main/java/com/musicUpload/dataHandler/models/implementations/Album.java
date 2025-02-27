@@ -19,7 +19,7 @@ import java.util.List;
 @EqualsAndHashCode(exclude = {"protectionType", "user", "songs", "createdAt", "updatedAt"})
 public class Album implements CustomEntityInterface, Serializable {
 
-    public final static String NAME = "ALBUM";
+    public final static String NAME = "`ALBUM`";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

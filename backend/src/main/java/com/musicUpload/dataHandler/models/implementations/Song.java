@@ -17,7 +17,7 @@ import java.util.*;
 @EqualsAndHashCode(exclude = {"protectionType", "user", "albums", "createdAt", "updatedAt"})
 public class Song implements CustomEntityInterface, Serializable {
 
-    public final static String NAME = "SONG";
+    public final static String NAME = "`SONG`";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -44,8 +44,8 @@ public class Song implements CustomEntityInterface, Serializable {
             joinColumns = @JoinColumn(name = "song_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"),
             indexes = {
-                @Index(name = "idx_song_id", columnList = "song_id"),
-                @Index(name = "idx_tag_id", columnList = "tag_id")
+                    @Index(name = "idx_song_id", columnList = "song_id"),
+                    @Index(name = "idx_tag_id", columnList = "tag_id")
             }
     )
     private Set<Tag> tags;

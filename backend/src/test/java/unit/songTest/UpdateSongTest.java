@@ -1,4 +1,4 @@
-package com.musicUpload.songTest;
+package unit.songTest;
 
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
@@ -18,14 +18,19 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 public class UpdateSongTest {
     @Mock
@@ -40,18 +45,24 @@ public class UpdateSongTest {
     private UserRecommendationService userRecommendationService;
     @Mock
     private MinioService minioService;
+    @Mock
+    private SecurityContext securityContext;
+    @Mock
+    private Authentication authentication;
+    @Mock
+    private UserDetailsImpl userDetails;
     @InjectMocks
     private SongService songService;
     private Song song;
     private Long id;
-    private UserDetailsImpl userDetails;
     private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
-        song = new Song(id,
+        song = new Song(
+                id,
                 "",
                 "foo",
                 "",
@@ -59,14 +70,20 @@ public class UpdateSongTest {
                 ProtectionType.PUBLIC,
                 new User(),
                 new ArrayList<>(),
+                new HashSet<>(),
                 new Date(),
-                new Date());
+                new Date()
+        );
         userDetails = new UserDetailsImpl(
                 1L,
                 "",
                 "",
                 new ArrayList<>(),
-                "");
+                ""
+        );
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
     }
 
     @AfterEach
@@ -78,10 +95,10 @@ public class UpdateSongTest {
     void updateSongWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
                 () -> songService.patchSong(
-                        null,
                         1L,
                         "",
                         "",
+                        new ArrayList<>(),
                         null
                 )
         );
@@ -96,11 +113,12 @@ public class UpdateSongTest {
                 .willReturn(Optional.empty());
         assertThrows(UnauthenticatedException.class,
                 () -> songService.patchSong(
-                        userDetails,
                         2L,
                         "",
                         "",
-                        null));
+                        new ArrayList<>(),
+                        null)
+        );
     }
 
     @Test
@@ -110,11 +128,13 @@ public class UpdateSongTest {
                 .willReturn(Optional.of(u));
         given(songRepository.findByUserAndId(u, 1L))
                 .willReturn(Optional.of(song));
-        songService.patchSong(userDetails,
+        songService.patchSong(
                 1L,
                 null,
                 "bar",
-                null);
+                new ArrayList<>(),
+                null
+        );
 
         assertEquals("bar", song.getName());
     }
@@ -126,11 +146,13 @@ public class UpdateSongTest {
                 .willReturn(Optional.of(u));
         given(songRepository.findByUserAndId(u, 1L))
                 .willReturn(Optional.of(song));
-        songService.patchSong(userDetails,
+        songService.patchSong(
                 1L,
                 "PROTECTED",
                 null,
-                null);
+                new ArrayList<>(),
+                null
+        );
 
         assertEquals("PROTECTED", song.getProtectionType().getName());
     }

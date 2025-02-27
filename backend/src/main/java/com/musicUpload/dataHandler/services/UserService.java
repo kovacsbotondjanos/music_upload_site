@@ -37,13 +37,19 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     public UserService(UserRepository userRepository,
-                       SongRepository songRepository,
-                       AlbumRepository albumRepository,
                        ImageFactory imageFactory,
                        MinioService minioService) {
         this.userRepository = userRepository;
         this.imageFactory = imageFactory;
         this.minioService = minioService;
+    }
+
+    public static UserDetailsImpl getCurrentUserDetails() {
+        if (SecurityContextHolder.getContext().getAuthentication() != null &&
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof UserDetailsImpl userDetails) {
+            return userDetails;
+        }
+        return null;
     }
 
     @Override
@@ -59,10 +65,6 @@ public class UserService implements UserDetailsService {
                 ),
                 user.getProfilePicture()
         );
-    }
-
-    public static UserDetailsImpl getCurrentUserDetails() {
-        return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication();
     }
 
     public User registerUser(User user) {

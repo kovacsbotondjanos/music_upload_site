@@ -2,6 +2,7 @@ package com.musicUpload.controllers;
 
 import com.musicUpload.dataHandler.DTOs.AlbumDAO;
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
+import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.UserRecommendationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class AlbumController {
     }
 
     @GetMapping("/recommended/{id}")
-    public List<Long> getRecommendedSongs(@PathVariable Long id) {
+    public List<SongDTO> getRecommendedSongs(@PathVariable Long id) {
         return userRecommendationService.getRecommendationsForAlbum(id);
     }
 
@@ -74,13 +75,13 @@ public class AlbumController {
                                @ModelAttribute AlbumDAO albumPatchDTO,
                                @RequestParam(name = "image", required = false) MultipartFile image) {
         return AlbumDTO.of(
-            albumService.patchAlbum(
-                id,
-                albumPatchDTO.getProtectionType(),
-                albumPatchDTO.getSongIds(),
-                albumPatchDTO.getName(),
-                image
-            )
+                albumService.patchAlbum(
+                        id,
+                        albumPatchDTO.getProtectionType(),
+                        albumPatchDTO.getSongIds(),
+                        albumPatchDTO.getName(),
+                        image
+                )
         );
     }
 

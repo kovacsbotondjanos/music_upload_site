@@ -22,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 public class User implements CustomEntityInterface, Serializable {
 
-    public final static String NAME = "USER";
+    public final static String NAME = "`USER`";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

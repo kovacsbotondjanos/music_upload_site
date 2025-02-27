@@ -20,11 +20,7 @@ public interface UserSongRepository extends JpaRepository<UserSong, Long> {
 
     Set<UserSong> findByUserIdAndCreatedAtBetween(Long id, Date startDate, Date endDate);
 
-    Set<UserSong> findBySongIdAndCreatedAtBetween(
-            @Param("id") Long id,
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate
-    );
+    Set<UserSong> findBySongIdAndCreatedAtBetween(Long id, Date startDate, Date endDate);
 
     @Query(value = "SELECT * FROM USER_SONG us " +
             "WHERE us.USER_ID in :ids " +

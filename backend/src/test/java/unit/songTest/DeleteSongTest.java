@@ -1,4 +1,4 @@
-package com.musicUpload.songTest;
+package unit.songTest;
 
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
@@ -15,22 +15,29 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 public class DeleteSongTest {
     private final ProtectionType protectionType = ProtectionType.PUBLIC;
-    UserDetailsImpl userDetails = new UserDetailsImpl(1L,
+    UserDetailsImpl userDetails = new UserDetailsImpl(
+            1L,
             "user1",
             "",
             List.of(),
-            "");
+            ""
+    );
+    @Mock
+    private SecurityContext securityContext;
+    @Mock
+    private Authentication authentication;
     @Mock
     private SongRepository songRepository;
     @Mock
@@ -46,7 +53,8 @@ public class DeleteSongTest {
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         songs = List.of(
-                new Song(1L,
+                new Song(
+                        1L,
                         "",
                         "foo",
                         "",
@@ -54,9 +62,12 @@ public class DeleteSongTest {
                         protectionType,
                         new User(),
                         new ArrayList<>(),
+                        new HashSet<>(),
                         new Date(),
-                        new Date()),
-                new Song(2L,
+                        new Date()
+                ),
+                new Song(
+                        2L,
                         "",
                         "bar",
                         "",
@@ -64,9 +75,12 @@ public class DeleteSongTest {
                         protectionType,
                         new User(),
                         new ArrayList<>(),
+                        new HashSet<>(),
                         new Date(),
-                        new Date()),
-                new Song(3L,
+                        new Date()
+                ),
+                new Song(
+                        3L,
                         "",
                         "baz",
                         "",
@@ -74,8 +88,13 @@ public class DeleteSongTest {
                         protectionType,
                         new User(),
                         new ArrayList<>(),
+                        new HashSet<>(),
                         new Date(),
-                        new Date()));
+                        new Date()
+                )
+        );
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
     }
 
     @AfterEach
@@ -87,33 +106,37 @@ public class DeleteSongTest {
     @Test
     void canDeleteWithoutAuth() {
         assertThrows(UnauthenticatedException.class,
-                () -> songService.deleteSong(null, 1L));
+                () -> songService.deleteSong(1L));
     }
 
     @Test
     void canDeleteOtherUserSongWithAuth() {
         //Given
         User u = new User(userDetails);
+        SecurityContextHolder.setContext(securityContext);
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         given(songRepository.findByUserAndId(u, 2L))
                 .willReturn(Optional.empty());
         //Then
         assertThrows(UnauthenticatedException.class,
-                () -> songService.deleteSong(userDetails, 2L));
+                () -> songService.deleteSong(2L));
+        SecurityContextHolder.clearContext();
     }
 
     @Test
     void canDeleteOwnSongWithAuth() {
         //Given
         User u = new User(userDetails);
+        SecurityContextHolder.setContext(securityContext);
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         given(songRepository.findByUserAndId(u, 1L))
-                .willReturn(Optional.of(songs.get(0)));
+                .willReturn(Optional.of(songs.getFirst()));
         //Then
-        Song s = songService.deleteSong(userDetails, 1L);
-        assertEquals(songs.get(0), s);
+        Song s = songService.deleteSong(1L);
+        assertEquals(songs.getFirst(), s);
         assertFalse(u.getSongs().contains(s));
+        SecurityContextHolder.clearContext();
     }
 }

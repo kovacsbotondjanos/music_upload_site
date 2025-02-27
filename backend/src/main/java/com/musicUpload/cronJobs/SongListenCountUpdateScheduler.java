@@ -13,7 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -60,56 +63,56 @@ public class SongListenCountUpdateScheduler {
                 synchronized (copyMap) {
                     log.info("lock for songs starts");
                     copyMap.entrySet()
-                        .stream()
-                        .parallel()
-                        .forEach(e -> {
-                            if (songsToSave.containsKey(e.getKey().getFirst())) {
-                                songsToSave.put(
-                                    e.getKey().getFirst(),
-                                    songsToSave.get(e.getKey().getFirst()) + e.getValue()
-                                );
-                            } else {
-                                songsToSave.put(e.getKey().getFirst(), e.getValue());
-                            }
-
-                            //daily reports of songs
-                            Date firstDate = getStartOfToday();
-                            Date lastDate = getStartOfTomorrow();
-                            //TODO: check if we could fetch by a list of ids here
-                            Optional<UserSong> userListenOpt = userSongRepository
-                                .findBySongIdAndUserIdAndCreatedAtBetween(
-                                    e.getKey().getFirst(),
-                                    e.getKey().getSecond(),
-                                    firstDate,
-                                    lastDate
-                                );
-
-                            userListenOpt.ifPresentOrElse(
-                                u -> {
-                                    u.setListenCount(u.getListenCount() + e.getValue());
-                                    userListensToSave.add(u);
-                                },
-                                () -> {
-                                    if (e.getKey().getSecond() != null) {
-                                        userListensToSave.add(
-                                            new UserSong(
-                                                e.getKey().getFirst(),
-                                                e.getKey().getSecond(),
-                                                e.getValue()
-                                            )
-                                        );
-                                    }
-                                }
-                            );
-                        });
-
-                    songRepository.saveAll(
-                        songRepository
-                            .findAllById(songsToSave.keySet())
                             .stream()
                             .parallel()
-                            .peek(song -> song.addListen(songsToSave.get(song.getId())))
-                            .toList()
+                            .forEach(e -> {
+                                if (songsToSave.containsKey(e.getKey().getFirst())) {
+                                    songsToSave.put(
+                                            e.getKey().getFirst(),
+                                            songsToSave.get(e.getKey().getFirst()) + e.getValue()
+                                    );
+                                } else {
+                                    songsToSave.put(e.getKey().getFirst(), e.getValue());
+                                }
+
+                                //daily reports of songs
+                                Date firstDate = getStartOfToday();
+                                Date lastDate = getStartOfTomorrow();
+                                //TODO: check if we could fetch by a list of ids here
+                                Optional<UserSong> userListenOpt = userSongRepository
+                                        .findBySongIdAndUserIdAndCreatedAtBetween(
+                                                e.getKey().getFirst(),
+                                                e.getKey().getSecond(),
+                                                firstDate,
+                                                lastDate
+                                        );
+
+                                userListenOpt.ifPresentOrElse(
+                                        u -> {
+                                            u.setListenCount(u.getListenCount() + e.getValue());
+                                            userListensToSave.add(u);
+                                        },
+                                        () -> {
+                                            if (e.getKey().getSecond() != null) {
+                                                userListensToSave.add(
+                                                        new UserSong(
+                                                                e.getKey().getFirst(),
+                                                                e.getKey().getSecond(),
+                                                                e.getValue()
+                                                        )
+                                                );
+                                            }
+                                        }
+                                );
+                            });
+
+                    songRepository.saveAll(
+                            songRepository
+                                    .findAllById(songsToSave.keySet())
+                                    .stream()
+                                    .parallel()
+                                    .peek(song -> song.addListen(songsToSave.get(song.getId())))
+                                    .toList()
                     );
 
                     userSongRepository.saveAll(userListensToSave);
@@ -129,8 +132,8 @@ public class SongListenCountUpdateScheduler {
 
     private Date getStartOfTomorrow() {
         return Date.from(LocalDate.now()
-            .plusDays(1)
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant());
+                .plusDays(1)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant());
     }
 }

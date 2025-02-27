@@ -1,4 +1,4 @@
-package com.musicUpload.albumTest;
+package unit.albumTest;
 
 import com.musicUpload.dataHandler.DTOs.AlbumDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,16 +27,23 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 public class FindByIdTest {
     private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
-    UserDetailsImpl userDetails = new UserDetailsImpl(1L,
+    UserDetailsImpl userDetails = new UserDetailsImpl(
+            1L,
             "user1",
             "pwd",
             List.of(),
-            "");
+            ""
+    );
     @Mock
     private AlbumRepository albumRepository;
+    @Mock
+    private SecurityContext securityContext;
+    @Mock
+    private Authentication authentication;
     @InjectMocks
     private AlbumService albumService;
     private Album album;
@@ -44,14 +54,18 @@ public class FindByIdTest {
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
-        album = new Album(id,
+        album = new Album(
+                id,
                 "",
                 "foo",
                 ProtectionType.PUBLIC,
                 new User(),
                 new ArrayList<>(),
                 new Date(),
-                new Date());
+                new Date()
+        );
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
     }
 
     @AfterEach
@@ -65,7 +79,7 @@ public class FindByIdTest {
         given(albumRepository.findById(id))
                 .willReturn(Optional.of(album));
         //When
-        AlbumDTO albumDTO = albumService.findById(id, null);
+        AlbumDTO albumDTO = albumService.findById(id);
         //Then
         assertEquals("foo", albumDTO.getName());
     }
@@ -78,7 +92,7 @@ public class FindByIdTest {
                 .willReturn(Optional.empty());
         //Then
         assertThrows(NotFoundException.class,
-                () -> albumService.findById(id, userDetails));
+                () -> albumService.findById(id));
     }
 
     @Test
@@ -89,7 +103,7 @@ public class FindByIdTest {
                 .willReturn(Optional.of(album));
         //Then
         assertThrows(UnauthenticatedException.class,
-                () -> albumService.findById(id, null));
+                () -> albumService.findById(id));
     }
 
     @Test
@@ -97,11 +111,13 @@ public class FindByIdTest {
         //Given
         album.setProtectionType(privateprotectionType);
         album.setUser(new User(userDetails));
+        SecurityContextHolder.setContext(securityContext);
         given(albumRepository.findById(id))
                 .willReturn(Optional.of(album));
         //When
-        AlbumDTO a = albumService.findById(id, userDetails);
+        AlbumDTO a = albumService.findById(id);
         //Then
         assertEquals("foo", a.getName());
+        SecurityContextHolder.clearContext();
     }
 }

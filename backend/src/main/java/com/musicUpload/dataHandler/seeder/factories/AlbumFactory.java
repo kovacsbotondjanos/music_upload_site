@@ -5,44 +5,34 @@ import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
-import com.musicUpload.dataHandler.services.AlbumService;
+import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.util.ImageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 @Service
 public class AlbumFactory {
     private final ImageFactory imageFactory;
-    private final AlbumService albumService;
+    private final AlbumRepository albumRepository;
 
     @Autowired
-    public AlbumFactory(ImageFactory imageFactory, AlbumService albumService) {
+    public AlbumFactory(ImageFactory imageFactory, AlbumRepository albumRepository) {
         this.imageFactory = imageFactory;
-        this.albumService = albumService;
+        this.albumRepository = albumRepository;
     }
 
     public List<Album> createAlbums(int number, List<User> users,
-                                    List<Song> songs,
-                                    ExecutorService executorService) {
-        List<Album> albums = Collections.synchronizedList(new ArrayList<>());
+                                    List<Song> songs) {
 
-        IntStream.range(0, number).parallel().forEachOrdered(__ ->
-            executorService.submit(() -> {
-                Album album = createAlbum(users, songs);
-                albumService.saveAlbum(album);
-                albums.add(album);
-            })
+        return albumRepository.saveAll(
+                IntStream.range(0, number)
+                        .mapToObj(__ -> createAlbum(users, songs))
+                        .toList()
         );
-
-        return albums;
     }
 
     private Album createAlbum(List<User> users, List<Song> songs) {

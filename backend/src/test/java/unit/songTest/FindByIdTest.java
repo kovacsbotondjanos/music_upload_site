@@ -1,4 +1,4 @@
-package com.musicUpload.songTest;
+package unit.songTest;
 
 import com.musicUpload.cronJobs.SongListenCountUpdateScheduler;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
@@ -22,23 +22,31 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 public class FindByIdTest {
     private final ProtectionType privateprotectionType = ProtectionType.PRIVATE;
-    private final UserDetailsImpl userDetails = new UserDetailsImpl(1L,
+    @Mock
+    private final UserDetailsImpl userDetails = new UserDetailsImpl(
+            1L,
             "user1",
             "pwd",
             List.of(),
-            "");
+            ""
+    );
+    @Mock
+    private SecurityContext securityContext;
+    @Mock
+    private Authentication authentication;
     @Mock
     private SongRepository songRepository;
     @Mock
@@ -65,7 +73,8 @@ public class FindByIdTest {
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
-        song = new Song(id,
+        song = new Song(
+                id,
                 "",
                 "foo",
                 "",
@@ -73,8 +82,12 @@ public class FindByIdTest {
                 ProtectionType.PUBLIC,
                 new User(),
                 new ArrayList<>(),
+                new HashSet<>(),
                 new Date(),
-                new Date());
+                new Date()
+        );
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
     }
 
     @AfterEach
@@ -88,7 +101,7 @@ public class FindByIdTest {
         given(songRepository.findById(id))
                 .willReturn(Optional.of(song));
         //When
-        SongDTO actualSong = songService.findById(null, id);
+        SongDTO actualSong = songService.findById(id);
         //Then
         assertEquals("foo", actualSong.getName());
     }
@@ -98,23 +111,27 @@ public class FindByIdTest {
         //Given
         song.setId(2L);
         song.setUser(new User(userDetails));
-//        userDetails.setSongs(List.of(song));
+        SecurityContextHolder.setContext(securityContext);
         given(songRepository.findById(id))
                 .willReturn(Optional.empty());
         //Then
         assertThrows(NotFoundException.class,
-                () -> songService.findById(userDetails, id));
+                () -> songService.findById(id));
+        SecurityContextHolder.clearContext();
     }
 
     @Test
     void canFindByIdPrivateNoAuth() {
         //Given
         song.setProtectionType(privateprotectionType);
+//        song.setUser(new User(userDetails));
+        SecurityContextHolder.clearContext();
+        when(securityContext.getAuthentication()).thenReturn(null);
         given(songRepository.findById(id))
                 .willReturn(Optional.of(song));
         //Then
         assertThrows(UnauthenticatedException.class,
-                () -> songService.findById(null, id));
+                () -> songService.findById(id));
     }
 
     @Test
@@ -122,12 +139,13 @@ public class FindByIdTest {
         //Given
         song.setProtectionType(privateprotectionType);
         song.setUser(new User(userDetails));
-//        userDetails.setSongs(List.of(song));
+        SecurityContextHolder.setContext(securityContext);
         given(songRepository.findById(id))
                 .willReturn(Optional.of(song));
         //When
-        SongDTO s = songService.findById(userDetails, id);
+        SongDTO s = songService.findById(id);
         //Then
         assertEquals("foo", s.getName());
+        SecurityContextHolder.clearContext();
     }
 }

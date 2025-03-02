@@ -16,6 +16,7 @@ import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 public class RecommendationEngine {
+    private final long NON_AUTHENTICATED_USER_LIMIT = 100L;
     private final UserSongService userSongService;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
@@ -149,6 +151,13 @@ public class RecommendationEngine {
     }
 
     public List<Long> createRecommendationsForUser(Long userId) {
+        if (userId.equals(0L)) {
+            return songRepository.findByProtectionTypeOrderByListenCount(
+                ProtectionType.PUBLIC,
+                NON_AUTHENTICATED_USER_LIMIT
+            );
+        }
+
         userRepository.findById(userId)
                 .orElseThrow(UnauthenticatedException::new);
 

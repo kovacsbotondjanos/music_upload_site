@@ -104,7 +104,11 @@ public class AlbumService {
     }
 
     public List<AlbumDTO> findByIdsIn(List<Long> ids) {
-        User user = userRepository.findById(UserService.getCurrentUserDetails().getId())
+        User user = userRepository.findById(
+                    Optional.ofNullable(UserService.getCurrentUserDetails())
+                            .map(UserDetailsImpl::getId)
+                            .orElse(-1L)
+                )
                 .orElseThrow(UnauthenticatedException::new);
         return albumRepository.findByIdInAndUserOrIdInAndProtectionType(
                         ids,

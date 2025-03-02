@@ -107,7 +107,6 @@ public class MinioService {
             return fileName;
         } catch (MinioException | NoSuchAlgorithmException |
                  InvalidKeyException | IOException e) {
-            //TODO: handle this better lol
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }

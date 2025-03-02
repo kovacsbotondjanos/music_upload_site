@@ -22,11 +22,11 @@ public interface UserSongRepository extends JpaRepository<UserSong, Long> {
 
     Set<UserSong> findBySongIdAndCreatedAtBetween(Long id, Date startDate, Date endDate);
 
-    @Query(value = "SELECT * FROM USER_SONG us " +
+    @Query(value = "SELECT * FROM user_song us " +
             "WHERE us.USER_ID in :ids " +
             "AND us.CREATED_AT BETWEEN :startDate AND :endDate " +
             "AND EXISTS ( " +
-            "    SELECT 1 FROM TAG_SONG ts " +
+            "    SELECT 1 FROM tag_song ts " +
             "    WHERE ts.SONG_ID = us.SONG_ID " +
             "    AND ts.TAG_ID IN :tagIds " +
             ")", nativeQuery = true)

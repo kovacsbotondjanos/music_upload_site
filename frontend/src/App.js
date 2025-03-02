@@ -4,7 +4,7 @@ import Navbar from "./components/navbar/Navbar";
 import HomeComponent from "./components/home/HomeComponent";
 import Register from "./components/register/Register";
 import UserComponent from "./components/user/UserComponent";
-import UploadSong from "./components/uploda_music/UploadSong";
+import UploadSong from "./components/upload_music/UploadSong";
 import UploadAlbum from "./components/upload_album/UploadAlbum";
 import SongDetail from "./components/song/SongDetails";
 import React, { useState, useEffect } from "react";

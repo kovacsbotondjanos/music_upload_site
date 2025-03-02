@@ -1,8 +1,48 @@
-import React from "react";
+import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
 
 function UploadSong() {
   const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [tags, setTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  function getTags(name) {
+    fetch(`http://localhost:8080/api/v1/tags/search/${name}`,{
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok " + response.statusText);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data);
+      setTags(data);
+    })
+    .catch((error) => {
+      console.error("There was a problem with the fetch operation:", error);
+    });
+  };
+
+  const handleInputChange = (event) => {
+    setSearchTerm(event.target.value);
+    const name = event.target.value;
+    if(name !== ""){
+        console.log(name)
+        getTags(name);
+    }
+  };
+
+  const addTag = (event) => {
+    
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -44,7 +84,7 @@ function UploadSong() {
                       <div className="col">
                         <div className="input-box">
                           <label className="button-label">Name</label>
-                          <br />
+                          <br/>
                           <span className="icon">
                             <ion-icon name="pricetag-outline"></ion-icon>
                           </span>
@@ -92,6 +132,19 @@ function UploadSong() {
                             <option value="PROTECTED">PROTECTED</option>
                             <option value="PUBLIC">PUBLIC</option>
                           </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="row">
+                      <div className="col">
+                        <div className="input-box">
+                          <label className="button-label">Tag</label>
+                          <br />
+                          <input type="text" id="name" name="name" value={searchTerm} onChange={handleInputChange} />
+                        </div>
+                        <div>
+                          {tags.map((item) => (<div>{item.name}</div>))}
                         </div>
                       </div>
                     </div>

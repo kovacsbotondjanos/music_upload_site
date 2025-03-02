@@ -1,8 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function UploadSong() {
   const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [tags, setTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  function getTags(name) {
+    fetch(`http://localhost:8080/api/v1/tags/search/${name}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok " + response.statusText);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setTags(data);
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+  }
+
+  const handleInputChange = (event) => {
+    setSearchTerm(event.target.value);
+    const name = event.target.value;
+    if (name !== "") {
+      console.log(name);
+      getTags(name);
+    }
+  };
+
+  const addTag = (tag) => {
+    selectedTags.push(tag);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -74,7 +114,7 @@ function UploadSong() {
                           <span className="icon">
                             <ion-icon name="image-outline"></ion-icon>
                           </span>
-                          <input type="file" id="image" name="image"/>
+                          <input type="file" id="image" name="image" />
                         </div>
                       </div>
                     </div>
@@ -85,7 +125,9 @@ function UploadSong() {
                           <span className="icon">
                             <ion-icon name="lock-closed-outline"></ion-icon>
                           </span>
-                          <label className="button-label">Protection type</label>
+                          <label className="button-label">
+                            Protection type
+                          </label>
                           <br />
                           <select name="protectionType" id="protection_type">
                             <option value="PRIVATE">PRIVATE</option>
@@ -94,6 +136,36 @@ function UploadSong() {
                           </select>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="row">
+                      <div className="col">
+                        <div className="input-box">
+                          <label className="button-label">Tag</label>
+                          <br />
+                          <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value={searchTerm}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <div>
+                          {selectedTags.map((item) => (
+                            <div>{item.name}</div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      {tags.map((item) => (
+                        <div className="row">
+                          <div className="col">
+                            <button onClick={addTag(item.name)}>{item.name}</button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
                     <div className="row">

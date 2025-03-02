@@ -60,12 +60,14 @@ public class AlbumController {
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void createAlbum(@ModelAttribute AlbumDAO andCreateDTO,
+    public AlbumDTO createAlbum(@ModelAttribute AlbumDAO andCreateDTO,
                             @RequestParam(name = "image", required = false) MultipartFile image) {
-        albumService.saveAlbum(
-                andCreateDTO.getProtectionType(),
-                andCreateDTO.getName(),
-                image
+        return AlbumDTO.of(
+                albumService.saveAlbum(
+                    andCreateDTO.getProtectionType(),
+                    andCreateDTO.getName(),
+                    image
+                )
         );
     }
 

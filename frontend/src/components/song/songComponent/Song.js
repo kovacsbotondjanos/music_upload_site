@@ -1,29 +1,41 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { getImage } from "../../../services/controller";
 
 function Song(props) {
   const navigate = useNavigate();
-  const { song, playMusic, getImageURL } = props;
+  const { song, playMusic } = props;
+  const [imgURL, setimgURL] = useState(null);
+
+  useEffect(() => {
+    const fetch = async () =>
+      getImage(album.image, (data) => {
+        if (data) {
+          setimgURL(data);
+        }
+      });
+    fetch();
+  }, []);
 
   function removeSong(id) {
     fetch(`http://localhost:8080/api/v1/songs/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
     })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok " + response.statusText);
-      }
-    })
-    .then(() => {
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok " + response.statusText);
+        }
+      })
+      .then(() => {
         navigate("/profile");
-    })
-    .catch((error) => {
-      console.error("There was a problem with the fetch operation:", error);
-    });
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
   }
 
   return (
@@ -44,16 +56,19 @@ function Song(props) {
                     <img
                       width="50px"
                       height="50px"
-                      src={getImageURL(song.image)}
+                      src={imgURL}
                       alt=""
                       className="profile"
                     />
                   </button>
                 </div>
                 <div>
-                    <button className="custom-button" onClick={() => removeSong(song.id)}>
-                        <ion-icon name="trash-outline"></ion-icon>
-                    </button>
+                  <button
+                    className="custom-button"
+                    onClick={() => removeSong(song.id)}
+                  >
+                    <ion-icon name="trash-outline"></ion-icon>
+                  </button>
                 </div>
               </div>
 
@@ -62,10 +77,18 @@ function Song(props) {
                   <h1>{song.createdAt}</h1>
                 </div>
               </div>
-              
+
               <div>
                 <div className="col">
-                  <ion-icon name={song.protectionType === "PRIVATE" ? "lock-closed-outline" : song.protectionType === "PUBLIC" ? "lock-open-outline" : "link-outline"}></ion-icon>
+                  <ion-icon
+                    name={
+                      song.protectionType === "PRIVATE"
+                        ? "lock-closed-outline"
+                        : song.protectionType === "PUBLIC"
+                        ? "lock-open-outline"
+                        : "link-outline"
+                    }
+                  ></ion-icon>
                 </div>
               </div>
 

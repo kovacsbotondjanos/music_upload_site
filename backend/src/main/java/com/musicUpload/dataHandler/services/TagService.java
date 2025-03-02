@@ -1,5 +1,6 @@
 package com.musicUpload.dataHandler.services;
 
+import com.musicUpload.dataHandler.DTOs.TagDTO;
 import com.musicUpload.dataHandler.models.implementations.Tag;
 import com.musicUpload.dataHandler.repositories.TagRepository;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,12 @@ public class TagService {
                 .map(name -> tagRepository.findByNameIgnoreCase(name)
                         .orElse(saveTag(name))
                 )
+                .toList();
+    }
+
+    public List<TagDTO> searchByName(String name) {
+        return tagRepository.findByNameLike(name.toUpperCase()).stream()
+                .map(TagDTO::of)
                 .toList();
     }
 }

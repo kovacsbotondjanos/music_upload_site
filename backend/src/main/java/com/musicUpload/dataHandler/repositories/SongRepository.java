@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public interface SongRepository extends JpaRepository<Song, Long> {
     @Query(value = "SELECT * " +
-            "FROM SONG " +
+            "FROM song " +
             "WHERE name LIKE CONCAT('%', :name, '%') " +
             "AND (user_id = :userId OR protection_type = :protection_type)" +
             "ORDER BY " +
@@ -23,7 +23,7 @@ public interface SongRepository extends JpaRepository<Song, Long> {
             "END, " +
             "name",
             countQuery = "SELECT COUNT(*) " +
-                    "FROM SONG " +
+                    "FROM song " +
                     "WHERE name LIKE CONCAT('%', :name, '%') " +
                     "AND (user_id = :userId OR protection_type = :protection_type)",
             nativeQuery = true)
@@ -35,7 +35,7 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     );
 
     @Query(value = "SELECT * " +
-            "FROM SONG " +
+            "FROM song " +
             "WHERE id IN :ids " +
             "AND (user_id = :userId " +
             "OR protection_type = :protection_type)", nativeQuery = true)
@@ -46,14 +46,24 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     );
 
     @Query(value = "SELECT * " +
-            "FROM SONG " +
+            "FROM song " +
             "WHERE id = :id " +
             "AND (user_id = :userId " +
-            "OR protection_type = :protection_type)", nativeQuery = true)
-    Optional<Song> findByIdAndProtectionTypeOrUser(
+            "OR protection_type IN :protection_type)", nativeQuery = true)
+    Optional<Song> findByIdAndProtectionTypeInOrUser(
             @Param("id") Long id,
             @Param("userId") Long userId,
-            @Param("protection_type") ProtectionType protectionType
+            @Param("protection_type") List<ProtectionType> protectionType
+    );
+
+    @Query(value = "SELECT * " +
+            "FROM song " +
+            "WHERE protection_type = :protection_type " +
+            "ORDER BY listen_count " +
+            "LIMIT :limit", nativeQuery = true)
+    List<Long> findByProtectionTypeOrderByListenCount(
+            @Param("protection_type") ProtectionType protectionType,
+            @Param("limit") Long limit
     );
 
     Optional<Song> findByNameHashed(String name);

@@ -3,14 +3,9 @@ import React from "react";
 import SongItem from "../../song/songItem/SongItem";
 import AlbumItem from "../../album/albumItem/AlbumItem";
 
-function User(props) {
+const User = (props) => {
   const navigate = useNavigate();
-  const {
-    albums,
-    userSongs,
-    playMusic,
-    getImageURL
-  } = props;
+  const { albums, userSongs, playMusic } = props;
 
   return (
     <div className="container container-fluid">
@@ -20,7 +15,7 @@ function User(props) {
           <br />
           {albums !== null && albums.length > 0 ? (
             albums.map((item) => (
-              <AlbumItem item={item} playMusic={playMusic} getImageURL={getImageURL}/>
+              <AlbumItem item={item} playMusic={playMusic} />
             ))
           ) : (
             <p>There are no albums we can show</p>
@@ -40,7 +35,7 @@ function User(props) {
           <br />
           {userSongs !== null && userSongs.length > 0 ? (
             userSongs.map((item) => (
-              <SongItem item={item} playMusic={playMusic} getImageURL={getImageURL}/>
+              <SongItem item={item} playMusic={playMusic} />
             ))
           ) : (
             <p>There are no songs we can show</p>

@@ -4,7 +4,7 @@ import Navbar from "./components/navbar/Navbar";
 import HomeComponent from "./components/home/HomeComponent";
 import Register from "./components/register/Register";
 import UserComponent from "./components/user/UserComponent";
-import UploadSong from "./components/uploda_music/UploadSong";
+import UploadSong from "./components/upload_music/UploadSong";
 import UploadAlbum from "./components/upload_album/UploadAlbum";
 import SongDetail from "./components/song/SongDetails";
 import React, { useState, useEffect } from "react";
@@ -13,8 +13,14 @@ import SongEditor from "./components/edit_song/SongEditor";
 import AlbumEditor from "./components/edit_album/AlbumEditor";
 import Player from "./components/player/Player";
 import Search from "./components/search/Search";
+import {
+  fetchRecommendedSongs,
+  fetchUserData,
+  fetchAlbums,
+  fetchSongsForUser,
+} from "./services/controller";
 
-function App() {
+const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState(null);
   const [profilePic, setProfilePic] = useState(null);
@@ -22,24 +28,8 @@ function App() {
   const [albums, setAlbums] = useState([]);
   const [userSongs, setUserSongs] = useState([]);
   const [audio, setAudio] = useState(null);
-
-  //TODO: put these in their respective files
-  useEffect(() => {
-    fetchSongs();
-  }, []);
-
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  useEffect(() => {
-    fetchAlbums();
-  }, []);
-
-  useEffect(() => {
-    fetchUserSongs();
-  }, []);
-
+  
+  //TODO: find a proper player to control current songs
   const playMusic = (nameHashed) => {
     if (nameHashed != null) {
       const audioPlayer = document.getElementById("audio-player");
@@ -52,18 +42,20 @@ function App() {
         },
         credentials: "include",
       })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok " + response.statusText);
-        }
-        return response.text();
-      })
-      .then((data) => {
-        setAudio(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(
+              "Network response was not ok " + response.statusText
+            );
+          }
+          return response.text();
+        })
+        .then((data) => {
+          setAudio(data);
+        })
+        .catch((error) => {
+          console.error("There was a problem with the fetch operation:", error);
+        });
 
       audioSource.src = audio;
 
@@ -81,108 +73,48 @@ function App() {
       audioPlayer.addEventListener("canplaythrough", handlePlay);
       audioPlayer.load();
     }
-  }
-
-  const fetchUserData = () => {
-    fetch("http://localhost:8080/api/v1/users", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok " + response.statusText);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      setLoggedIn(true);
-      setUsername(data.username);
-      setProfilePic(data.profilePicture);
-    })
-    .catch((error) => {
-      console.error("There was a problem with the fetch operation:", error);
-    });
   };
 
-  const fetchAlbums = () => {
-    fetch("http://localhost:8080/api/v1/albums", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok " + response.statusText);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      setAlbums(data);
-    })
-    .catch((error) => {
-      console.error("There was a problem with the fetch operation:", error);
-    });
-  };
-
-  const fetchUserSongs = () => {
-    fetch("http://localhost:8080/api/v1/songs", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok " + response.statusText);
+  //TODO: put these in their respective files
+  useEffect(() => {
+    const fetch = async () =>
+      await fetchRecommendedSongs((data) => {
+        if (data) {
+          setSongs(data);
         }
-        return response.json();
-      })
-      .then((data) => {
+      });
+    fetch();
+  }, []);
+
+  useEffect(() => {
+    const fetch = async () =>
+      await fetchUserData((data) => {
+        if (data) {
+          setLoggedIn(true);
+          setUsername(data.username);
+          setProfilePic(data.profilePicture);
+        }
+      });
+    fetch();
+  }, []);
+
+  useEffect(() => {
+    const fetch = async () =>
+      await fetchAlbums((data) => {
+        if (data) {
+          setAlbums(data);
+        }
+      });
+    fetch();
+  }, []);
+
+  useEffect(() => {
+    const fetch = async () =>
+      await fetchSongsForUser((data) => {
         setUserSongs(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
       });
-  };
-
-  const fetchSongs = () => {
-    fetch("http://localhost:8080/api/v1/users/recommended", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok " + response.statusText);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setSongs(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
-  };
-
-  const getImageURL = async (imageName) => {
-    const resp = await fetch("http://localhost:8080/api/v1/files/image/" + imageName, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    return await resp.text();
-  }
+    fetch();
+  }, []);
 
   return (
     <Router>
@@ -194,7 +126,6 @@ function App() {
           setLoggedIn={setLoggedIn}
           setUsername={setUsername}
           setProfilePic={setProfilePic}
-          getImageURL={getImageURL}
         />
         <Routes>
           <Route
@@ -209,8 +140,9 @@ function App() {
           />
           <Route path="/register" element={<Register />} />
           <Route
-          index 
-          element={<HomeComponent songs={songs} playMusic={playMusic} getImageURL={getImageURL}/>} />
+            index
+            element={<HomeComponent songs={songs} playMusic={playMusic} />}
+          />
           <Route
             path="/profile"
             element={
@@ -221,22 +153,30 @@ function App() {
                 albums={albums}
                 userSongs={userSongs}
                 playMusic={playMusic}
-                getImageURL={getImageURL}
               />
             }
           />
-          <Route path="/search" element={<Search playMusic={playMusic} getImageURL={getImageURL}/>} />
-          <Route path="/song/add" element={<UploadSong/>} />
-          <Route path="/album/add" element={<UploadAlbum/>} />
-          <Route path="/songs/:songId" element={<SongDetail playMusic={playMusic} getImageURL={getImageURL}/>} />
-          <Route path="/albums/:albumId" element={<AlbumDetail playMusic={playMusic} getImageURL={getImageURL}/>} />
-          <Route path="songs/edit/:songId" element={<SongEditor playMusic={playMusic} getImageURL={getImageURL}/>} />
-          <Route path="albums/edit/:albumId" element={<AlbumEditor playMusic={playMusic} getImageURL={getImageURL}/>} />
+          <Route path="/search" element={<Search playMusic={playMusic} />} />
+          <Route path="/song/add" element={<UploadSong />} />
+          <Route path="/album/add" element={<UploadAlbum />} />
+          <Route
+            path="/songs/:songId"
+            element={<SongDetail playMusic={playMusic} />}
+          />
+          <Route
+            path="/albums/:albumId"
+            element={<AlbumDetail playMusic={playMusic} />}
+          />
+          <Route
+            path="songs/edit/:songId"
+            element={<SongEditor playMusic={playMusic} />}
+          />
+          <Route path="albums/edit/:albumId" element={<AlbumEditor />} />
         </Routes>
-        <Player/>
+        <Player />
       </div>
     </Router>
   );
-}
+};
 
 export default App;

@@ -11,10 +11,16 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = UserSong.NAME)
+@Table(
+        name = UserSong.NAME,
+        indexes = {
+                @Index(columnList = "userId"),
+                @Index(columnList = "songId")
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"updatedAt", "createdAt"})
+@EqualsAndHashCode(exclude = {"id", "updatedAt", "createdAt"})
 public class UserSong implements CustomEntityInterface {
 
     public final static String NAME = "`USER_SONG`";
@@ -23,7 +29,6 @@ public class UserSong implements CustomEntityInterface {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Long listenCount;
     private Long userId;
     private Long songId;
 
@@ -35,19 +40,18 @@ public class UserSong implements CustomEntityInterface {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    public UserSong(Long songId, Long userId, Long listenCount) {
+    public UserSong(Long songId, Long userId, Date date) {
         this.userId = userId;
         this.songId = songId;
-        this.listenCount = listenCount;
+        this.createdAt = date;
+    }
+
+    public UserSong(Long songId, Long userId) {
+        this(songId, userId, new Date());
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = new Date();
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = new Date();
     }
 }

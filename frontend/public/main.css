@@ -88,6 +88,10 @@ html {
   font-weight: normal;
 }
 
+.mainScreen {
+  padding-bottom: 25px;
+}
+
 .left {
   position: absolute;
   top: 10px;
@@ -232,7 +236,6 @@ input {
   bottom: 0;
   width: 100%;
   background-color: #181818;
-  padding: 10px;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 

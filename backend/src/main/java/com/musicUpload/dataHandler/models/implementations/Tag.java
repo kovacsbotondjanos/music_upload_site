@@ -12,7 +12,10 @@ import java.util.Set;
 
 @Entity
 @Data
-@Table(name = Tag.NAME)
+@Table(
+        name = Tag.NAME,
+        indexes = @Index(columnList = "name")
+)
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"id", "songs"})
 public class Tag {

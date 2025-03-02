@@ -2,7 +2,7 @@ import React from "react";
 import SongItem from "../../song/songItem/SongItem";
 
 function Home(props) {
-  const { songs, playMusic, getImageURL } = props;
+  const { songs, playMusic } = props;
   return (
     <div className="container container-fluid">
       <div className="row">
@@ -10,9 +10,7 @@ function Home(props) {
           <h1>Recommended songs:</h1>
           <br />
           {songs != null &&
-            songs.map((item) => (
-              <SongItem item={item} playMusic={playMusic} getImageURL={getImageURL}/>
-            ))}
+            songs.map((item) => <SongItem item={item} playMusic={playMusic} />)}
         </div>
       </div>
     </div>

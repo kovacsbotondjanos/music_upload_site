@@ -2,11 +2,11 @@ import React from "react";
 import Home from "./homeComponent/Home";
 
 function HomeComponent(props) {
-  const { songs, playMusic, getImageURL } = props;
+  const { songs, playMusic } = props;
 
   return (
     <div className="black-bg">
-      <Home songs={songs} playMusic={playMusic} getImageURL={getImageURL}/>
+      <Home songs={songs} playMusic={playMusic} />
     </div>
   );
 }

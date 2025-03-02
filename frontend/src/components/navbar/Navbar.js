@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getImage, logout } from "../../services/controller";
 
 function Navbar(props) {
   const navigate = useNavigate();
@@ -11,44 +12,19 @@ function Navbar(props) {
     setLoggedIn,
     setUsername,
     setProfilePic,
-    getImageURL
   } = props;
 
   useEffect(() => {
     if (profilePic) {
-      fetchImg();
+      const fetch = async () =>
+        getImage(profilePic, (data) => {
+          if (data) {
+            setimgURL(resp);
+          }
+        });
+      fetch();
     }
   }, [profilePic]);
-
-  const fetchImg = () => {
-    getImageURL(profilePic)
-    .then((resp) => {
-      setimgURL(resp);
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  };
-
-  function logout() {
-    fetch("http://localhost:8080/logout", {
-      method: "POST",
-      credentials: "include",
-    })
-      .then((response) => {
-        if (response.ok) {
-          setLoggedIn(false);
-          setProfilePic(null);
-          setUsername(null);
-          navigate("/login");
-        } else {
-          console.error("Logout failed");
-        }
-      })
-      .catch((error) => {
-        console.error("Error during logout:", error);
-      });
-  }
 
   return (
     <nav className="navbar navbar-expand">
@@ -78,7 +54,18 @@ function Navbar(props) {
             <div className="collapse navbar-collapse justify-content-end">
               <div className="navbar-nav">
                 <a
-                  onClick={() => logout()}
+                  onClick={() =>
+                    logout((response) => {
+                      if (response) {
+                        setLoggedIn(false);
+                        setProfilePic(null);
+                        setUsername(null);
+                        navigate("/login");
+                      } else {
+                        console.error("Logout failed");
+                      }
+                    })
+                  }
                   className="custom-button nav-link active text-white"
                 >
                   Log out

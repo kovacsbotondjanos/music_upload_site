@@ -11,8 +11,7 @@ function userComponent(props) {
     setProfilePic,
     albums,
     userSongs,
-    playMusic,
-    getImageURL
+    playMusic
   } = props;
   return (
     <div className="black-bg">
@@ -23,7 +22,6 @@ function userComponent(props) {
         albums={albums}
         userSongs={userSongs}
         playMusic={playMusic}
-        getImageURL={getImageURL}
       />
     </div>
   );

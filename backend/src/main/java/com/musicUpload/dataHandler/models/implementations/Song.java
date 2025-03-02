@@ -10,7 +10,10 @@ import java.util.*;
 
 @Entity
 @Data
-@Table(name = Song.NAME)
+@Table(
+        name = Song.NAME,
+        indexes = @Index(columnList = "id")
+)
 @ToString(exclude = {"user", "albums"})
 @AllArgsConstructor
 @NoArgsConstructor

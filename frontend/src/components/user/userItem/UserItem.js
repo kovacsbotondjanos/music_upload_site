@@ -1,24 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-function UserItem(props) {
+const UserItem = (props) => {
   const navigate = useNavigate();
   const { getImageURL, item, follow } = props;
   const [imgURL, setimgURL] = useState("");
 
   useEffect(() => {
-    fetchImg();
-  }, []);
-
-  const fetchImg = () => {
-    getImageURL(item.profilePicture)
-      .then((resp) => {
-        setimgURL(resp);
-      })
-      .catch((err) => {
-        console.error(err);
+    const fetch = async () =>
+      getImage(item.profilePicture, (data) => {
+        if (data) {
+          setimgURL(data);
+        }
       });
-  };
+    fetch();
+  }, []);
 
   return (
     <div className="container mt-5 mb-5 d-flex justify-content-between align-items-center rounded">

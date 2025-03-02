@@ -1,9 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getImage } from "../../../services/controller";
 
-function Album(props) {
+const Album = (props) => {
   const navigate = useNavigate();
-  const { album, getImageURL } = props;
+  const { album } = props;
+  const [imgURL, setimgURL] = useState(null);
+
+  useEffect(() => {
+    const fetch = async () =>
+      getImage(album.image, (data) => {
+        if (data) {
+          setimgURL(data);
+        }
+      });
+    fetch();
+  }, []);
 
   function removeAlbum(id) {
     fetch(`http://localhost:8080/api/v1/albums/${id}`, {
@@ -40,7 +52,7 @@ function Album(props) {
                   <img
                     width="50px"
                     height="50px"
-                    src={getImageURL(album.image)}
+                    src={imgURL}
                     alt=""
                     className="profile"
                   />
@@ -69,7 +81,15 @@ function Album(props) {
 
               <div>
                 <div className="col">
-                  <ion-icon name={album.protectionType === "PRIVATE" ? "lock-closed-outline" : album.protectionType === "PUBLIC" ? "lock-open-outline" : "link-outline"}></ion-icon>
+                  <ion-icon
+                    name={
+                      album.protectionType === "PRIVATE"
+                        ? "lock-closed-outline"
+                        : album.protectionType === "PUBLIC"
+                        ? "lock-open-outline"
+                        : "link-outline"
+                    }
+                  ></ion-icon>
                 </div>
               </div>
 

@@ -1,8 +1,10 @@
 package com.musicUpload.dataHandler.services;
 
+import com.musicUpload.dataHandler.DTOs.FilteredUserDTO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
+import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
@@ -128,13 +130,17 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(NotFoundException::new);
     }
 
-    public List<UserDTO> findByNameLike(String name, int pageNumber, int pageSize) {
+    public List<FilteredUserDTO> findByNameLike(String name, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         return userRepository.findByNameLike(name, pageable)
                 .stream()
-                .map(UserDTO::new)
+                .map(FilteredUserDTO::of)
                 .toList();
+    }
+
+    public FilteredUserDTO getUserById(Long id) {
+        return userRepository.findById(id).map(FilteredUserDTO::of).orElseThrow();
     }
 
     public List<User> getUsers() {

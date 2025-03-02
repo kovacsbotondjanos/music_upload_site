@@ -1,12 +1,66 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getTags } from "../../services/controller";
+import { resolve } from "../../services/utils";
+import TagItem from "../tag/TagItem";
 
-function UploadSong() {
+const UploadSong = () => {
   const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [tags, setTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  const handleInputChange = (event) => {
+    setSearchTerm(event.target.value);
+    const name = event.target.value;
+    if (name !== "") {
+      getTags(name, (data) => {
+        if (data) {
+          setTags((prevTags) => {
+            const existingNames = prevTags.map((tag) => tag.name);
+            if (!existingNames.includes(name)) {
+              return [...data, { name }];
+            }
+            return data;
+          });
+        }
+      });
+    }
+  };
+
+  const addTag = (tag) => {
+    setSelectedTags((prevTags) => {
+      if (prevTags.includes(tag)) {
+        return prevTags.filter((t) => t !== tag);
+      }
+
+      if (prevTags.length < 3) {
+        return [...prevTags, tag];
+      }
+
+      return prevTags;
+    });
+  };
+
+  const removeTag = (tag) => {
+    setSelectedTags((prevTags) => {
+      return prevTags.filter((t) => t !== tag);
+    });
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     const formData = new FormData(event.target);
+
+    if (selectedTags.length > 0) {
+      formData.append(
+        "tags",
+        selectedTags.length > 0 ? selectedTags.join(",") : ""
+      );
+    }
+
     try {
       const response = await fetch("http://localhost:8080/api/v1/songs", {
         method: "POST",
@@ -74,7 +128,7 @@ function UploadSong() {
                           <span className="icon">
                             <ion-icon name="image-outline"></ion-icon>
                           </span>
-                          <input type="file" id="image" name="image"/>
+                          <input type="file" id="image" name="image" />
                         </div>
                       </div>
                     </div>
@@ -85,7 +139,9 @@ function UploadSong() {
                           <span className="icon">
                             <ion-icon name="lock-closed-outline"></ion-icon>
                           </span>
-                          <label className="button-label">Protection type</label>
+                          <label className="button-label">
+                            Protection type
+                          </label>
                           <br />
                           <select name="protectionType" id="protection_type">
                             <option value="PRIVATE">PRIVATE</option>
@@ -94,6 +150,38 @@ function UploadSong() {
                           </select>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="row">
+                      <div className="col">
+                        <div className="input-box">
+                          <label className="button-label">Tag</label>
+                          <br />
+                          <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value={searchTerm}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="bg-secondary p-2 rounded">
+                        {tags.map((item) => (
+                          <div className="row">
+                            <div className="col">
+                              <a className="text-white" onClick={() => addTag(item.name)}>
+                                {item.name}
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {selectedTags.map((item, index) => (
+                        <TagItem item={item} index={index + 1} removeTag={removeTag} />
+                      ))}
                     </div>
 
                     <div className="row">
@@ -118,6 +206,6 @@ function UploadSong() {
       </div>
     </div>
   );
-}
+};
 
 export default UploadSong;

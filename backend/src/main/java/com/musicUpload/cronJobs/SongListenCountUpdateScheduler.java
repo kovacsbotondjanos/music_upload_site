@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -28,20 +25,20 @@ public class SongListenCountUpdateScheduler {
     private final SongRepository songRepository;
     private final UserSongRepository userSongRepository;
     private final int SCHEDULE = 2 * 1000 * 60;
-    private final Map<Pair<Long, Long>, Long> songListensBuffer;
+    private Set<Pair<Pair<Long, Long>, Date>> songListensBuffer;
 
     @Autowired
     public SongListenCountUpdateScheduler(SongRepository songRepository,
                                           UserSongRepository userSongRepository) {
         this.songRepository = songRepository;
         this.userSongRepository = userSongRepository;
-        this.songListensBuffer = new ConcurrentHashMap<>();
+        this.songListensBuffer = Collections.synchronizedSet(new HashSet<>());
     }
 
     public void addListenToSong(Long songId, UserDetailsImpl userDetails) {
         new Thread(() -> {
             Long userId = userDetails == null ? null : userDetails.getId();
-            songListensBuffer.merge(Pair.of(songId, userId), 1L, Long::sum);
+            songListensBuffer.add(Pair.of(Pair.of(songId, userId), new Date()));
             log.info("buffer: {}", songListensBuffer);
         }).start();
     }
@@ -49,10 +46,10 @@ public class SongListenCountUpdateScheduler {
     @Scheduled(fixedRate = SCHEDULE)
     @SchedulerLock(name = "SongListenCountUpdateScheduler_saveReport", lockAtMostFor = "2m")
     public void saveReport() {
-        Map<Pair<Long, Long>, Long> copyMap;
-        synchronized (songListensBuffer) {
-            copyMap = new ConcurrentHashMap<>(songListensBuffer);
-            songListensBuffer.clear();
+        Set<Pair<Pair<Long, Long>, Date>> copyMap;
+        synchronized (SongListenCountUpdateScheduler.class) {
+            copyMap = songListensBuffer;
+            songListensBuffer = Collections.synchronizedSet(new HashSet<>());
         }
         try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
             log.info("{} new listens are being saved into the database", copyMap.size());
@@ -62,48 +59,27 @@ public class SongListenCountUpdateScheduler {
                 //this is not optimized, i'll have to look into this in the future, but this is the best i came up for now
                 synchronized (copyMap) {
                     log.info("lock for songs starts");
-                    copyMap.entrySet()
-                            .stream()
+                    copyMap.stream()
                             .parallel()
                             .forEach(e -> {
-                                if (songsToSave.containsKey(e.getKey().getFirst())) {
+                                if (songsToSave.containsKey(e.getFirst().getFirst())) {
                                     songsToSave.put(
-                                            e.getKey().getFirst(),
-                                            songsToSave.get(e.getKey().getFirst()) + e.getValue()
+                                            e.getFirst().getFirst(),
+                                            songsToSave.get(e.getFirst().getFirst()) + 1
                                     );
                                 } else {
-                                    songsToSave.put(e.getKey().getFirst(), e.getValue());
+                                    songsToSave.put(e.getFirst().getFirst(), 1L);
                                 }
 
-                                //daily reports of songs
-                                Date firstDate = getStartOfToday();
-                                Date lastDate = getStartOfTomorrow();
-                                //TODO: check if we could fetch by a list of ids here
-                                Optional<UserSong> userListenOpt = userSongRepository
-                                        .findBySongIdAndUserIdAndCreatedAtBetween(
-                                                e.getKey().getFirst(),
-                                                e.getKey().getSecond(),
-                                                firstDate,
-                                                lastDate
-                                        );
-
-                                userListenOpt.ifPresentOrElse(
-                                        u -> {
-                                            u.setListenCount(u.getListenCount() + e.getValue());
-                                            userListensToSave.add(u);
-                                        },
-                                        () -> {
-                                            if (e.getKey().getSecond() != null) {
-                                                userListensToSave.add(
-                                                        new UserSong(
-                                                                e.getKey().getFirst(),
-                                                                e.getKey().getSecond(),
-                                                                e.getValue()
-                                                        )
-                                                );
-                                            }
-                                        }
-                                );
+                                if (e.getFirst().getSecond() != null) {
+                                    userListensToSave.add(
+                                            new UserSong(
+                                                    e.getFirst().getFirst(),
+                                                    e.getFirst().getSecond(),
+                                                    e.getSecond()
+                                            )
+                                    );
+                                }
                             });
 
                     songRepository.saveAll(
@@ -122,18 +98,5 @@ public class SongListenCountUpdateScheduler {
                 copyMap.clear();
             });
         }
-    }
-
-    private Date getStartOfToday() {
-        return Date.from(LocalDate.now()
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant());
-    }
-
-    private Date getStartOfTomorrow() {
-        return Date.from(LocalDate.now()
-                .plusDays(1)
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant());
     }
 }

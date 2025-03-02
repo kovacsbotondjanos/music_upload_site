@@ -12,7 +12,13 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = Album.NAME)
+@Table(
+        name = Album.NAME,
+        indexes = {
+                @Index(columnList = "id"),
+                @Index(columnList = "user_id")
+        }
+)
 @ToString(exclude = {"user", "songs"})
 @AllArgsConstructor
 @NoArgsConstructor

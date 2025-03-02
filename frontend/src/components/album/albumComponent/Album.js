@@ -1,46 +1,46 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SongItem from "../../song/songItem/SongItem";
+import { getImage, removeAlbum, getUser } from "../../../services/controller";
+import { formatStringToDate, resolve } from "../../../services/utils";
 
-function Album(props) {
+const Album = (props) => {
   const navigate = useNavigate();
-  const { album, getImageURL } = props;
+  const { album, playMusic } = props;
+  const [user, setUser] = useState(null);
+  const [imgURL, setimgURL] = useState(null);
 
-  function removeAlbum(id) {
-    fetch(`http://localhost:8080/api/v1/albums/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok " + response.statusText);
-        }
-      })
-      .then(() => {
-        navigate("/profile");
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
-  }
+  useEffect(() => {
+    const fetch = async () =>
+      await getImage(album.image, resolve(setimgURL));
+    if (album) {
+      fetch();
+    }
+  }, [album]);
+
+  useEffect(() => {
+    const fetch = async () =>
+      await getUser(album.userId, resolve(setUser));
+    if (album) {
+      fetch();
+    }
+  }, [album]);
 
   return (
     <div className="container container-fluid">
       <div className="row">
         <div className="col">
-          {album != null ? (
+          {album != null && user != null ? (
             <div>
               <div className="row">
                 <div className="col">
                   <h1>{album.name}</h1>
                 </div>
-                <div class="col ms-auto text-end">
+                <div className="col ms-auto text-end">
                   <img
                     width="50px"
                     height="50px"
-                    src={getImageURL(album.image)}
+                    src={imgURL}
                     alt=""
                     className="profile"
                   />
@@ -48,7 +48,11 @@ function Album(props) {
                 <div>
                   <button
                     className="custom-button"
-                    onClick={() => removeAlbum(album.id)}
+                    onClick={() =>
+                      removeAlbum(album.id, () => {
+                        navigate("/profile");
+                      })
+                    }
                   >
                     <ion-icon name="trash-outline"></ion-icon>
                   </button>
@@ -57,25 +61,36 @@ function Album(props) {
 
               <div>
                 <div className="col">
-                  <h1>{album.createdAt}</h1>
+                  <h1>{formatStringToDate(album.createdAt)}</h1>
                 </div>
               </div>
 
               <div>
                 <div className="col">
-                  <h1>{album.songs.length}</h1>
+                  <ion-icon
+                    name={
+                      album.protectionType === "PRIVATE"
+                        ? "lock-closed-outline"
+                        : album.protectionType === "PUBLIC"
+                        ? "lock-open-outline"
+                        : "link-outline"
+                    }
+                  ></ion-icon>
                 </div>
               </div>
 
               <div>
                 <div className="col">
-                  <ion-icon name={album.protectionType === "PRIVATE" ? "lock-closed-outline" : album.protectionType === "PUBLIC" ? "lock-open-outline" : "link-outline"}></ion-icon>
+                  <h1>{user.username}</h1>
                 </div>
               </div>
 
+              
               <div>
                 <div className="col">
-                  <h1>{album.userId}</h1>
+                {album.songs != null && album.songs.length > 0 
+                  ? album.songs.map((item) => <SongItem item={item} playMusic={playMusic} />) 
+                  : ("No songs present")}
                 </div>
               </div>
             </div>
@@ -87,6 +102,6 @@ function Album(props) {
       </div>
     </div>
   );
-}
+};
 
 export default Album;

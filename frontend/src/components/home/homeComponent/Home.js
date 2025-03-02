@@ -1,8 +1,18 @@
-import React from "react";
+import { React, useState, useEffect } from "react";
 import SongItem from "../../song/songItem/SongItem";
+import { getRecommendedSongs } from "../../../services/controller";
+import { resolve } from "../../../services/utils";
 
-function Home(props) {
-  const { songs, playMusic, getImageURL } = props;
+const Home = (props) => {
+  const [songs, setSongs] = useState([]);
+  const { playMusic } = props
+
+   useEffect(() => {
+      const fetch = async () =>
+        await getRecommendedSongs(resolve(setSongs));
+      fetch();
+    }, []);
+  
   return (
     <div className="container container-fluid">
       <div className="row">
@@ -10,9 +20,7 @@ function Home(props) {
           <h1>Recommended songs:</h1>
           <br />
           {songs != null &&
-            songs.map((item) => (
-              <SongItem item={item} playMusic={playMusic} getImageURL={getImageURL}/>
-            ))}
+            songs.map((item) => <SongItem item={item} playMusic={playMusic} />)}
         </div>
       </div>
     </div>

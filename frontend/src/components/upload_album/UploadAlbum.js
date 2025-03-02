@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-function UploadAlbum() {
+const UploadAlbum = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {

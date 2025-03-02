@@ -137,8 +137,8 @@ public class RecommendationEngineTest {
         Song song1 = songRepository.findById(1L).orElseThrow();
         Song song2 = songRepository.findById(2L).orElseThrow();
         //we set the tag of the first song to be different from others
-        Tag oldTag = tagRepository.findByNameIgnoreCase("ROCK").orElseThrow();
-        Tag newTag = tagRepository.findByNameIgnoreCase("POP").orElseThrow();
+        Tag oldTag = tagRepository.findByName("ROCK").orElseThrow();
+        Tag newTag = tagRepository.findByName("POP").orElseThrow();
         song1.setTags(Set.of(newTag));
         songRepository.save(song1);
         //we add two listens
@@ -150,19 +150,16 @@ public class RecommendationEngineTest {
         UserSong userSong1 = new UserSong();
         userSong1.setUserId(user1.getId());
         userSong1.setSongId(song1.getId());
-        userSong1.setListenCount(1L);
         userSongs.add(userSong1);
 
         UserSong userSong2 = new UserSong();
         userSong2.setUserId(user2.getId());
         userSong2.setSongId(song1.getId());
-        userSong2.setListenCount(1L);
         userSongs.add(userSong2);
 
         UserSong userSong3 = new UserSong();
         userSong3.setUserId(user1.getId());
         userSong3.setSongId(song2.getId());
-        userSong3.setListenCount(1L);
         userSongs.add(userSong3);
 
         userSongRepository.saveAll(userSongs);
@@ -189,19 +186,16 @@ public class RecommendationEngineTest {
         UserSong userSong1 = new UserSong();
         userSong1.setUserId(user1.getId());
         userSong1.setSongId(song1.getId());
-        userSong1.setListenCount(1L);
         userSongs.add(userSong1);
 
         UserSong userSong2 = new UserSong();
         userSong2.setUserId(user2.getId());
         userSong2.setSongId(song1.getId());
-        userSong2.setListenCount(1L);
         userSongs.add(userSong2);
 
         UserSong userSong3 = new UserSong();
         userSong3.setUserId(user1.getId());
         userSong3.setSongId(song2.getId());
-        userSong3.setListenCount(1L);
         userSongs.add(userSong3);
 
         userSongRepository.saveAll(userSongs);
@@ -224,13 +218,13 @@ public class RecommendationEngineTest {
         List<Long> userIds = userRepository.findAll().stream().map(User::getId).toList();
 
         userSongRepository.saveAll(
-            userIds.stream().map(id -> new UserSong(1L, id, 1L)).toList()
+            userIds.stream().map(id -> new UserSong(1L, id)).toList()
         );
 
         userSongRepository.saveAll(
             songIds.stream().map(
                     id -> IntStream.range(0, id.intValue()).mapToObj(
-                            userId -> new UserSong(id, (long) userId+1, 1L)
+                            userId -> new UserSong(id, (long) userId+1)
                     ).toList()
             ).flatMap(List::stream).toList()
         );

@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-function Login(props) {
+const Login = (props) => {
   const navigate = useNavigate();
 
   const { setLoggedIn, setUsername, setProfilePic } = props;

@@ -1,24 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getImage } from "../../../services/controller";
+import { resolve } from "../../../services/utils";
 
-function SongItem(props) {
+const SongItem = (props) => {
   const navigate = useNavigate();
-  const { playMusic, getImageURL, item } = props;
+  const { playMusic, item } = props;
   const [imgURL, setimgURL] = useState("");
 
   useEffect(() => {
-    fetchImg();
-  }, []);
-
-  const fetchImg = () => {
-    getImageURL(item.image)
-      .then((resp) => {
-        setimgURL(resp);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  };
+    const fetch = async () =>
+      getImage(item.image, resolve(setimgURL));
+    if (item) {
+      fetch();
+    }
+  }, [item]);
 
   return (
     <div className="container mt-5 mb-5 d-flex justify-content-between align-items-center rounded">
@@ -26,7 +22,13 @@ function SongItem(props) {
         className="custom-button"
         onClick={() => playMusic(item.nameHashed)}
       >
-        <img width="50px" height="50px" src={imgURL} className="profile" />
+        <img
+          alt=""
+          width="50px"
+          height="50px"
+          src={imgURL}
+          className="profile"
+        />
       </button>
       <div className="d-flex align-items-center">
         <a onClick={() => navigate(`/songs/${item.id}`)}>
@@ -35,6 +37,6 @@ function SongItem(props) {
       </div>
     </div>
   );
-}
+};
 
 export default SongItem;

@@ -12,7 +12,7 @@ import java.util.Set;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
     @Query(value = "SELECT * " +
-            "FROM TAG " +
+            "FROM tag " +
             "WHERE name LIKE CONCAT('%', :name, '%') " +
             "ORDER BY " +
             "CASE " +
@@ -20,20 +20,16 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
             "ELSE 2 " +
             "END, " +
             "name",
-            countQuery = "SELECT COUNT(*) " +
-                    "FROM TAG " +
-                    "WHERE name LIKE CONCAT('%', :name, '%')",
             nativeQuery = true)
     List<Tag> findByNameLike(
-            @Param("name") String name,
-            Pageable pageable
+            @Param("name") String name
     );
 
     @Query(value = "SELECT song_id " +
-            "FROM TAG_SONG " +
+            "FROM tag_song " +
             "WHERE tag_id in :tagIds",
             nativeQuery = true)
     Set<Long> findIdsForTagList(@Param("tagIds") List<Long> tagIds);
 
-    Optional<Tag> findByNameIgnoreCase(String name);
+    Optional<Tag> findByName(String name);
 }

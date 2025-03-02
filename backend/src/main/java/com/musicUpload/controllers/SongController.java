@@ -35,8 +35,8 @@ public class SongController {
         return songService.findById(id);
     }
 
-    @GetMapping("/ids/{ids}")
-    public List<SongDTO> getAlbumsIn(@PathVariable List<Long> ids) {
+    @GetMapping("/ids")
+    public List<SongDTO> getSongsIn(@RequestParam List<Long> ids) {
         return songService.findByIdsIn(ids);
     }
 

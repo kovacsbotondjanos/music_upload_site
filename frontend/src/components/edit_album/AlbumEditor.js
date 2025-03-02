@@ -1,46 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getAlbum } from "../../services/controller";
+import { resolve } from "../../services/utils";
 
-function AlbumEditor(props) {
+const AlbumEditor = () => {
   const navigate = useNavigate();
-  const {getImageURL} = props;
   const { albumId } = useParams();
   const [album, setAlbum] = useState(null);
 
   useEffect(() => {
-    fetchAlbum();
-  }, []);
-
-  const fetchAlbum = () => fetch(`http://localhost:8080/api/v1/albums/${albumId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok " + response.statusText);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      setAlbum(data);
-    })
-    .catch((error) => {
-      console.error("There was a problem with the fetch operation:", error);
-    });
-
+    const fetch = async () =>
+      getAlbum(albumId, resolve(setAlbum));
+    fetch();
+  }, [albumId]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/albums/${album.id}`, {
-        method: "PATCH",
-        body: formData,
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/v1/albums/${album.id}`,
+        {
+          method: "PATCH",
+          body: formData,
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -65,8 +50,8 @@ function AlbumEditor(props) {
                   </div>
                 </div>
               </div>
-              {album && 
-                  <div className="container">
+              {album && (
+                <div className="container">
                   <div className="row">
                     <form onSubmit={handleSubmit} encType="multipart/form-data">
                       <div className="row">
@@ -77,7 +62,13 @@ function AlbumEditor(props) {
                             <span className="icon">
                               <ion-icon name="pricetag-outline"></ion-icon>
                             </span>
-                            <input type="text" id="name" name="name" required defaultValue={album.name}/>
+                            <input
+                              type="text"
+                              id="name"
+                              name="name"
+                              required
+                              defaultValue={album.name}
+                            />
                           </div>
                         </div>
                       </div>
@@ -90,7 +81,7 @@ function AlbumEditor(props) {
                             <span className="icon">
                               <ion-icon name="image-outline"></ion-icon>
                             </span>
-                            <input type="file" id="image" name="image"/>
+                            <input type="file" id="image" name="image" />
                           </div>
                         </div>
                       </div>
@@ -101,9 +92,15 @@ function AlbumEditor(props) {
                             <span className="icon">
                               <ion-icon name="lock-closed-outline"></ion-icon>
                             </span>
-                            <label className="button-label">Protection type</label>
+                            <label className="button-label">
+                              Protection type
+                            </label>
                             <br />
-                            <select name="protection_type" id="protection_type"  defaultValue={album.protectionType}>
+                            <select
+                              name="protection_type"
+                              id="protection_type"
+                              defaultValue={album.protectionType}
+                            >
                               <option value="PRIVATE">PRIVATE</option>
                               <option value="PROTECTED">PROTECTED</option>
                               <option value="PUBLIC">PUBLIC</option>
@@ -128,7 +125,7 @@ function AlbumEditor(props) {
                     </form>
                   </div>
                 </div>
-              }
+              )}
             </div>
           </div>
         </div>

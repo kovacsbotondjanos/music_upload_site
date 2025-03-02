@@ -1,5 +1,6 @@
 package com.musicUpload.controllers;
 
+import com.musicUpload.dataHandler.DTOs.FilteredUserDTO;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.DTOs.UserDAO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
@@ -33,10 +34,15 @@ public class UserController {
     }
 
     @GetMapping("/search/{name}")
-    public List<UserDTO> getSongByNameLike(@PathVariable String name,
-                                           @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
-                                           @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
+    public List<FilteredUserDTO> getSongByNameLike(@PathVariable String name,
+                                                   @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+                                                   @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
         return userService.findByNameLike(name, pageNumber, pageSize);
+    }
+
+    @GetMapping("/{id}")
+    public FilteredUserDTO getUser(@PathVariable Long id) {
+        return userService.getUserById(id);
     }
 
     @GetMapping("/recommended")

@@ -81,7 +81,7 @@ public class SongFactory {
         return IntStream.range(0, random.nextInt(0, 5))
                 .mapToObj(__ -> {
                     User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());
-                    return new UserSong(songId, user.getId(), random.nextLong(1, 5));
+                    return new UserSong(songId, user.getId());
                 }).toList();
     }
 }

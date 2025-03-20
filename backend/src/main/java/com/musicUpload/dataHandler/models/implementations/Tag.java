@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -12,8 +13,12 @@ import java.util.Set;
 
 @Entity
 @Data
-@Table(name = Tag.NAME)
+@Table(
+        name = Tag.NAME,
+        indexes = @Index(columnList = "name")
+)
 @NoArgsConstructor
+@ToString(exclude = {"songs"})
 @EqualsAndHashCode(exclude = {"id", "songs"})
 public class Tag {
 

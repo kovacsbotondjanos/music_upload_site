@@ -1,54 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getImage, getUserData, logout } from "../../services/controller";
+import { resolve } from "../../services/utils";
 
-function Navbar(props) {
+const Navbar = (props) => {
   const navigate = useNavigate();
   const [imgURL, setimgURL] = useState("");
   const {
     loggedIn,
     profilePic,
-    username,
     setLoggedIn,
     setUsername,
     setProfilePic,
-    getImageURL
   } = props;
 
   useEffect(() => {
-    if (profilePic) {
-      fetchImg();
-    }
+      const fetch = async () =>
+        getUserData((data) => {
+          if (data) {
+            setLoggedIn(true);
+            setUsername(data.username);
+            setProfilePic(data.profilePicture);
+          }
+        });
+      fetch();
+    }, [setLoggedIn, setUsername, setProfilePic]);
+
+  useEffect(() => {
+      const fetch = async () =>
+        getImage(profilePic, resolve(setimgURL));
+      fetch();
   }, [profilePic]);
-
-  const fetchImg = () => {
-    getImageURL(profilePic)
-    .then((resp) => {
-      setimgURL(resp);
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  };
-
-  function logout() {
-    fetch("http://localhost:8080/logout", {
-      method: "POST",
-      credentials: "include",
-    })
-      .then((response) => {
-        if (response.ok) {
-          setLoggedIn(false);
-          setProfilePic(null);
-          setUsername(null);
-          navigate("/login");
-        } else {
-          console.error("Logout failed");
-        }
-      })
-      .catch((error) => {
-        console.error("Error during logout:", error);
-      });
-  }
 
   return (
     <nav className="navbar navbar-expand">
@@ -58,10 +40,10 @@ function Navbar(props) {
             <div className="collapse navbar-collapse">
               <a className="justify-content profile_div" href="/profile">
                 <img
+                  alt=""
                   width="50px"
                   height="50px"
                   src={imgURL}
-                  alt="User's Profile Picture"
                   className="profile"
                 />
               </a>
@@ -78,7 +60,19 @@ function Navbar(props) {
             <div className="collapse navbar-collapse justify-content-end">
               <div className="navbar-nav">
                 <a
-                  onClick={() => logout()}
+                  href=""
+                  onClick={() =>
+                    logout((response) => {
+                      if (response) {
+                        setLoggedIn(false);
+                        setProfilePic(null);
+                        setUsername(null);
+                        navigate("/login");
+                      } else {
+                        console.error("Logout failed");
+                      }
+                    })
+                  }
                   className="custom-button nav-link active text-white"
                 >
                   Log out

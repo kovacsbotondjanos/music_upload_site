@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 public class RecommendationEngine {
+    private final long NON_AUTHENTICATED_USER_LIMIT = 100L;
     private final UserSongService userSongService;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
@@ -65,12 +66,17 @@ public class RecommendationEngine {
         Date dateGivenWeeksAgoStart = getDateWeeksFromToday(weeksBefore);
         Date dateGivenWeeksAgoEnd = weeksBefore == 1 ? new Date() : getDateWeeksFromToday(weeksBefore - 1);
 
-        Song s = songRepository.findByIdAndProtectionTypeOrUser(
-                        songId,
-                        userId,
-                        ProtectionType.PUBLIC
-                )
-                .orElseThrow(UnauthenticatedException::new);
+        Optional<Song> songOpt = songRepository.findByIdAndProtectionTypeInOrUser(
+                songId,
+                userId,
+                List.of(ProtectionType.PUBLIC, ProtectionType.PROTECTED)
+        );
+
+        if (songOpt.isEmpty()) {
+            return Map.of();
+        }
+
+        Song s = songOpt.orElseThrow(UnauthenticatedException::new);
 
         Set<Long> tagsForSong = s.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
 
@@ -84,6 +90,7 @@ public class RecommendationEngine {
                         .stream()
                         .parallel()
                         .map(UserSong::getUserId)
+                        .filter(id -> !id.equals(userId))
                         .collect(Collectors.toSet()),
                 tagsForSong,
                 dateGivenWeeksAgoStart,
@@ -107,7 +114,6 @@ public class RecommendationEngine {
                         songOccurrenceMap.merge(song.getId(), multiplier, Double::sum);
                     }
                 });
-
         return songOccurrenceMap;
     }
 
@@ -149,6 +155,16 @@ public class RecommendationEngine {
     }
 
     public List<Long> createRecommendationsForUser(Long userId) {
+        log.info("creating recommendation for user {}", userId);
+        long start = System.currentTimeMillis();
+
+        if (userId.equals(0L)) {
+            return songRepository.findByProtectionTypeOrderByListenCount(
+                ProtectionType.PUBLIC,
+                NON_AUTHENTICATED_USER_LIMIT
+            );
+        }
+
         userRepository.findById(userId)
                 .orElseThrow(UnauthenticatedException::new);
 
@@ -191,6 +207,7 @@ public class RecommendationEngine {
             }
         });
 
+        log.info("finished creating recommendation for user {} in {}", userId, (System.currentTimeMillis() - start)/1_000);
         return sortMap(songOccurrences);
     }
 

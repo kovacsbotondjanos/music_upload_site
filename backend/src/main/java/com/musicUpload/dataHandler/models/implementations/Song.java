@@ -10,7 +10,13 @@ import java.util.*;
 
 @Entity
 @Data
-@Table(name = Song.NAME)
+@Table(
+        name = Song.NAME,
+        indexes = {
+                @Index(columnList = "id"),
+                @Index(columnList = "user_id")
+        }
+)
 @ToString(exclude = {"user", "albums"})
 @AllArgsConstructor
 @NoArgsConstructor
@@ -48,7 +54,7 @@ public class Song implements CustomEntityInterface, Serializable {
                     @Index(name = "idx_tag_id", columnList = "tag_id")
             }
     )
-    private Set<Tag> tags;
+    private Set<Tag> tags = new HashSet<>();
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")

@@ -1,39 +1,25 @@
-import React, { useState, useEffect }from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Song from "./songComponent/Song";
+import { getSong } from "../../services/controller";
+import { resolve } from "../../services/utils";
 
-function SongDetail(props) {
+const SongDetail = (props) => {
   const { songId } = useParams();
-  const { playMusic, getImageURL } = props;
+  const { playMusic } = props;
   const [song, setSong] = useState(null);
 
   useEffect(() => {
-    fetchSong();
-  }, []);
+    const fetch = async () =>
+      await getSong(songId, resolve(setSong));
+    fetch();
+  }, [songId]);
 
-  const fetchSong = () => fetch(`http://localhost:8080/api/v1/songs/${songId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok " + response.statusText);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      setSong(data);
-    })
-    .catch((error) => {
-      console.error("There was a problem with the fetch operation:", error);
-    });
+  console.log(song);
 
   return (
     <div className="black-bg">
-      <Song song={song} playMusic={playMusic} getImageURL={getImageURL} />
+      <Song song={song} playMusic={playMusic} />
     </div>
   );
 }

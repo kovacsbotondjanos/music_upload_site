@@ -8,7 +8,6 @@ import com.musicUpload.recommendation.RecommendationEngine;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserRecommendationService {
@@ -47,9 +46,7 @@ public class UserRecommendationService {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
         Long userId = userDetails != null ? userDetails.getId() : 0L;
         return songRepository.findByIdInAndUserOrIdInAndProtectionType(
-                Optional.ofNullable(UserService.getCurrentUserDetails())
-                        .map(details -> recommendationEngine.createRecommendationsForUser(details.getId()))
-                        .orElse(List.of()),
+                recommendationEngine.createRecommendationsForUser(userId),
                 userId,
                 ProtectionType.PUBLIC
         ).stream().map(SongDTO::of).toList();

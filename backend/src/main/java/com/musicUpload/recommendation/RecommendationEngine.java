@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -97,22 +98,29 @@ public class RecommendationEngine {
                 dateGivenWeeksAgoEnd
         );
 
-        Map<Long, Song> alreadyQueriedSongs = new ConcurrentHashMap<>();
+        Map<Long, Song> queriedSongs = songRepository.findByIdInAndUserOrIdInAndProtectionType(
+                songsOfUsersWhoListenedToTheSong.stream().map(UserSong::getSongId).collect(Collectors.toSet()),
+                userId,
+                ProtectionType.PUBLIC
+        ).stream().collect(Collectors.toConcurrentMap(
+                Song::getId,
+                Function.identity(),
+                (s1, s2) -> s1
+        ));
         Map<Long, Double> songOccurrenceMap = new ConcurrentHashMap<>();
         songsOfUsersWhoListenedToTheSong.stream().parallel()
                 .forEach(userSong -> {
-                    var song = alreadyQueriedSongs.get(userSong.getSongId());
+                    Song song = queriedSongs.get(userSong.getSongId());
 
                     if (song == null) {
-                        song = songRepository.findById(userSong.getSongId()).orElse(null);
-                        if (song != null) {
-                            alreadyQueriedSongs.put(songId, song);
-                        }
+                        return;
                     }
 
-                    if (song != null) {
-                        songOccurrenceMap.merge(song.getId(), multiplier, Double::sum);
-                    }
+                    songOccurrenceMap.merge(
+                            song.getId(),
+                            multiplier,
+                            Double::sum
+                    );
                 });
         return songOccurrenceMap;
     }

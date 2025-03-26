@@ -11,13 +11,14 @@ import React, { useState, useEffect } from "react";
 import AlbumDetail from "./components/album/AlbumDetails";
 import SongEditor from "./components/edit_song/SongEditor";
 import AlbumEditor from "./components/edit_album/AlbumEditor";
-import Player from "./components/player/Player";
 import Search from "./components/search/Search";
 import {
   getUserData,
   getMusic,
 } from "./services/controller";
 import { resolve } from "./services/utils";
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -25,31 +26,11 @@ const App = () => {
   const [profilePic, setProfilePic] = useState(null);
   const [audio, setAudio] = useState(null);
 
-  //TODO: find a proper player to control current songs
   const playMusic = (nameHashed) => {
     if (nameHashed != null) {
-      const audioPlayer = document.getElementById("audio-player");
-      const audioSource = document.getElementById("audio-source");
-
       const fetch = async () =>
         getMusic(nameHashed, resolve(setAudio));
       fetch();
-
-      audioSource.src = audio;
-
-      audioPlayer.removeEventListener("canplaythrough", handlePlay);
-      const handlePlay = () => {
-        audioPlayer
-          .play()
-          .then(() => {
-            console.info("Audio is playing.");
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-      }
-      audioPlayer.addEventListener("canplaythrough", handlePlay);
-      audioPlayer.load();
     }
   };
 
@@ -117,7 +98,7 @@ const App = () => {
           />
           <Route path="albums/edit/:albumId" element={<AlbumEditor />} />
         </Routes>
-        <Player />
+        <AudioPlayer src={audio} autoPlayAfterSrcChange crossOrigin/>
       </div>
     </Router>
   );

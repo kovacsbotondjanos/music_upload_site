@@ -1,15 +1,20 @@
 package com.musicUpload.util;
 
+import javazoom.jl.decoder.Bitstream;
 import com.musicUpload.dataHandler.services.MinioService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Random;
 
 @Service
+@Slf4j
 public class MusicFactory {
     private final MinioService minioService;
     private final int durationInSeconds = 60;
@@ -33,10 +38,27 @@ public class MusicFactory {
             audioData[i + 1] = bytes[1];
         }
 
+        byte[] mp3Data = convertWavToMp3(audioData);
+
         MultipartFile multipartFile = new MockMultipartFile("song",
                 "",
                 "audio/mp3",
-                audioData);
+                mp3Data);
         return minioService.uploadSong(multipartFile);
+    }
+
+    public byte[] convertWavToMp3(byte[] wavData) {
+        try {
+            ByteArrayInputStream wavInputStream = new ByteArrayInputStream(wavData);
+
+            Bitstream decoder = new Bitstream(
+                    wavInputStream
+            );
+
+            return decoder.getRawID3v2().readAllBytes();
+        } catch (IOException e) {
+            log.error("{}", e.getMessage());
+            return null;
+        }
     }
 }

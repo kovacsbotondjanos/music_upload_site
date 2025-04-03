@@ -12,27 +12,31 @@ import AlbumDetail from "./components/album/AlbumDetails";
 import SongEditor from "./components/edit_song/SongEditor";
 import AlbumEditor from "./components/edit_album/AlbumEditor";
 import Search from "./components/search/Search";
-import {
-  getUserData,
-  getMusic,
-} from "./services/controller";
+import { getUserData, getMusic } from "./services/controller";
 import { resolve } from "./services/utils";
-import AudioPlayer from 'react-h5-audio-player';
-import 'react-h5-audio-player/lib/styles.css';
+import "react-h5-audio-player/lib/styles.css";
+import Player from "./components/player/Player";
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState(null);
   const [profilePic, setProfilePic] = useState(null);
   const [audio, setAudio] = useState(null);
+  const [songs, setSongs] = useState([]);
 
   const playMusic = (nameHashed) => {
     if (nameHashed != null) {
-      const fetch = async () =>
-        getMusic(nameHashed, resolve(setAudio));
+      const fetch = async () => getMusic(nameHashed, resolve(setAudio));
       fetch();
     }
   };
+
+  //TODO:  get the next  sogns
+  const getNextSong = () => {
+    if (songs.length >= songs.at()) {
+      
+    }
+  }
 
   useEffect(() => {
     const fetch = async () =>
@@ -98,7 +102,7 @@ const App = () => {
           />
           <Route path="albums/edit/:albumId" element={<AlbumEditor />} />
         </Routes>
-        <AudioPlayer src={audio} autoPlayAfterSrcChange crossOrigin/>
+        <Player className="audio-player music-player" audio={audio}/>
       </div>
     </Router>
   );

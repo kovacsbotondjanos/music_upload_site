@@ -1,12 +1,28 @@
+import AudioPlayer from "react-h5-audio-player";
 import React, { memo } from "react";
 
-const Player = memo(() => {
-  return (
+const Player = memo((props) => {
+  const { audio }  = props;
+
+  return (  
     <div id="music-player">
-      <audio id="audio-player" controls>
-        <source id="audio-source" src="" type="audio/mp3" />
-        Your browser does not support the audio element.
-      </audio>
+      <AudioPlayer
+          src={audio}
+          autoPlayAfterSrcChange={true}
+          autoPlay={true}
+          showSkipControls={true}
+          showJumpControls={true}
+          showDownloadProgress={true}
+          showFilledVolume={true}
+          
+          onPlaying={() => console.log("asd")}
+
+          onClickNext={() => console.log("next")}
+          onClickPrevious={() => console.log("prev")}
+          onPause={(e) => console.log("Paused")}
+          onPlay={(e) => console.log("Playing")}
+          onLoadedData={() => console.log("loaded")}
+        />
     </div>
   );
 })

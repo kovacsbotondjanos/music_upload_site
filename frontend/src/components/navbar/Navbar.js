@@ -56,18 +56,25 @@ const Navbar = (props) => {
               </a>
             </div>
           </div>
+          <div className="collapse navbar-collapse">
+            <div className="navbar-nav">
+              <a className="nav-link active text-white" href="/">
+                Discover new songs
+              </a>
+            </div>
+          </div>
           {loggedIn && (
             <div className="collapse navbar-collapse justify-content-end">
               <div className="navbar-nav">
                 <a
-                  href=""
+                  href="/login"
                   onClick={() =>
                     logout((response) => {
                       if (response) {
+                        console.log("logout")
                         setLoggedIn(false);
                         setProfilePic(null);
                         setUsername(null);
-                        navigate("/login");
                       } else {
                         console.error("Logout failed");
                       }

@@ -9,6 +9,7 @@ import com.musicUpload.dataHandler.models.implementations.UserSong;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
+import com.musicUpload.dataHandler.repositories.UserSongRepository;
 import com.musicUpload.dataHandler.services.UserService;
 import com.musicUpload.dataHandler.services.UserSongService;
 import com.musicUpload.exceptions.NotFoundException;
@@ -33,20 +34,19 @@ import java.util.stream.Stream;
 @Slf4j
 public class RecommendationEngine {
     private final long NON_AUTHENTICATED_USER_LIMIT = 100L;
-    private final UserSongService userSongService;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
+    private final UserSongRepository userSongRepository;
     private final AlbumRepository albumRepository;
     private final Map<Integer, Double> weekToMultiplierMap;
 
     @Autowired
-    public RecommendationEngine(UserSongService userSongService,
-                                SongRepository songRepository,
-                                UserRepository userRepository,
+    public RecommendationEngine(SongRepository songRepository,
+                                UserRepository userRepository, UserSongRepository userSongRepository,
                                 AlbumRepository albumRepository) {
-        this.userSongService = userSongService;
         this.songRepository = songRepository;
         this.userRepository = userRepository;
+        this.userSongRepository = userSongRepository;
         this.albumRepository = albumRepository;
         this.weekToMultiplierMap = Map.of(
                 1, 1.0,
@@ -80,12 +80,12 @@ public class RecommendationEngine {
 
         Set<Long> tagsForSong = s.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
 
-        Set<UserSong> usersWhoListenedToTheSong = userSongService.getListensForSongAndCreatedAtGreaterThan(
+        Set<UserSong> usersWhoListenedToTheSong = userSongRepository.findBySongIdAndCreatedAtBetween(
                 songId, dateGivenWeeksAgoStart, dateGivenWeeksAgoEnd
         );
 
         //songs with the same tag
-        Set<UserSong> songsOfUsersWhoListenedToTheSong = userSongService.getSongsForUsersAndCreatedAtGreaterThan(
+        Set<UserSong> songsOfUsersWhoListenedToTheSong = userSongRepository.findByUserIdInAndCreatedAtBetween(
                 usersWhoListenedToTheSong
                         .stream()
                         .parallel()
@@ -168,7 +168,7 @@ public class RecommendationEngine {
         userRepository.findById(userId)
                 .orElseThrow(UnauthenticatedException::new);
 
-        Set<UserSong> songs = userSongService.getSongsForUser(
+        Set<UserSong> songs = userSongRepository.findByUserIdAndCreatedAtBetween(
                 userId,
                 getDateWeeksFromToday(1),
                 new Date()

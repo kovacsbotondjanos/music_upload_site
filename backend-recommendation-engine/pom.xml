@@ -31,6 +31,8 @@
 		<grpc.version>1.70.0</grpc.version>
 		<protobuf-java.version>3.25.6</protobuf-java.version>
 		<spring-grpc.version>0.7.0</spring-grpc.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -58,7 +60,8 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>1.18.30</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

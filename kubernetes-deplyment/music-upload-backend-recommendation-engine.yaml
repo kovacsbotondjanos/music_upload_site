@@ -1,27 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: music-upload-backend
+  name: music-upload-recommendation-engine
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: music-upload-backend
+      app: music-upload-recommendation-engine
   template:
     metadata:
       labels:
-        app: music-upload-backend
+        app: music-upload-recommendation-engine
     spec:
       initContainers:
         - name: wait-for-mysql
           image: busybox
           command: [ 'sh', '-c', 'until nc -z music-upload-mysql-db-service 3306; do echo waiting; sleep 2; done;' ]
-        - name: wait-for-minio
-          image: busybox
-          command: [ 'sh', '-c', 'until nc -z music-upload-minio-service 9000; do echo waiting; sleep 2; done;' ]
       containers:
-        - name: music-upload-backend
-          image: kovacsbotondjanos/musicupload-spring-app:latest
+        - name: music-upload-recommendation-engine
+          image: kovacsbotondjanos/musicupload-recommendation-engine:latest
           ports:
             - containerPort: 8080
           imagePullPolicy: IfNotPresent
@@ -32,12 +29,6 @@ spec:
               value: root
             - name: SPRING_DATASOURCE_PASSWORD
               value: ASD123
-            - name: MINIO_DATASOURCE_URL
-              value: music-upload-minio-service
-            - name: MINIO_ROOT_USER
-              value: minio99
-            - name: MINIO_ROOT_PASSWORD
-              value: minio123
           resources:
             requests:
               memory: "256Mi"
@@ -49,12 +40,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: music-upload-backend-service
+  name: music-upload-recommendation-engine-service
 spec:
   selector:
-    app: music-upload-backend
+    app: music-upload-recommendation-engine
   ports:
     - protocol: TCP
       port: 8080
       targetPort: 8080
-  type: LoadBalancer
+  type: ClusterIP

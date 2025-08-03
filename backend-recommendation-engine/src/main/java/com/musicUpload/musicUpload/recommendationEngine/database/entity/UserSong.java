@@ -38,4 +38,25 @@ public class UserSong {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @PrePersist
+    public void onPersist() {
+        createdAt = new Date();
+        updatedAt = new Date();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        updatedAt = new Date();
+    }
+
+    public UserSong(Long songId, Long userId, Date date) {
+        this.userId = userId;
+        this.songId = songId;
+        this.createdAt = date;
+    }
+
+    public UserSong(Long songId, Long userId) {
+        this(songId, userId, new Date());
+    }
 }

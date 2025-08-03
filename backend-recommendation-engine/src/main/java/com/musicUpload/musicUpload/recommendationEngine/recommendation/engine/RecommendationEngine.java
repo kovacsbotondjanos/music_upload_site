@@ -151,13 +151,12 @@ public class RecommendationEngine {
 
         if (userId.equals(0L)) {
             return songRepository.findByProtectionTypeOrderByListenCount(
-                ProtectionType.PUBLIC,
-                NON_AUTHENTICATED_USER_LIMIT
+                    ProtectionType.PUBLIC,
+                    NON_AUTHENTICATED_USER_LIMIT
             );
         }
 
-        userRepository.findById(userId)
-                .orElseThrow(UnauthenticatedException::new);
+        userRepository.findById(userId).orElseThrow(UnauthenticatedException::new);
 
         Set<UserSong> songs = userSongService.getSongsForUser(
                 userId,
@@ -198,7 +197,7 @@ public class RecommendationEngine {
             }
         });
 
-        log.info("finished creating recommendation for user {} in {}", userId, (System.currentTimeMillis() - start)/1_000);
+        log.info("finished creating recommendation for user {} in {}", userId, (System.currentTimeMillis() - start) / 1_000);
         return sortMap(songOccurrences);
     }
 

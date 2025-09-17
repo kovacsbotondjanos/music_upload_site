@@ -18,7 +18,7 @@ const AlbumItem = (props) => {
 
   return (
     <div className="container mt-5 mb-5 d-flex justify-content-between align-items-center rounded">
-      <img width="50px" height="50px" src={imgURL} alt="" className="profile" />
+      <img width="50px" height="50px" src={`${imgURL}`} alt="" className="profile" />
       <div className="d-flex align-items-center">
         <a onClick={() => navigate(`/albums/${item.id}`)}>
           <h2 className="text-white">{item.name}</h2>

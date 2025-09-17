@@ -21,6 +21,7 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"protectionType", "user", "albums", "createdAt", "updatedAt"})
+@Builder
 public class Song implements CustomEntityInterface, Serializable {
 
     public final static String NAME = "`SONG`";

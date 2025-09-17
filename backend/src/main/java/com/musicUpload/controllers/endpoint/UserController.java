@@ -1,14 +1,18 @@
 package com.musicUpload.controllers.endpoint;
 
-import com.musicUpload.dataHandler.DTOs.FilteredUserDTO;
-import com.musicUpload.dataHandler.DTOs.SongDTO;
-import com.musicUpload.dataHandler.DTOs.UserDAO;
-import com.musicUpload.dataHandler.DTOs.UserDTO;
+import com.musicUpload.dataHandler.DTOs.*;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserRecommendationService;
 import com.musicUpload.dataHandler.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.musicUpload.util.JwtUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,19 +21,33 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/users")
 @CrossOrigin
+@RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
     private final UserRecommendationService userRecommendationService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
-    @Autowired
-    public UserController(UserService userService,
-                          UserRecommendationService userRecommendationService) {
-        this.userService = userService;
-        this.userRecommendationService = userRecommendationService;
+    @PostMapping("/login")
+    public ResponseEntity<LogInResponseDTO> login(@RequestBody LogInDTO loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(),
+                        loginRequest.getPassword()
+                )
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return ResponseEntity.ok(
+                LogInResponseDTO.builder()
+                        .token(jwtUtils.generateToken(authentication))
+                        .build()
+        );
     }
 
     @GetMapping
-    public UserDTO getCurrUser() {
+    public UserDTO getCurrUser(HttpServletRequest request) {
         return userService.findCurrUser();
     }
 

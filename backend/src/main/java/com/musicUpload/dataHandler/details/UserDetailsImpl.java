@@ -1,5 +1,7 @@
 package com.musicUpload.dataHandler.details;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -7,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 @Data
+@Builder
+@AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
     private final Long id;
     private final String username;
@@ -28,7 +32,6 @@ public class UserDetailsImpl implements UserDetails {
         this.password = password;
         this.authorities = authorities;
         this.profilePicture = profilePicture;
-        //TODO: implement these functionalities in the future
         this.accountNonLocked = true;
         this.accountNonExpired = true;
         this.credentialsNonExpired = true;

@@ -3,8 +3,10 @@ package com.musicUpload.dataHandler.services;
 import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.http.Method;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +20,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class MinioService {
@@ -30,13 +34,8 @@ public class MinioService {
     @Value("${minio.pictureBucketName}")
     private String imageBucket;
 
-    @Value("${linkExpirationTime}")
+    @Value("${link.expiration.time}")
     private int expirationTime;
-
-    @Autowired
-    public MinioService(MinioClient minioClient) {
-        this.minioClient = minioClient;
-    }
 
     public String uploadSong(MultipartFile file) {
         return uploadFile(file, songBucket);
@@ -62,8 +61,7 @@ public class MinioService {
         return getUrlToContent(name, songBucket);
     }
 
-    private void deleteFile(String name,
-                            String bucketName) {
+    private void deleteFile(String name, String bucketName) {
         try {
             minioClient.removeObject(RemoveObjectArgs.builder()
                     .bucket(bucketName)
@@ -75,24 +73,24 @@ public class MinioService {
         }
     }
 
-    private String getUrlToContent(String name,
-                                   String bucketName) {
+    private String getUrlToContent(String name, String bucketName) {
         try {
-            String fullUrl = minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
-                    .bucket(bucketName)
-                    .method(Method.GET)
-                    .object(name)
-                    .expiry(expirationTime, TimeUnit.SECONDS)
-                    .build());
-            return new URI(fullUrl).toURL().getFile();
+            String fullUrl = minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .bucket(bucketName)
+                            .method(Method.GET)
+                            .object(name)
+                            .expiry(expirationTime, TimeUnit.SECONDS)
+                            .build());
+            URI uri = new URI(fullUrl);
+            return uri.getPath() + "?" + uri.getQuery();
         } catch (MinioException | InvalidKeyException |
                  IOException | NoSuchAlgorithmException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String uploadFile(MultipartFile file,
-                              String bucketName) {
+    private String uploadFile(MultipartFile file, String bucketName) {
         try {
             boolean isExist = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!isExist) {

@@ -70,7 +70,7 @@ const Search = (props) => {
           </div>
           <h2>Songs:</h2>
           <div>
-            {songs.map((item) => (
+            {songs !== null && songs.map((item) => (
               <SongItem
                 item={item}
                 playMusic={playMusic}

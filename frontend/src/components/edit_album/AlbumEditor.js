@@ -19,7 +19,7 @@ const AlbumEditor = () => {
     const formData = new FormData(event.target);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/albums/${album.id}`,
+        `http://localhost:30002/api/v1/albums/${album.id}`,
         {
           method: "PATCH",
           body: formData,

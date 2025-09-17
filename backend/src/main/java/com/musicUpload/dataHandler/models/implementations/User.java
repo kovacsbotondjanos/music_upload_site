@@ -4,10 +4,7 @@ import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,6 +17,7 @@ import java.util.List;
 @ToString(exclude = {"followers", "followedUsers", "albums", "songs"})
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class User implements CustomEntityInterface, Serializable {
 
     public final static String NAME = "`USER`";

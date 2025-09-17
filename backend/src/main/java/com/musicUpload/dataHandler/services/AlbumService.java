@@ -46,10 +46,7 @@ public class AlbumService {
     public Album saveAlbum(String protectionType,
                            String name,
                            MultipartFile image) {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         if (protectionType == null || name == null) {
             throw new WrongFormatException();
@@ -80,11 +77,7 @@ public class AlbumService {
     }
 
     public List<AlbumDTO> getAlbums() {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
-
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(UnauthenticatedException::new);
@@ -120,11 +113,7 @@ public class AlbumService {
     }
 
     public List<AlbumDTO> findByNameLike(String name, int pageNumber, int pageSize) {
-        Long userId = Optional.ofNullable(
-                        UserService.getCurrentUserDetails()
-                )
-                .map(UserDetailsImpl::getId)
-                .orElse(null);
+        Long userId = UserService.getCurrentUserId();
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
@@ -144,10 +133,7 @@ public class AlbumService {
                             List<Long> songIds,
                             String name,
                             MultipartFile image) {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(UnauthenticatedException::new);
@@ -188,10 +174,7 @@ public class AlbumService {
 
     public Album addSongs(Long id,
                           List<Long> songIds) {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(UnauthenticatedException::new);
@@ -212,10 +195,7 @@ public class AlbumService {
     }
 
     public Album deleteAlbum(Long id) {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);

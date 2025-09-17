@@ -24,7 +24,7 @@ spec:
           image: kovacsbotondjanos/musicupload-spring-app:latest
           ports:
             - containerPort: 8080
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://music-upload-mysql-db-service:3306/music?createDatabaseIfNotExist=true
@@ -33,11 +33,15 @@ spec:
             - name: SPRING_DATASOURCE_PASSWORD
               value: ASD123
             - name: MINIO_DATASOURCE_URL
-              value: music-upload-minio-service
+              value: music-upload-minio-service.default.svc.cluster.local
             - name: MINIO_ROOT_USER
               value: minio99
             - name: MINIO_ROOT_PASSWORD
               value: minio123
+            - name: GRPC_RECOMMENDATION_SERVER_HOST
+              value: music-upload-recommendation-engine-service
+            - name: GRPC_RECOMMENDATION_SERVER_PORT
+              value: "9090"
           resources:
             requests:
               memory: "256Mi"
@@ -57,4 +61,4 @@ spec:
     - protocol: TCP
       port: 8080
       targetPort: 8080
-  type: LoadBalancer
+  type: ClusterIP

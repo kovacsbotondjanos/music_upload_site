@@ -62,7 +62,7 @@ const UploadSong = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/v1/songs", {
+      const response = await fetch("http://localhost:30002/api/v1/songs", {
         method: "POST",
         body: formData,
         credentials: "include",

@@ -42,29 +42,23 @@ public class UpdateAlbumTest {
             List.of(),
             ""
     );
-    private final Song song = new Song(
-            1L,
-            "",
-            "foo",
-            "",
-            0L,
-            privateProtectionType,
-            new User(),
-            new ArrayList<>(),
-            new HashSet<>(),
-            new Date(),
-            new Date()
-    );
+    private final Song song = Song.builder()
+            .id(1L)
+            .image("")
+            .name("foo")
+            .nameHashed("")
+            .listenCount(0L)
+            .protectionType(privateProtectionType)
+            .user(new User())
+            .createdAt(new Date())
+            .updatedAt(new Date())
+            .build();
     @Mock
     private AlbumRepository albumRepository;
     @Mock
     private UserRepository userRepository;
     @Mock
     private SongService songService;
-    @Mock
-    private ImageFactory imageFactory;
-    @Mock
-    private MinioService minioService;
     @Mock
     private SecurityContext securityContext;
     @Mock
@@ -74,38 +68,26 @@ public class UpdateAlbumTest {
     @InjectMocks
     private AlbumService albumService;
     private Album album;
-    private Long id;
     private User user;
     private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
-        id = 1L;
-        album = new Album(
-                id,
-                "",
-                "foo",
-                publicProtectionType,
-                new User(),
-                new ArrayList<>(),
-                new Date(),
-                new Date()
-        );
-        user = new User(
-                1L,
-                null,
-                null,
-                null,
-                "user",
-                List.of(),
-                List.of(),
-                Privilege.USER,
-                List.of(),
-                List.of(),
-                null,
-                null
-        );
+        album = Album.builder()
+                .id(1L)
+                .image("")
+                .name("foo")
+                .protectionType(publicProtectionType)
+                .user(new User())
+                .createdAt(new Date())
+                .updatedAt(new Date())
+                .build();
+        user = User.builder()
+                .id(1L)
+                .username("user")
+                .privilege(Privilege.USER)
+                .build();
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(securityContext.getAuthentication()).thenReturn(authentication);
     }

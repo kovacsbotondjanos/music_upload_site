@@ -18,8 +18,8 @@ public class RecommendationServiceController {
     private final ManagedChannel channel;
     private final ServiceGrpc.ServiceBlockingStub blockingStub;
 
-    public RecommendationServiceController(@Value("${GRPC_RECOMMENDATION_SERVER_HOST}") String recommendationHost,
-                                           @Value("${GRPC_RECOMMENDATION_SERVER_PORT}") int recommendationPort) {
+    public RecommendationServiceController(@Value("${GRPC_RECOMMENDATION_SERVER_HOST:localhost}") String recommendationHost,
+                                           @Value("${GRPC_RECOMMENDATION_SERVER_PORT:9000}") int recommendationPort) {
         channel = ManagedChannelBuilder.forAddress(recommendationHost, recommendationPort)
                 .usePlaintext()
                 .build();

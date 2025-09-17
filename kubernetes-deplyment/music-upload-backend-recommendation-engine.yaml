@@ -20,8 +20,8 @@ spec:
         - name: music-upload-recommendation-engine
           image: kovacsbotondjanos/musicupload-recommendation-engine:latest
           ports:
-            - containerPort: 8080
-          imagePullPolicy: IfNotPresent
+            - containerPort: 8081
+          imagePullPolicy: Always
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://music-upload-mysql-db-service:3306/music?createDatabaseIfNotExist=true
@@ -46,6 +46,6 @@ spec:
     app: music-upload-recommendation-engine
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
+      port: 9090
+      targetPort: 9090
   type: ClusterIP

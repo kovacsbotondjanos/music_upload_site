@@ -47,12 +47,6 @@ public class DeleteAlbumTest {
     private AlbumRepository albumRepository;
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private SongService songService;
-    @Mock
-    private ImageFactory imageFactory;
-    @Mock
-    private MinioService minioService;
     @InjectMocks
     private AlbumService albumService;
     private List<Album> albums;
@@ -62,37 +56,37 @@ public class DeleteAlbumTest {
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         albums = List.of(
-                new Album(
-                        1L,
-                        "",
-                        "foo",
-                        protectionType,
-                        new User(),
-                        new ArrayList<>(),
-                        new Date(),
-                        new Date()
-                ),
-                new Album(
-                        2L,
-                        "",
-                        "bar",
-                        protectionType,
-                        new User(),
-                        new ArrayList<>(),
-                        new Date(),
-                        new Date()
-                ),
-                new Album(
-                        3L,
-                        "",
-                        "baz",
-                        protectionType,
-                        new User(),
-                        new ArrayList<>(),
-                        new Date(),
-                        new Date()
-                )
-        );
+                Album.builder()
+                        .id(1L)
+                        .image("")
+                        .name("foo")
+                        .protectionType(protectionType)
+                        .user(new User())
+                        .songs(new ArrayList<>())
+                        .createdAt(new Date())
+                        .updatedAt(new Date())
+                        .build(),
+                Album.builder()
+                        .id(2L)
+                        .image("")
+                        .name("bar")
+                        .protectionType(protectionType)
+                        .user(new User())
+                        .songs(new ArrayList<>())
+                        .createdAt(new Date())
+                        .updatedAt(new Date())
+                        .build(),
+                Album.builder()
+                        .id(3L)
+                        .image("")
+                        .name("baz")
+                        .protectionType(protectionType)
+                        .user(new User())
+                        .songs(new ArrayList<>())
+                        .createdAt(new Date())
+                        .updatedAt(new Date())
+                        .build()
+                );
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(securityContext.getAuthentication()).thenReturn(authentication);
     }

@@ -15,6 +15,7 @@ import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.exceptions.UnprocessableException;
 import com.musicUpload.exceptions.WrongFormatException;
 import com.musicUpload.util.ImageFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,12 +27,12 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class SongService {
     private final SongRepository songRepository;
     private final UserRepository userRepository;
     private final AlbumRepository albumRepository;
     private final ImageFactory imageFactory;
-    private final UserRecommendationService userRecommendationService;
     private final MinioService minioService;
     private final SongListenCountUpdateScheduler songListenCountUpdateScheduler;
     private final TagService tagService;
@@ -41,7 +42,6 @@ public class SongService {
                        UserRepository userRepository,
                        AlbumRepository albumRepository,
                        ImageFactory imageFactory,
-                       UserRecommendationService userRecommendationService,
                        MinioService minioService,
                        SongListenCountUpdateScheduler songListenCountUpdateScheduler,
                        TagService tagService) {
@@ -49,7 +49,6 @@ public class SongService {
         this.userRepository = userRepository;
         this.albumRepository = albumRepository;
         this.imageFactory = imageFactory;
-        this.userRecommendationService = userRecommendationService;
         this.minioService = minioService;
         this.songListenCountUpdateScheduler = songListenCountUpdateScheduler;
         this.tagService = tagService;
@@ -70,11 +69,7 @@ public class SongService {
                         List<String> tags,
                         MultipartFile image,
                         MultipartFile songFile) {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
-
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         if (name == null || protectionType == null || songFile == null) {
             throw new WrongFormatException();
@@ -121,14 +116,12 @@ public class SongService {
     }
 
     public List<SongDTO> getSongs() {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        log.info("userdetails = {}", userDetails);
 
         User u = userRepository.findById(userDetails.getId())
-                .orElseThrow(UnauthenticatedException::new);
+                .orElseThrow(NotFoundException::new);
 
         return songRepository.findByUser(u).stream().map(SongDTO::new).toList();
     }
@@ -163,13 +156,13 @@ public class SongService {
     public List<SongDTO> findByNameLike(String name,
                                         int pageNumber,
                                         int pageSize) {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
+        Long userId = UserService.getCurrentUserId();
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         return songRepository.findByNameLike(
                         name,
-                        userDetails.getId(),
+                        userId,
                         ProtectionType.PUBLIC,
                         pageable
                 )
@@ -205,11 +198,7 @@ public class SongService {
                           String name,
                           List<String> tags,
                           MultipartFile image) {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
-
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(UnauthenticatedException::new);
@@ -239,11 +228,7 @@ public class SongService {
     }
 
     public Song deleteSong(Long id) {
-        UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
-
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);

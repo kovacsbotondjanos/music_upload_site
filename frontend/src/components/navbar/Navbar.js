@@ -43,7 +43,7 @@ const Navbar = (props) => {
                   alt=""
                   width="50px"
                   height="50px"
-                  src={imgURL}
+                  src={`${imgURL}`}
                   className="profile"
                 />
               </a>
@@ -62,15 +62,11 @@ const Navbar = (props) => {
                 <a
                   href=""
                   onClick={() =>
-                    logout((response) => {
-                      if (response) {
-                        setLoggedIn(false);
-                        setProfilePic(null);
-                        setUsername(null);
-                        navigate("/login");
-                      } else {
-                        console.error("Logout failed");
-                      }
+                    logout(() => {
+                      setLoggedIn(false);
+                      setProfilePic(null);
+                      setUsername(null);
+                      navigate("/login");
                     })
                   }
                   className="custom-button nav-link active text-white"

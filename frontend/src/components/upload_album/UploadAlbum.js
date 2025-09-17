@@ -8,7 +8,7 @@ const UploadAlbum = () => {
     event.preventDefault();
     const formData = new FormData(event.target);
     try {
-      const response = await fetch("http://localhost:8080/api/v1/albums", {
+      const response = await fetch("http://localhost:30002/api/v1/albums", {
         method: "POST",
         body: formData,
         credentials: "include",

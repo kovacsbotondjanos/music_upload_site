@@ -12,16 +12,12 @@ spec:
       labels:
         app: music-upload-frontend
     spec:
-      # initContainers:
-      #   - name: wait-for-backend
-      #     image: busybox
-      #     command: [ 'sh', '-c', 'until nc -z music-upload-backend-service 8080; do echo waiting; sleep 2; done;' ]
       containers:
         - name: music-upload-frontend
           image: kovacsbotondjanos/musicupload-react-app:latest
           ports:
-            - containerPort: 3000
-          imagePullPolicy: IfNotPresent
+            - containerPort: 80
+          imagePullPolicy: Always
           resources:
             requests:
               memory: "256Mi"
@@ -37,8 +33,9 @@ metadata:
 spec:
   selector:
     app: music-upload-frontend
+  type: NodePort
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
-  type: LoadBalancer
+      targetPort: 80
+      nodePort: 30001

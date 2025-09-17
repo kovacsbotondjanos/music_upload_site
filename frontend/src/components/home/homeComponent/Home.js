@@ -19,7 +19,7 @@ const Home = (props) => {
         <div className="col">
           <h1>Recommended songs:</h1>
           <br />
-          {songs != null &&
+          {songs !== null &&
             songs.map((item) => <SongItem item={item} playMusic={playMusic} />)}
         </div>
       </div>

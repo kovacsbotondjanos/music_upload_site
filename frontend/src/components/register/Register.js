@@ -13,7 +13,7 @@ const Register = () => {
     });
 
     try {
-      const response = await fetch("http://localhost:8080/api/v1/users/add", {
+      const response = await fetch("http://localhost:30002/api/v1/users/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

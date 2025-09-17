@@ -6,12 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDAO {
-    private String username;
-    private String email;
-    private String password;
-    private String oldPassword;
+@Builder
+public class LogInResponseDTO {
+    String token;
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { login, getCurrentUser } from "../../services/controller";
 
 const Login = (props) => {
   const navigate = useNavigate();
@@ -14,48 +15,16 @@ const Login = (props) => {
       formDataJson[key] = value;
     });
 
-    try {
-      const response = await fetch("http://localhost:8080/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams(formDataJson),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      fetch("http://localhost:8080/api/v1/users", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(
-              "Network response was not ok " + response.statusText
-            );
+    login(formDataJson['username'], formDataJson['password'], () => {
+      getCurrentUser(data => {
+          if (data) {
+            setLoggedIn(true);
+            setUsername(data.username);
+            setProfilePic(data.profilePicture);
+            navigate("/");
           }
-          return response.json();
         })
-        .then((data) => {
-          setLoggedIn(true);
-          setUsername(data.username);
-          setProfilePic(data.profilePicture);
-        })
-        .catch((error) => {
-          console.error("There was a problem with the fetch operation:", error);
-        });
-
-      navigate("/");
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    })
   };
 
   return (

@@ -26,7 +26,7 @@ const SongItem = (props) => {
           alt=""
           width="50px"
           height="50px"
-          src={imgURL}
+          src={`${imgURL}`}
           className="profile"
         />
       </button>

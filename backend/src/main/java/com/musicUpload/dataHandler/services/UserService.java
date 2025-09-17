@@ -4,13 +4,11 @@ import com.musicUpload.dataHandler.DTOs.FilteredUserDTO;
 import com.musicUpload.dataHandler.DTOs.UserDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.Privilege;
-import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.User;
-import com.musicUpload.dataHandler.repositories.AlbumRepository;
-import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +27,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
@@ -47,11 +46,23 @@ public class UserService implements UserDetailsService {
     }
 
     public static UserDetailsImpl getCurrentUserDetails() {
+        log.info("userdetails = {}", SecurityContextHolder.getContext().getAuthentication());
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof UserDetailsImpl userDetails) {
             return userDetails;
         }
         return null;
+    }
+
+    public static Long getCurrentUserId() {
+        return Optional.ofNullable(getCurrentUserDetails())
+                .map(UserDetailsImpl::getId)
+                .orElse(null);
+    }
+
+    public static UserDetailsImpl getCurrentUserDetailsOrThrowError() {
+        return Optional.ofNullable(getCurrentUserDetails())
+                .orElseThrow(UnauthenticatedException::new);
     }
 
     @Override
@@ -120,11 +131,7 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDTO findCurrUser() {
-        UserDetailsImpl userDetails = getCurrentUserDetails();
-
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = getCurrentUserDetailsOrThrowError();
 
         return findById(userDetails.getId()).map(UserDTO::new)
                 .orElseThrow(NotFoundException::new);
@@ -152,11 +159,7 @@ public class UserService implements UserDetailsService {
                           String password,
                           String oldPassword,
                           MultipartFile image) {
-        UserDetailsImpl userDetails = getCurrentUserDetails();
-
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = getCurrentUserDetailsOrThrowError();
 
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
@@ -200,11 +203,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void followUser(Long userId) {
-        UserDetailsImpl userDetails = getCurrentUserDetails();
-
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
+        UserDetailsImpl userDetails = getCurrentUserDetailsOrThrowError();
 
         if (userId.equals(userDetails.getId())) {
             throw new WrongFormatException();
@@ -228,11 +227,8 @@ public class UserService implements UserDetailsService {
     }
 
     public void deleteUser() {
-        UserDetailsImpl userDetails = getCurrentUserDetails();
+        UserDetailsImpl userDetails = getCurrentUserDetailsOrThrowError();
 
-        if (userDetails == null) {
-            throw new UnauthenticatedException();
-        }
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
         minioService.deleteImage(user.getProfilePicture());

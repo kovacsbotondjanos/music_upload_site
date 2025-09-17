@@ -14,6 +14,5 @@ public class MusicUploadApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MusicUploadApplication.class, args);
-        log.info("Application started");
     }
 }

@@ -1,13 +1,23 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080";
+const getToken = () => localStorage.getItem("jwtToken");
 
 const apiWithCredentials = axios.create({
-  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
+    "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
   },
-  withCredentials: "include",
+});
+
+apiWithCredentials.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+    console.log(token)
+  } else {
+    delete config.headers.Authorization;
+  }
+  return config;
 });
 
 const basePost = (endpointName, success) => {
@@ -38,7 +48,18 @@ const baseDelete = (endpointName, success) => {
 };
 
 //USER
-export const logout = (success) => basePost("/logout", success);
+export const login = async (username, password, success) => axios
+  .post("/api/v1/users/login", { username, password })
+  .then((resp) => {
+    const { token } = resp.data;
+    localStorage.setItem("jwtToken", token);
+    if (success) success(token);
+  })
+  .catch((error) => {
+    console.error("Login failed:", error);
+  });
+
+export const logout = () => localStorage.removeItem("jwtToken");
 
 export const getRecommendedSongs = async (success) =>
   baseGet("/api/v1/users/recommended", success);
@@ -46,6 +67,8 @@ export const getRecommendedSongs = async (success) =>
 export const getUserData = async (success) => baseGet("/api/v1/users", success);
 
 export const getUser = async (userId, success) => baseGet("/api/v1/users/" + userId, success);
+
+export const getCurrentUser = async (success) => baseGet("/api/v1/users", success);
 
 export const getUsers = async (userName, success) =>
   baseGet("/api/v1/users/search/" + userName, success);

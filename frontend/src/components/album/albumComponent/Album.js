@@ -40,7 +40,7 @@ const Album = (props) => {
                   <img
                     width="50px"
                     height="50px"
-                    src={imgURL}
+                    src={`${imgURL}`}
                     alt=""
                     className="profile"
                   />
@@ -88,7 +88,7 @@ const Album = (props) => {
               
               <div>
                 <div className="col">
-                {album.songs != null && album.songs.length > 0 
+                {album.songs !== null && album.songs.length > 0 
                   ? album.songs.map((item) => <SongItem item={item} playMusic={playMusic} />) 
                   : ("No songs present")}
                 </div>

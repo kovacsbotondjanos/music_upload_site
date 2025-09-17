@@ -42,8 +42,6 @@ public class DeleteSongTest {
     private SongRepository songRepository;
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private MinioService minioService;
     @InjectMocks
     private SongService songService;
     private List<Song> songs;

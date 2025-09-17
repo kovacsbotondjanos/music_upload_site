@@ -54,16 +54,16 @@ public class FindByIdTest {
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         id = 1L;
-        album = new Album(
-                id,
-                "",
-                "foo",
-                ProtectionType.PUBLIC,
-                new User(),
-                new ArrayList<>(),
-                new Date(),
-                new Date()
-        );
+        album = Album.builder()
+                .id(id)
+                .image("")
+                .name("foo")
+                .protectionType(ProtectionType.PUBLIC)
+                .user(new User())
+                .songs(new ArrayList<>())
+                .createdAt(new Date())
+                .updatedAt(new Date())
+                .build();
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(securityContext.getAuthentication()).thenReturn(authentication);
     }

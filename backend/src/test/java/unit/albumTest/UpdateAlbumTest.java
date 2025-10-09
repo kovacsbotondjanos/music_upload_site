@@ -79,6 +79,7 @@ public class UpdateAlbumTest {
                 .image("")
                 .name("foo")
                 .protectionType(publicProtectionType)
+                .songs(new ArrayList<>())
                 .user(new User())
                 .createdAt(new Date())
                 .updatedAt(new Date())

@@ -22,13 +22,21 @@ public interface SongRepository extends JpaRepository<Song, Long> {
             @Param("protection_type") List<ProtectionType> protectionType
     );
 
-    @Query(value = "SELECT * " +
+    @Query(value = "SELECT id " +
             "FROM song " +
             "WHERE protection_type = :protection_type " +
+            "AND id not in (:songIds) AND listen_count != 0 " +
             "ORDER BY listen_count " +
             "LIMIT :limit", nativeQuery = true)
     List<Long> findByProtectionTypeOrderByListenCount(
             @Param("protection_type") ProtectionType protectionType,
-            @Param("limit") Long limit
+            @Param("limit") Long limit,
+            @Param("songIds") List<Long> songIds
     );
+
+    @Query(value = "SELECT id " +
+            "FROM song " +
+            "WHERE protection_type != 2 AND user_id = :userId " +
+            "AND id in (:songIds)", nativeQuery = true)
+    List<Long> findByProtectionTypePublic(@Param("songIds") List<Long> ids, @Param("userId") Long userId);
 }

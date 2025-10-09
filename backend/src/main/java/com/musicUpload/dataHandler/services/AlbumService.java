@@ -13,6 +13,7 @@ import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.exceptions.UnprocessableException;
 import com.musicUpload.exceptions.WrongFormatException;
 import com.musicUpload.util.ImageFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,24 +25,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final UserRepository userRepository;
     private final SongRepository songRepository;
     private final ImageFactory imageFactory;
     private final MinioService minioService;
-
-    @Autowired
-    public AlbumService(AlbumRepository albumRepository, UserRepository userRepository,
-                        SongRepository songRepository,
-                        ImageFactory imageFactory,
-                        MinioService minioService) {
-        this.albumRepository = albumRepository;
-        this.userRepository = userRepository;
-        this.songRepository = songRepository;
-        this.imageFactory = imageFactory;
-        this.minioService = minioService;
-    }
 
     public Album saveAlbum(String protectionType,
                            String name,
@@ -158,15 +148,13 @@ public class AlbumService {
         }
 
         if (songIds != null) {
-            songIds.forEach(songId -> {
-                songRepository.findById(songId).ifPresent(song -> {
-                    if (!song.getProtectionType().equals(ProtectionType.PRIVATE)
-                            || album.getUser().getSongs().stream()
-                            .anyMatch(s -> s.getId().equals(song.getId()))) {
-                        album.getSongs().add(song);
-                    }
-                });
-            });
+            songIds.forEach(songId -> songRepository.findById(songId).ifPresent(song -> {
+                if (!song.getProtectionType().equals(ProtectionType.PRIVATE)
+                        || album.getUser().getSongs().stream()
+                        .anyMatch(s -> s.getId().equals(song.getId()))) {
+                    album.getSongs().add(song);
+                }
+            }));
         }
 
         return albumRepository.save(album);

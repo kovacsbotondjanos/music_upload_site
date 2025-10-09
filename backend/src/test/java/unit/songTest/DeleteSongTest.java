@@ -42,6 +42,8 @@ public class DeleteSongTest {
     private SongRepository songRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private MinioService minioService;
     @InjectMocks
     private SongService songService;
     private List<Song> songs;
@@ -51,45 +53,9 @@ public class DeleteSongTest {
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         songs = List.of(
-                new Song(
-                        1L,
-                        "",
-                        "foo",
-                        "",
-                        1L,
-                        protectionType,
-                        new User(),
-                        new ArrayList<>(),
-                        new HashSet<>(),
-                        new Date(),
-                        new Date()
-                ),
-                new Song(
-                        2L,
-                        "",
-                        "bar",
-                        "",
-                        1L,
-                        protectionType,
-                        new User(),
-                        new ArrayList<>(),
-                        new HashSet<>(),
-                        new Date(),
-                        new Date()
-                ),
-                new Song(
-                        3L,
-                        "",
-                        "baz",
-                        "",
-                        1L,
-                        protectionType,
-                        new User(),
-                        new ArrayList<>(),
-                        new HashSet<>(),
-                        new Date(),
-                        new Date()
-                )
+                createSong(1L, "foo"),
+                createSong(2L, "bar"),
+                createSong(3L, "baz")
         );
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -136,5 +102,22 @@ public class DeleteSongTest {
         assertEquals(songs.getFirst(), s);
         assertFalse(u.getSongs().contains(s));
         SecurityContextHolder.clearContext();
+    }
+
+    private Song createSong(Long id, String name) {
+        Date now = new Date();
+        return Song.builder()
+                .id(id)
+                .image("")
+                .name(name)
+                .nameHashed("")
+                .listenCount(1L)
+                .protectionType(protectionType)
+                .user(new User())
+                .albums(new ArrayList<>())
+                .tags(new HashSet<>())
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
     }
 }

@@ -22,6 +22,7 @@ kubectl apply -f kubernetes-deplyment/music-upload-backend-recommendation-engine
 kubectl apply -f kubernetes-deplyment/music-upload-frontend-deployment.yaml
 
 do {
+    Clear-Host
     $statuses = kubectl get pods -o jsonpath="{range .items[*]}{.metadata.name}={.status.phase}{'\n'}{end}"
     Write-Output "Current pod statuses:"
     $statusLines = $statuses -split "\\n"
@@ -40,7 +41,7 @@ do {
     }
 } until ($allRunning)
 
-Write-Output "✅ All pods are Running!"
+Write-Output "All pods are Running!"
 
 Start-Job -Name "MinikubeTunnel" -ScriptBlock { minikube tunnel }
 

@@ -1,4 +1,4 @@
-package com.musicUpload.musicUpload.benchmark;
+package com.musicUpload.recommendationEngine.benchmark;
 
 
 import com.musicUpload.musicUpload.recommendationEngine.Application;
@@ -14,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.databene.contiperf.PerfTest;
 import org.databene.contiperf.Required;
 import org.databene.contiperf.junit.JUnitPerfTestFailure;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +22,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.util.StopWatch;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @SpringBootTest(classes = Application.class)
@@ -87,5 +85,8 @@ public class RecommendationEnginePerformanceTest {
         recommendationEngine.createRecommendationsForUser(user2.getId());
         stopWatch.stop();
         log.info(stopWatch.prettyPrint());
+        Assertions.assertTrue(Arrays.stream(stopWatch.getTaskInfo())
+                .map(StopWatch.TaskInfo::getTimeMillis)
+                .allMatch(millis -> millis < 700));
     }
 }

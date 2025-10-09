@@ -1,5 +1,6 @@
-package com.musicUpload.musicUpload.recommendationEngine;
+package com.musicUpload.recommendationEngine.recommendationEngine;
 
+import com.musicUpload.musicUpload.recommendationEngine.Application;
 import com.musicUpload.musicUpload.recommendationEngine.database.entity.*;
 import com.musicUpload.musicUpload.recommendationEngine.database.entity.Tag;
 import com.musicUpload.musicUpload.recommendationEngine.database.repository.SongRepository;
@@ -7,6 +8,7 @@ import com.musicUpload.musicUpload.recommendationEngine.database.repository.TagR
 import com.musicUpload.musicUpload.recommendationEngine.database.repository.UserRepository;
 import com.musicUpload.musicUpload.recommendationEngine.database.repository.UserSongRepository;
 import com.musicUpload.musicUpload.recommendationEngine.recommendation.engine.RecommendationEngine;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +20,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Slf4j
 @SpringBootTest(classes = Application.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -144,18 +147,16 @@ public class RecommendationEngineTest {
             userIds.stream().map(id -> new UserSong(1L, id)).toList()
         );
 
-        userSongRepository.saveAll(
-            songIds.stream().map(
-                    id -> IntStream.range(0, id.intValue()).mapToObj(
-                            userId -> new UserSong(id, (long) userId+1)
-                    ).toList()
-            ).flatMap(List::stream).toList()
-        );
+        List<UserSong> listens = songIds.stream().map(
+                id -> IntStream.range(0, id.intValue()).mapToObj(
+                        userId -> new UserSong(id, (long) userId+1)
+                ).toList()
+        ).flatMap(List::stream).toList();
 
-       Collections.reverse(songIds);
+        userSongRepository.saveAll(listens);
 
         assertEquals(
-                songIds.stream().filter(id -> !id.equals(1L)).toList(),
+                List.of(5L, 4L, 3L, 2L),
                 recommendationEngine.createRecommendationsForSong(1L, null)
         );
     }

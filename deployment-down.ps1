@@ -1,6 +1,6 @@
 Stop-Job -Name "MinikubeTunnel"
-Stop-Job -Name "FrontendPortForward"
 Remove-Job -Name "MinikubeTunnel"
+Stop-Job -Name "FrontendPortForward"
 Remove-Job -Name "FrontendPortForward"
 
 kubectl delete -f kubernetes-deplyment/music-upload-mysql-db-deployment.yaml

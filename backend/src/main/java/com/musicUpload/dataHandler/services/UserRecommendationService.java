@@ -4,52 +4,56 @@ import com.musicUpload.controllers.grpc.RecommendationServiceController;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
+import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.repositories.SongRepository;
-import com.musicUpload.recommendationEngine.grpc.client.Type;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserRecommendationService {
     private final SongRepository songRepository;
     private final RecommendationServiceController recommendationServiceController;
+    private final MinioService minioService;
 
-    public UserRecommendationService(SongRepository songRepository,
-                                     RecommendationServiceController recommendationServiceController) {
-        this.songRepository = songRepository;
-        this.recommendationServiceController = recommendationServiceController;
-    }
-
-    public List<SongDTO> getRecommendationsForSong(Long songId) {
+    public List<SongDTO> getRecommendationsForSong(Long songId, Long pageSize, Long pageNumber) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
         long userId = userDetails != null ? userDetails.getId() : 0L;
-
-        return songRepository.findByIdInAndUserOrIdInAndProtectionType(
-                recommendationServiceController.getRecommendations(songId, userId, Type.SONG),
-                userId,
-                ProtectionType.PUBLIC
-        ).stream().map(SongDTO::of).toList();
+        return getRecommendationsForSong(songId, userId, pageSize, pageNumber);
     }
 
-    public List<SongDTO> getRecommendationsForAlbum(Long albumId) {
+    public List<SongDTO> getRecommendationsForAlbum(Long albumId, Long pageSize, Long pageNumber) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
         long userId = userDetails != null ? userDetails.getId() : 0L;
-
-        return songRepository.findByIdInAndUserOrIdInAndProtectionType(
-                recommendationServiceController.getRecommendations(albumId, userId, Type.ALBUM),
-                userId,
-                ProtectionType.PUBLIC
-        ).stream().map(SongDTO::of).toList();
+        return getRecommendationsForAlbum(albumId, userId, pageSize, pageNumber);
     }
 
-    public List<SongDTO> getRecommendationsForUser() {
+    public List<SongDTO> getRecommendationsForUser(Long pageSize, Long pageNumber) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
         long userId = userDetails != null ? userDetails.getId() : 0L;
-        return songRepository.findByIdInAndUserOrIdInAndProtectionType(
-                recommendationServiceController.getRecommendations(userId),
-                userId,
-                ProtectionType.PUBLIC
-        ).stream().map(SongDTO::of).toList();
+        return getRecommendationsForUser(userId, pageSize, pageNumber);
+    }
+
+    private List<SongDTO> getRecommendationsForSong(Long songId, Long userId, Long pageSize, Long pageNumber) {
+        var songs = songRepository.findByIdInAndUserOrIdInAndProtectionType(
+                recommendationServiceController.getRecommendationsForSong(songId, userId, pageSize, pageNumber), userId);
+        var songImageMap = minioService.getImageMap(songs.stream().map(Song::getImage).toList());
+        return songs.stream().map(s -> SongDTO.of(s, songImageMap.get(s.getImage()))).toList();
+    }
+
+    private List<SongDTO> getRecommendationsForAlbum(Long albumId, Long userId, Long pageSize, Long pageNumber) {
+        var songs = songRepository.findByIdInAndUserOrIdInAndProtectionType(
+                recommendationServiceController.getRecommendationsForAlbum(albumId, userId, pageSize, pageNumber), userId);
+        var songImageMap = minioService.getImageMap(songs.stream().map(Song::getImage).toList());
+        return songs.stream().map(s -> SongDTO.of(s, songImageMap.get(s.getImage()))).toList();
+    }
+
+    private List<SongDTO> getRecommendationsForUser(Long userId, Long pageSize, Long pageNumber) {
+        var songs = songRepository.findByIdInAndUserOrIdInAndProtectionType(
+                recommendationServiceController.getRecommendationsForUser(userId, pageSize, pageNumber), userId);
+        var songImageMap = minioService.getImageMap(songs.stream().map(Song::getImage).toList());
+        return songs.stream().map(s -> SongDTO.of(s, songImageMap.get(s.getImage()))).toList();
     }
 }

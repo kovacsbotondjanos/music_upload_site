@@ -26,13 +26,13 @@ public class Album implements Serializable {
     public final static String NAME = "`ALBUM`";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String image;
     private String name;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private ProtectionType protectionType;
 
     @ManyToOne

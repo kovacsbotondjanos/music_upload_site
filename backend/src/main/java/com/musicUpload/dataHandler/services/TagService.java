@@ -3,17 +3,15 @@ package com.musicUpload.dataHandler.services;
 import com.musicUpload.dataHandler.DTOs.TagDTO;
 import com.musicUpload.dataHandler.models.implementations.Tag;
 import com.musicUpload.dataHandler.repositories.TagRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TagService {
     private final TagRepository tagRepository;
-
-    public TagService(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
-    }
 
     public Tag saveTag(String tag) {
         return tagRepository.save(new Tag(tag.toUpperCase()));

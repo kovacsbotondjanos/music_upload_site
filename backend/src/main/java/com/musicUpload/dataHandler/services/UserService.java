@@ -8,8 +8,8 @@ import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.*;
 import com.musicUpload.util.ImageFactory;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final ImageFactory imageFactory;
@@ -36,17 +37,7 @@ public class UserService implements UserDetailsService {
     private final String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    @Autowired
-    public UserService(UserRepository userRepository,
-                       ImageFactory imageFactory,
-                       MinioService minioService) {
-        this.userRepository = userRepository;
-        this.imageFactory = imageFactory;
-        this.minioService = minioService;
-    }
-
     public static UserDetailsImpl getCurrentUserDetails() {
-        log.info("userdetails = {}", SecurityContextHolder.getContext().getAuthentication());
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof UserDetailsImpl userDetails) {
             return userDetails;
@@ -100,8 +91,6 @@ public class UserService implements UserDetailsService {
             throw new WrongFormatException("Please fill the email field with valid data");
         }
 
-
-        //TODO: This will have to change in the future, bc it can be unsafe
         if (user.getPrivilege() == null) {
             user.setPrivilege(Privilege.USER);
         }
@@ -114,8 +103,7 @@ public class UserService implements UserDetailsService {
             throw new NotAcceptableException("Email already exists");
         }
 
-        String image = imageFactory.getRandomImage();
-        user.setProfilePicture(image);
+        user.setProfilePicture(imageFactory.getRandomImage(user.getUsername()));
 
         user.setPassword(encoder.encode(user.getPassword()));
 
@@ -133,21 +121,22 @@ public class UserService implements UserDetailsService {
     public UserDTO findCurrUser() {
         UserDetailsImpl userDetails = getCurrentUserDetailsOrThrowError();
 
-        return findById(userDetails.getId()).map(UserDTO::new)
+        return findById(userDetails.getId()).map(u -> UserDTO.of(u, minioService.getImage(u.getProfilePicture())))
                 .orElseThrow(NotFoundException::new);
     }
 
     public List<FilteredUserDTO> findByNameLike(String name, int pageNumber, int pageSize) {
+        UserDetailsImpl userDetails = getCurrentUserDetails();
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        return userRepository.findByNameLike(name, pageable)
+        return userRepository.findByNameLike(name, Optional.ofNullable(userDetails).map(UserDetailsImpl::getId).orElse(0L), pageable)
                 .stream()
-                .map(FilteredUserDTO::of)
+                .map(u -> FilteredUserDTO.of(u, minioService.getImage(u.getProfilePicture())))
                 .toList();
     }
 
     public FilteredUserDTO getUserById(Long id) {
-        return userRepository.findById(id).map(FilteredUserDTO::of).orElseThrow();
+        return userRepository.findById(id).map(u -> FilteredUserDTO.of(u, minioService.getImage(u.getProfilePicture()))).orElseThrow();
     }
 
     public List<User> getUsers() {

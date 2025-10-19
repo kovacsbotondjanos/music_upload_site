@@ -22,7 +22,7 @@ public class User implements Serializable {
     public final static String NAME = "`USER`";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String profilePicture;

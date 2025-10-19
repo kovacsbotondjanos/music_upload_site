@@ -5,7 +5,9 @@ VALUES
 (2, 'user2@gmail.com', 'password', 'user2 user2', 'USER', NOW(), NOW()),
 (3, 'user3@gmail.com', 'password', 'user3 user3', 'USER', NOW(), NOW()),
 (4, 'user4@gmail.com', 'password', 'user4 user4', 'USER', NOW(), NOW()),
-(5, 'user5@gmail.com', 'password', 'user5 user5', 'USER', NOW(), NOW());
+(5, 'user5@gmail.com', 'password', 'user5 user5', 'USER', NOW(), NOW()),
+(6, 'user6@gmail.com', 'password', 'user6 user6', 'USER', NOW(), NOW()),
+(7, 'user7@gmail.com', 'password', 'user7 user7', 'USER', NOW(), NOW());
 
 -- Insert Tags
 INSERT INTO `TAG` (id, name, created_at, updated_at)
@@ -17,16 +19,17 @@ VALUES
 -- Insert Songs
 INSERT INTO `SONG` (id, image, name, name_hashed, listen_count, protection_type, user_id, created_at, updated_at)
 VALUES
-(1, 'hashed_name', 'song1', 'hashed_name', 0, 2, 1, NOW(), NOW()),
-(2, 'hashed_name', 'song2', 'hashed_name', 0, 2, 1, NOW(), NOW()),
-(3, 'hashed_name', 'song3', 'hashed_name', 0, 2, 1, NOW(), NOW()),
-(4, 'hashed_name', 'song4', 'hashed_name', 0, 2, 1, NOW(), NOW()),
-(5, 'hashed_name', 'song5', 'hashed_name', 0, 2, 1, NOW(), NOW()),
-(6, 'hashed_name', 'song6', 'hashed_name', 0, 2, 1, NOW(), NOW()),
-(7, 'hashed_name', 'song7', 'hashed_name', 0, 2, 1, NOW(), NOW()),
-(8, 'hashed_name', 'song8', 'hashed_name', 0, 2, 1, NOW(), NOW()),
-(9, 'hashed_name', 'song9', 'hashed_name', 0, 2, 1, NOW(), NOW()),
-(10, 'hashed_name', 'song10', 'hashed_name', 0, 2, 1, NOW(), NOW());
+(1, 'hashed_name', 'song1', 'hashed_name', 0, 'PUBLIC', 1, NOW(), NOW()),
+(2, 'hashed_name', 'song2', 'hashed_name', 0, 'PUBLIC', 1, NOW(), NOW()),
+(3, 'hashed_name', 'song3', 'hashed_name', 100, 'PUBLIC', 1, NOW(), NOW()),
+(4, 'hashed_name', 'song4', 'hashed_name', 200, 'PUBLIC', 1, NOW(), NOW()),
+(5, 'hashed_name', 'song5', 'hashed_name', 0, 'PUBLIC', 1, NOW(), NOW()),
+(6, 'hashed_name', 'song6', 'hashed_name', 0, 'PUBLIC', 1, NOW(), NOW()),
+(7, 'hashed_name', 'song7', 'hashed_name', 0, 'PUBLIC', 1, NOW(), NOW()),
+(8, 'hashed_name', 'song8', 'hashed_name', 0, 'PUBLIC', 1, NOW(), NOW()),
+(9, 'hashed_name', 'song9', 'hashed_name', 0, 'PUBLIC', 1, NOW(), NOW()),
+(10, 'hashed_name', 'song10', 'hashed_name', 0, 'PUBLIC', 1, NOW(), NOW()),
+(11, 'hashed_name', 'song11', 'hashed_name', 300, 'PRIVATE', 3, NOW(), NOW());
 
 -- Map Tags to Songs (all songs use the first tag: 'ROCK')
 INSERT INTO `tag_song` (song_id, tag_id)

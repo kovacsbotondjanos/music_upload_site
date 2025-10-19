@@ -27,11 +27,11 @@ spec:
               name: mysql-storage
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
-            limits:
-              memory: "512Mi"
+              memory: "1024Mi"
               cpu: "500m"
+            limits:
+              memory: "1024Mi"
+              cpu: "750m"
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:

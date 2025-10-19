@@ -1,17 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import SongItem from "../song/songItem/SongItem";
 import AlbumItem from "../album/albumItem/AlbumItem";
 import UserItem from "../user/userItem/UserItem";
-import {
-  getImage,
-  searchSongs,
-  searchAlbums,
-  getUsers,
-} from "../../services/controller";
+import { searchSongs, searchAlbums, getUsers } from "../../services/controller";
 import { resolve } from "../../services/utils";
 
 const Search = (props) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState("SONG");
   const [songs, setSongs] = useState([]);
   const [albums, setAlbums] = useState([]);
   const [users, setUsers] = useState([]);
@@ -21,13 +17,24 @@ const Search = (props) => {
   const fetchAlbums = async (name) => searchAlbums(name, resolve(setAlbums));
   const fetchUsers = async (name) => getUsers(name, resolve(setUsers));
 
+  const handleDropdownChange = (e) => {
+    setSongs([]);
+    setAlbums([]);
+    setUsers([]);
+    setSearchType(e.target.value);
+  };
+
   const handleInputChange = (event) => {
     setSearchTerm(event.target.value);
     const name = event.target.value;
     if (name !== "") {
-      fetchSongs(name);
-      fetchAlbums(name);
-      fetchUsers(name);
+      if (searchType === "SONG") {
+        fetchSongs(name);
+      } else if (searchType === "ALBUM") {
+        fetchAlbums(name);
+      } else if (searchType === "USER") {
+        fetchUsers(name);
+      }
     }
   };
 
@@ -35,7 +42,6 @@ const Search = (props) => {
     setSearchTerm(event.target.value);
     event.preventDefault();
     if (searchTerm !== "") {
-      console.log(searchTerm);
       searchSongs(searchTerm);
       searchAlbums(searchTerm);
       getUsers(searchTerm);
@@ -53,6 +59,21 @@ const Search = (props) => {
                 <div className="row">
                   <div className="col">
                     <div className="input-box">
+                      <label className="button-label">Search type</label>
+                      <br />
+                      <select
+                        value={searchType}
+                        onChange={handleDropdownChange}
+                        className="form-select"
+                      >
+                        <option value="SONG">Song</option>
+                        <option value="ALBUM">Album</option>
+                        <option value="USER">User</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="col">
+                    <div className="input-box">
                       <label className="button-label">Name</label>
                       <br />
                       <input
@@ -68,36 +89,29 @@ const Search = (props) => {
               </form>
             </div>
           </div>
-          <h2>Songs:</h2>
+          {searchTerm === "SONG" ? <h2>Songs:</h2> : null}
+          {searchTerm === "ALBUM" ? <h2>Albums:</h2> : null}
+          {searchTerm === "USER" ? <h2>Users:</h2> : null}
           <div>
-            {songs !== null && songs.map((item) => (
-              <SongItem
-                item={item}
-                playMusic={playMusic}
-                getImageURL={getImage}
-              />
-            ))}
+            {songs !== null &&
+              songs.map((item) => (
+                <SongItem item={item} playMusic={playMusic} />
+              ))}
           </div>
-          <h2>Albums:</h2>
           <div>
             {albums.map((item) => (
               <AlbumItem item={item} playMusic={playMusic} />
             ))}
           </div>
-          <h2>Users:</h2>
           <div>
             {users.map((item) => (
-              <UserItem
-                item={item}
-                playMusic={playMusic}
-                getImageURL={getImage}
-              />
+              <UserItem item={item} playMusic={playMusic} />
             ))}
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Search;

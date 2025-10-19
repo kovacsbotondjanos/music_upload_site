@@ -52,7 +52,7 @@ public class UserController {
     }
 
     @GetMapping("/search/{name}")
-    public List<FilteredUserDTO> getSongByNameLike(@PathVariable String name,
+    public List<FilteredUserDTO> getUserByNameLike(@PathVariable String name,
                                                    @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
                                                    @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
         return userService.findByNameLike(name, pageNumber, pageSize);
@@ -64,8 +64,9 @@ public class UserController {
     }
 
     @GetMapping("/recommended")
-    public List<SongDTO> getRecommendedSongs() {
-        return userRecommendationService.getRecommendationsForUser();
+    public List<SongDTO> getRecommendedSongs(@RequestParam(name = "pageNumber", defaultValue = "0", required = false) long pageNumber,
+                                             @RequestParam(name = "pageSize", defaultValue = "10", required = false) long pageSize) {
+        return userRecommendationService.getRecommendationsForUser(pageSize, pageNumber);
     }
 
     @PostMapping("/add")

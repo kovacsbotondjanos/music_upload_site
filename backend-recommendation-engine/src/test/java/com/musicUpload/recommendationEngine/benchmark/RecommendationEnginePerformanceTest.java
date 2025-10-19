@@ -2,28 +2,21 @@ package com.musicUpload.recommendationEngine.benchmark;
 
 
 import com.musicUpload.musicUpload.recommendationEngine.Application;
-import com.musicUpload.musicUpload.recommendationEngine.database.entity.Song;
-import com.musicUpload.musicUpload.recommendationEngine.database.entity.User;
-import com.musicUpload.musicUpload.recommendationEngine.database.entity.UserSong;
-import com.musicUpload.musicUpload.recommendationEngine.database.repository.SongRepository;
-import com.musicUpload.musicUpload.recommendationEngine.database.repository.TagRepository;
-import com.musicUpload.musicUpload.recommendationEngine.database.repository.UserRepository;
-import com.musicUpload.musicUpload.recommendationEngine.database.repository.UserSongRepository;
-import com.musicUpload.musicUpload.recommendationEngine.recommendation.engine.RecommendationEngine;
+import com.musicUpload.musicUpload.recommendationEngine.database.service.RecommendationEngine;
 import lombok.extern.slf4j.Slf4j;
 import org.databene.contiperf.PerfTest;
 import org.databene.contiperf.Required;
-import org.databene.contiperf.junit.JUnitPerfTestFailure;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.util.StopWatch;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @SpringBootTest(classes = Application.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -32,61 +25,88 @@ import java.util.List;
 public class RecommendationEnginePerformanceTest {
 
     private final RecommendationEngine recommendationEngine;
-    private final UserRepository userRepository;
-    private final SongRepository songRepository;
-    private final UserSongRepository userSongRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public RecommendationEnginePerformanceTest(RecommendationEngine recommendationEngine,
-                                    UserRepository userRepository,
-                                    SongRepository songRepository,
-                                    UserSongRepository userSongRepository) {
+    public RecommendationEnginePerformanceTest(
+            RecommendationEngine recommendationEngine, JdbcTemplate jdbcTemplate) {
         this.recommendationEngine = recommendationEngine;
-        this.userRepository = userRepository;
-        this.songRepository = songRepository;
-        this.userSongRepository = userSongRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Test
-    @PerfTest(invocations = 10)
-    @Required(average = 10)
-    @Sql(scripts = "/init-scripts/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/init-scripts/performance-test-data/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    public void benchMarkEasyQuery() {
+    public void benchMarkEasyQuery_1() {
+        createData(10);
+        benchmarkTest(150L, 100L);
+    }
+
+    @Test
+    @Sql(scripts = "/init-scripts/performance-test-data/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void benchMarkMediumQuery_1() {
+        createData(500);
+        benchmarkTest(100L, 100L);
+    }
+
+    @Test
+    @Sql(scripts = "/init-scripts/performance-test-data/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void benchMarkHardQuery_1() {
+        createData(10_000);
+        benchmarkTest(1000L, 1000L);
+    }
+
+    @Test
+    @Sql(scripts = "/init-scripts/performance-test-data/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void benchMarkHardQuery_2() {
+        createData(100_000);
+        benchmarkTest(1000L, 1000L);
+    }
+
+    @Test
+    @Sql(scripts = "/init-scripts/performance-test-data/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void benchMarkHardQuery_3() {
+        createData(500_000);
+        benchmarkTest(2000L, 2000L);
+    }
+
+    @PerfTest(invocations = 100)
+    @Required(average = 100)
+    private void benchmarkTest(Long userRecommendationMillis, Long songRecommendationMillis) {
         StopWatch stopWatch = new StopWatch();
-        stopWatch.start("recommend");
+        stopWatch.start("recommend-user");
 
-        userSongRepository.deleteAll();
-        Song song1 = songRepository.findById(1L).orElseThrow();
-        Song song2 = songRepository.findById(2L).orElseThrow();
-        //we add two listens
-        User user1 = userRepository.findById(1L).orElseThrow();
-        User user2 = userRepository.findById(2L).orElseThrow();
-        //both users listened to song1
-        List<UserSong> userSongs = new ArrayList<>();
+        recommendationEngine.createRecommendationsForUser(4L, 20L, 0L);
 
-        UserSong userSong1 = new UserSong();
-        userSong1.setUserId(user1.getId());
-        userSong1.setSongId(song1.getId());
-        userSongs.add(userSong1);
-
-        UserSong userSong2 = new UserSong();
-        userSong2.setUserId(user2.getId());
-        userSong2.setSongId(song1.getId());
-        userSongs.add(userSong2);
-
-        UserSong userSong3 = new UserSong();
-        userSong3.setUserId(user1.getId());
-        userSong3.setSongId(song2.getId());
-        userSongs.add(userSong3);
-
-        userSongRepository.saveAll(userSongs);
-
-        recommendationEngine.createRecommendationsForUser(user2.getId());
         stopWatch.stop();
         log.info(stopWatch.prettyPrint());
         Assertions.assertTrue(Arrays.stream(stopWatch.getTaskInfo())
                 .map(StopWatch.TaskInfo::getTimeMillis)
-                .allMatch(millis -> millis < 700));
+                .allMatch(millis -> millis < userRecommendationMillis));
+
+        stopWatch = new StopWatch();
+        stopWatch.start("recommend-song");
+
+        recommendationEngine.createRecommendationsForSong(8L, 4L, 20L, 0L);
+
+        stopWatch.stop();
+        log.info(stopWatch.prettyPrint());
+        Assertions.assertTrue(Arrays.stream(stopWatch.getTaskInfo())
+                .map(StopWatch.TaskInfo::getTimeMillis)
+                .allMatch(millis -> millis < songRecommendationMillis));
+    }
+
+    private void createData(int listenRowCount) {
+        Random rand = new Random();
+        String data = IntStream.rangeClosed(1, listenRowCount).mapToObj(i ->
+                String.format("(%d, %d, NOW(), NOW())", rand.nextLong(30L), rand.nextLong(30L)))
+                .collect(Collectors.joining(", "));
+        jdbcTemplate.execute(
+                String.format("INSERT INTO user_song (user_id, song_id, created_at, updated_at) VALUES %s;", data)
+        );
     }
 }

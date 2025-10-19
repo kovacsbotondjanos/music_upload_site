@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: music-upload-backend
 spec:
-  replicas: 3
   selector:
     matchLabels:
       app: music-upload-backend
@@ -19,6 +18,9 @@ spec:
         - name: wait-for-minio
           image: busybox
           command: [ 'sh', '-c', 'until nc -z music-upload-minio-service 9000; do echo waiting; sleep 2; done;' ]
+        - name: wait-for-redis
+          image: busybox
+          command: [ 'sh', '-c', 'until nc -z music-upload-redis-service 6379; do echo waiting for redis; sleep 2; done;' ]
       containers:
         - name: music-upload-backend
           image: kovacsbotondjanos/musicupload-spring-app:latest
@@ -42,13 +44,31 @@ spec:
               value: music-upload-recommendation-engine-service
             - name: GRPC_RECOMMENDATION_SERVER_PORT
               value: "9090"
+            - name: SPRING_CACHE_TYPE
+              value: redis
+            - name: SPRING_DATA_REDIS_HOST
+              value: music-upload-redis-service
+            - name: SPRING_DATA_REDIS_PORT
+              value: "6379"
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: "800Mi"
+              cpu: "1000m"
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "1024Mi"
+              cpu: "1250m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -62,3 +82,27 @@ spec:
       port: 8080
       targetPort: 8080
   type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: music-upload-backend-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: music-upload-backend
+  minReplicas: 1
+  maxReplicas: 3
+  behavior: 
+    scaleDown:
+      stabilizationWindowSeconds: 120
+    scaleUp:
+      stabilizationWindowSeconds: 30
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 85

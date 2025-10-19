@@ -4,7 +4,7 @@ import com.musicUpload.dataHandler.DTOs.SongDAO;
 import com.musicUpload.dataHandler.DTOs.SongDTO;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.dataHandler.services.UserRecommendationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,16 +14,10 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/songs")
 @CrossOrigin
+@RequiredArgsConstructor
 public class SongController {
     private final SongService songService;
     private final UserRecommendationService userRecommendationService;
-
-    @Autowired
-    public SongController(SongService songService,
-                          UserRecommendationService userRecommendationService) {
-        this.songService = songService;
-        this.userRecommendationService = userRecommendationService;
-    }
 
     @GetMapping
     public List<SongDTO> getSongs() {
@@ -48,8 +42,10 @@ public class SongController {
     }
 
     @GetMapping("/recommended/{id}")
-    public List<SongDTO> getRecommendedSongs(@PathVariable Long id) {
-        return userRecommendationService.getRecommendationsForSong(id);
+    public List<SongDTO> getRecommendedSongs(@PathVariable Long id,
+                                             @RequestParam(name = "pageNumber", defaultValue = "0", required = false) long pageNumber,
+                                             @RequestParam(name = "pageSize", defaultValue = "10", required = false) long pageSize) {
+        return userRecommendationService.getRecommendationsForSong(id, pageSize, pageNumber);
     }
 
     @PostMapping
@@ -58,11 +54,7 @@ public class SongController {
                            @RequestParam(name = "image", required = false) MultipartFile image,
                            @RequestParam(name = "song") MultipartFile song) {
 
-        songService.addSong(
-                songDAO,
-                image,
-                song
-        );
+        songService.addSong(songDAO, image, song);
     }
 
     @PatchMapping("/{id}")
@@ -70,11 +62,7 @@ public class SongController {
     public void patchSong(@PathVariable Long id,
                           @ModelAttribute SongDAO songPatchDTO,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
-        songService.patchSong(
-                id,
-                songPatchDTO,
-                image
-        );
+        songService.patchSong(id, songPatchDTO, image);
     }
 
     @DeleteMapping("/{id}")

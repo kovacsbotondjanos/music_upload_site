@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAlbum } from "../../services/controller";
+import { getAlbum, patchAlbum } from "../../services/controller";
 import { resolve } from "../../services/utils";
 
 const AlbumEditor = () => {
@@ -17,24 +17,7 @@ const AlbumEditor = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    try {
-      const response = await fetch(
-        `http://localhost:30002/api/v1/albums/${album.id}`,
-        {
-          method: "PATCH",
-          body: formData,
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      navigate("/profile");
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    patchAlbum(album.id, formData, () => navigate("/profile"));
   };
 
   return (
@@ -97,8 +80,8 @@ const AlbumEditor = () => {
                             </label>
                             <br />
                             <select
-                              name="protection_type"
-                              id="protection_type"
+                              name="protectionType"
+                              id="protectionType"
                               defaultValue={album.protectionType}
                             >
                               <option value="PRIVATE">PRIVATE</option>

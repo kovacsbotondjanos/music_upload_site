@@ -78,13 +78,6 @@ const Login = (props) => {
                         </div>
                       </div>
                     </div>
-                    <div className="row">
-                      <div className="col">
-                        <div className="remember-forgot">
-                          <a href="#">Forgot Password?</a>
-                        </div>
-                      </div>
-                    </div>
 
                     <div className="row">
                       <div className="col">

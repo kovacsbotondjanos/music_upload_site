@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Song from "./songComponent/Song";
 import { getSong } from "../../services/controller";
@@ -15,11 +15,9 @@ const SongDetail = (props) => {
     fetch();
   }, [songId]);
 
-  console.log(song);
-
   return (
     <div className="black-bg">
-      <Song song={song} playMusic={playMusic} />
+      { song == null ? null : <Song song={song} playMusic={playMusic} /> }
     </div>
   );
 }

@@ -29,6 +29,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
@@ -65,6 +66,8 @@ public class UpdateAlbumTest {
     private Authentication authentication;
     @Mock
     private SongRepository songRepository;
+    @Mock
+    private MinioService minioService;
     @InjectMocks
     private AlbumService albumService;
     private Album album;
@@ -91,6 +94,7 @@ public class UpdateAlbumTest {
                 .build();
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(minioService.getImageMap(anyList())).thenReturn(Map.of());
     }
 
     @AfterEach
@@ -116,6 +120,8 @@ public class UpdateAlbumTest {
         SecurityContextHolder.setContext(securityContext);
         given(albumRepository.findByUserAndId(u, 1L))
                 .willReturn(Optional.of(album));
+        given(albumRepository.save(album))
+                .willReturn(album);
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         albumService.patchAlbum(
@@ -134,6 +140,8 @@ public class UpdateAlbumTest {
         SecurityContextHolder.setContext(securityContext);
         given(albumRepository.findByUserAndId(u, 1L))
                 .willReturn(Optional.of(album));
+        given(albumRepository.save(album))
+                .willReturn(album);
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         albumService.patchAlbum(
@@ -153,6 +161,8 @@ public class UpdateAlbumTest {
         SecurityContextHolder.setContext(securityContext);
         given(albumRepository.findByUserAndId(u, 1L))
                 .willReturn(Optional.of(album));
+        given(albumRepository.save(album))
+                .willReturn(album);
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         albumService.patchAlbum(
@@ -172,10 +182,12 @@ public class UpdateAlbumTest {
         SecurityContextHolder.setContext(securityContext);
         given(albumRepository.findByUserAndId(u, 1L))
                 .willReturn(Optional.of(album));
+        given(albumRepository.save(album))
+                .willReturn(album);
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         given(songService.findById(1L))
-                .willReturn(SongDTO.of(song));
+                .willReturn(SongDTO.of(song, ""));
         given(songRepository.findById(1L))
                 .willReturn(Optional.of(song));
         albumService.patchAlbum(
@@ -196,13 +208,15 @@ public class UpdateAlbumTest {
         SecurityContextHolder.setContext(securityContext);
         given(albumRepository.findByUserAndId(u, 1L))
                 .willReturn(Optional.of(album));
+        given(albumRepository.save(album))
+                .willReturn(album);
         given(userRepository.findById(userDetails.getId()))
                 .willReturn(Optional.of(u));
         album.setUser(user);
         user.setAlbums(List.of(album));
         user.setSongs(List.of(song));
         given(songService.findById(1L))
-                .willReturn(SongDTO.of(song));
+                .willReturn(SongDTO.of(song, ""));
         albumService.patchAlbum(
                 1L,
                 null,

@@ -12,10 +12,7 @@ import java.util.*;
 @Data
 @Table(
         name = Song.NAME,
-        indexes = {
-                @Index(columnList = "id"),
-                @Index(columnList = "user_id")
-        }
+        indexes = @Index(columnList = "user_id")
 )
 @ToString(exclude = {"user", "albums"})
 @AllArgsConstructor
@@ -35,14 +32,14 @@ public class Song implements CustomEntityInterface, Serializable {
     private String nameHashed;
     private Long listenCount = 0L;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private ProtectionType protectionType;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToMany(mappedBy = "songs", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "songs", fetch = FetchType.LAZY)
     private List<Album> albums = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -75,23 +72,7 @@ public class Song implements CustomEntityInterface, Serializable {
         createdAt = new Date();
     }
 
-    public void addListen(Long count) {
-        listenCount += count;
-    }
-
     public void addTags(List<Tag> tags) {
         this.tags.addAll(tags);
-    }
-
-    public void addTags(Tag... tags) {
-        addTags(Arrays.asList(tags));
-    }
-
-    public long getCacheIndex() {
-        if (listenCount == 0) {
-            return 0;
-        }
-        //I take the 100 base log of the listen count to determine how long i have to cache the song, the cap is one hour
-        return (long) (Math.min(1000 * 60 * 60, 100 * Math.log(listenCount) / Math.log(100)) * Math.sqrt(listenCount));
     }
 }

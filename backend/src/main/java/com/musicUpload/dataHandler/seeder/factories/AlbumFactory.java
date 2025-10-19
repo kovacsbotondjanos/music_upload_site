@@ -7,7 +7,8 @@ import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.util.ImageFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,15 +16,10 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 @Service
+@RequiredArgsConstructor
 public class AlbumFactory {
     private final ImageFactory imageFactory;
     private final AlbumRepository albumRepository;
-
-    @Autowired
-    public AlbumFactory(ImageFactory imageFactory, AlbumRepository albumRepository) {
-        this.imageFactory = imageFactory;
-        this.albumRepository = albumRepository;
-    }
 
     public List<Album> createAlbums(int number, List<User> users,
                                     List<Song> songs) {
@@ -35,6 +31,7 @@ public class AlbumFactory {
         );
     }
 
+    @Transactional
     private Album createAlbum(List<User> users, List<Song> songs) {
         Album album = new Album();
         Random random = new Random();
@@ -43,7 +40,7 @@ public class AlbumFactory {
         String name = faker.book().title();
 
         album.setName(name);
-        album.setImage(imageFactory.getRandomImage());
+        album.setImage(imageFactory.getRandomImage(name));
         album.setProtectionType(ProtectionType.getRandomPrivilege());
 
         User user = users.get(random.nextInt(0, Integer.MAX_VALUE) % users.size());

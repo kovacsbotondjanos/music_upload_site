@@ -16,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "SELECT * " +
             "FROM user " +
-            "WHERE username LIKE CONCAT('%', :name, '%') " +
+            "WHERE username LIKE CONCAT('%', :name, '%') AND (:userId = 0 OR id != :userId) " +
             "ORDER BY " +
             "CASE " +
             "WHEN username LIKE CONCAT(:name, '%') THEN 1 " +
@@ -25,7 +25,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "username",
             countQuery = "SELECT COUNT(*) " +
                     "FROM user " +
-                    "WHERE username LIKE CONCAT('%', :name, '%')",
+                    "WHERE username LIKE CONCAT('%', :name, '%') AND (:userId = 0 OR id != :userId) ",
             nativeQuery = true)
-    List<User> findByNameLike(@Param("name") String name, Pageable pageable);
+    List<User> findByNameLike(@Param("name") String name, @Param("userId") Long userId, Pageable pageable);
 }

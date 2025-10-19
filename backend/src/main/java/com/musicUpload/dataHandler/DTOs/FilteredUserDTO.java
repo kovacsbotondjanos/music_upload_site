@@ -20,10 +20,10 @@ public class FilteredUserDTO {
     private List<Long> followedUsers;
     private List<Long> followers;
 
-    public FilteredUserDTO(User user) {
+    public FilteredUserDTO(User user, String profilePicture) {
         this(
                 user.getId(),
-                user.getProfilePicture(),
+                profilePicture,
                 user.getUsername(),
                 user.getAlbums()
                         .stream()
@@ -42,7 +42,7 @@ public class FilteredUserDTO {
         );
     }
 
-    public static FilteredUserDTO of(User user) {
-        return new FilteredUserDTO(user);
+    public static FilteredUserDTO of(User user, String profilePicture) {
+        return new FilteredUserDTO(user, profilePicture);
     }
 }

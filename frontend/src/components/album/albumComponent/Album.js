@@ -1,26 +1,41 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SongItem from "../../song/songItem/SongItem";
-import { getImage, removeAlbum, getUser } from "../../../services/controller";
 import { formatStringToDate, resolve } from "../../../services/utils";
+import {
+  getUser,
+  removeAlbum,
+  getRecommendedSongsForAlbum,
+} from "../../../services/controller";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const Album = (props) => {
   const navigate = useNavigate();
-  const { album, playMusic } = props;
+  const { album, playMusic, currentUserId } = props;
   const [user, setUser] = useState(null);
-  const [imgURL, setimgURL] = useState(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [recommendedSongs, setSongs] = useState([]);
+
+  var fetchSongs = async () => {
+    await getRecommendedSongsForAlbum(page, album.id, (data) => {
+      if (!data || data.length === 0) {
+        setHasMore(false);
+      } else {
+        setSongs((prev) => [...prev, ...data]);
+        setPage((prev) => prev + 1);
+      }
+    });
+  };
 
   useEffect(() => {
-    const fetch = async () =>
-      await getImage(album.image, resolve(setimgURL));
     if (album) {
-      fetch();
+      fetchSongs();
     }
   }, [album]);
 
   useEffect(() => {
-    const fetch = async () =>
-      await getUser(album.userId, resolve(setUser));
+    const fetch = async () => await getUser(album.userId, resolve(setUser));
     if (album) {
       fetch();
     }
@@ -40,23 +55,25 @@ const Album = (props) => {
                   <img
                     width="50px"
                     height="50px"
-                    src={`${imgURL}`}
+                    src={`${album.image}`}
                     alt=""
                     className="profile"
                   />
                 </div>
-                <div>
-                  <button
-                    className="custom-button"
-                    onClick={() =>
-                      removeAlbum(album.id, () => {
-                        navigate("/profile");
-                      })
-                    }
-                  >
-                    <ion-icon name="trash-outline"></ion-icon>
-                  </button>
-                </div>
+                {album.userId === currentUserId ? (
+                  <div>
+                    <button
+                      className="custom-button"
+                      onClick={() =>
+                        removeAlbum(album.id, () => {
+                          navigate("/profile");
+                        })
+                      }
+                    >
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                  </div>
+                ) : null}
               </div>
 
               <div>
@@ -85,17 +102,39 @@ const Album = (props) => {
                 </div>
               </div>
 
-              
               <div>
                 <div className="col">
-                {album.songs !== null && album.songs.length > 0 
-                  ? album.songs.map((item) => <SongItem item={item} playMusic={playMusic} />) 
-                  : ("No songs present")}
+                  {album.songs !== null && album.songs.length > 0
+                    ? album.songs.map((item) => (
+                        <SongItem item={item} playMusic={playMusic} />
+                      ))
+                    : "No songs present"}
+                </div>
+              </div>
+
+              <div className="container container-fluid">
+                <div className="row">
+                  <div className="col">
+                    <h1>Recommended songs:</h1>
+                    <br />
+                    <InfiniteScroll
+                      dataLength={recommendedSongs.length}
+                      next={fetchSongs}
+                      hasMore={hasMore}
+                      loader={<h4>Loading songs...</h4>}
+                      endMessage={<p>No more songs</p>}
+                    >
+                      {recommendedSongs !== null &&
+                        recommendedSongs.map((item) => (
+                          <SongItem item={item} playMusic={playMusic} />
+                        ))}
+                    </InfiniteScroll>
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <p>Sorry this song is not available</p>
+            <p>Sorry this album is not available</p>
           )}
           <br />
         </div>

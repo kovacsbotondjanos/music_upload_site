@@ -7,6 +7,7 @@ import com.musicUpload.dataHandler.models.implementations.Album;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.services.AlbumService;
+import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.exceptions.NotFoundException;
 import com.musicUpload.exceptions.UnauthenticatedException;
 import org.junit.jupiter.api.AfterEach;
@@ -44,6 +45,8 @@ public class FindByIdTest {
     private SecurityContext securityContext;
     @Mock
     private Authentication authentication;
+    @Mock
+    private MinioService minioService;
     @InjectMocks
     private AlbumService albumService;
     private Album album;

@@ -35,7 +35,7 @@ public class Album implements CustomEntityInterface, Serializable {
     private String image;
     private String name;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private ProtectionType protectionType;
 
     @ManyToOne

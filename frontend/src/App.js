@@ -17,7 +17,6 @@ import {
   getUserData,
   getMusic,
 } from "./services/controller";
-import { resolve } from "./services/utils";
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -25,30 +24,30 @@ const App = () => {
   const [profilePic, setProfilePic] = useState(null);
   const [audio, setAudio] = useState(null);
 
-  //TODO: find a proper player to control current songs
-  const playMusic = (nameHashed) => {
+  const playMusic = async (nameHashed) => {
     if (nameHashed != null) {
       const audioPlayer = document.getElementById("audio-player");
       const audioSource = document.getElementById("audio-source");
 
-      const fetch = async () =>
-        getMusic(nameHashed, resolve(setAudio));
-      fetch();
+      const audio = await new Promise((resolve) => {
+        getMusic(nameHashed, (url) => resolve(url));
+      });
 
-      audioSource.src = audio;
+      if (!audio) {
+        console.error("Audio call failed");
+        return;
+      }
 
-      audioPlayer.removeEventListener("canplaythrough", handlePlay);
       const handlePlay = () => {
         audioPlayer
           .play()
-          .then(() => {
-            console.info("Audio is playing.");
-          })
-          .catch((error) => {
-            console.error(error);
-          });
+          .catch((error) => console.error(error));
       }
+
+      audioPlayer.removeEventListener("canplaythrough", handlePlay);
       audioPlayer.addEventListener("canplaythrough", handlePlay);
+
+      audioSource.src = audio;
       audioPlayer.load();
     }
   };

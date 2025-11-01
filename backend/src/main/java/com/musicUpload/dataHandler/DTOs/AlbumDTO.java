@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class AlbumDTO {
@@ -16,17 +17,17 @@ public class AlbumDTO {
     private Long userId;
     private Date createdAt;
 
-    public AlbumDTO(Album album) {
+    public AlbumDTO(Album album, String imageName, Map<String, String> songImageMap) {
         this.id = album.getId();
         this.name = album.getName();
-        this.songs = album.getSongs().stream().map(SongDTO::new).toList();
-        this.image = album.getImage();
+        this.songs = album.getSongs().stream().map(s -> SongDTO.of(s, songImageMap.get(s.getImage()))).toList();
+        this.image = imageName;
         this.protectionType = album.getProtectionType().getName();
         this.userId = album.getUser().getId();
         this.createdAt = album.getCreatedAt();
     }
 
-    public static AlbumDTO of(Album album) {
-        return new AlbumDTO(album);
+    public static AlbumDTO of(Album album, String image, Map<String, String> songImageMap) {
+        return new AlbumDTO(album, image, songImageMap);
     }
 }

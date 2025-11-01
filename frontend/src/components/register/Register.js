@@ -1,5 +1,5 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import { register } from "../../services/controller";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -11,24 +11,7 @@ const Register = () => {
     formData.forEach((value, key) => {
       formDataJson[key] = value;
     });
-
-    try {
-      const response = await fetch("http://localhost:30002/api/v1/users/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams(formDataJson),
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      navigate("/login");
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    register(formData, navigate("/login"));
   };
 
   return (

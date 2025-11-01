@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getTags } from "../../services/controller";
+import { addSong, getTags } from "../../services/controller";
 import { resolve } from "../../services/utils";
 import TagItem from "../tag/TagItem";
 
@@ -60,22 +60,7 @@ const UploadSong = () => {
         selectedTags.length > 0 ? selectedTags.join(",") : ""
       );
     }
-
-    try {
-      const response = await fetch("http://localhost:30002/api/v1/songs", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      navigate("/profile");
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    addSong(formData, () => navigate("/profile"));
   };
 
   return (

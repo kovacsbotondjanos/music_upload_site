@@ -54,26 +54,24 @@ public class UpdateSongTest {
     @InjectMocks
     private SongService songService;
     private Song song;
-    private Long id;
     private AutoCloseable autoCloseable;
 
     @BeforeEach
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
-        id = 1L;
-        song = new Song(
-                id,
-                "",
-                "foo",
-                "",
-                1L,
-                ProtectionType.PUBLIC,
-                new User(),
-                new ArrayList<>(),
-                new HashSet<>(),
-                new Date(),
-                new Date()
-        );
+        song = Song.builder()
+                .id(1L)
+                .image("")
+                .name("foo")
+                .nameHashed("")
+                .listenCount(1L)
+                .protectionType(ProtectionType.PUBLIC)
+                .user(new User())
+                .albums(new ArrayList<>())
+                .tags(new HashSet<>())
+                .createdAt(new Date())
+                .updatedAt(new Date())
+                .build();
         userDetails = new UserDetailsImpl(
                 1L,
                 "",

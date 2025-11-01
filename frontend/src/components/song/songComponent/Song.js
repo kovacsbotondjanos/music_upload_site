@@ -1,19 +1,33 @@
-import { React, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import SongItem from "../songItem/SongItem";
 import { useNavigate } from "react-router-dom";
-import { getImage, removeSong } from "../../../services/controller";
-import { resolve } from "../../../services/utils";
+import {
+  removeSong,
+  getRecommendedSongsForSong,
+} from "../../../services/controller";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const Song = (props) => {
   const navigate = useNavigate();
-  const { song, playMusic } = props;
-  const [imgURL, setimgURL] = useState(null);
+  const { song, playMusic, currentUserId } = props;
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [recommendedSongs, setSongs] = useState([]);
+
+  var fetchSongs = async () => {
+    await getRecommendedSongsForSong(page, song.id, (data) => {
+      if (!data || data.length === 0) {
+        setHasMore(false);
+      } else {
+        setSongs((prev) => [...prev, ...data]);
+        setPage((prev) => prev + 1);
+      }
+    });
+  };
 
   useEffect(() => {
-    const fetch = async () =>
-      getImage(song.image, resolve(setimgURL));
-
     if (song) {
-      fetch();
+      fetchSongs();
     }
   }, [song]);
 
@@ -35,24 +49,26 @@ const Song = (props) => {
                     <img
                       width="50px"
                       height="50px"
-                      src={`${imgURL}`}
+                      src={`${song.image}`}
                       alt=""
                       className="profile"
                     />
                   </button>
                 </div>
-                <div>
-                  <button
-                    className="custom-button"
-                    onClick={() =>
-                      removeSong(song.id, () => {
-                        navigate("/profile");
-                      })
-                    }
-                  >
-                    <ion-icon name="trash-outline"></ion-icon>
-                  </button>
-                </div>
+                {song.userId === currentUserId ? (
+                  <div>
+                    <button
+                      className="custom-button"
+                      onClick={() =>
+                        removeSong(song.id, () => {
+                          navigate("/profile");
+                        })
+                      }
+                    >
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                  </div>
+                ) : null}
               </div>
 
               <div>
@@ -78,6 +94,27 @@ const Song = (props) => {
               <div>
                 <div className="col">
                   <h1>{song.userId}</h1>
+                </div>
+              </div>
+
+              <div className="container container-fluid">
+                <div className="row">
+                  <div className="col">
+                    <h1>Recommended songs:</h1>
+                    <br />
+                    <InfiniteScroll
+                      dataLength={recommendedSongs.length}
+                      next={fetchSongs}
+                      hasMore={hasMore}
+                      loader={<h4>Loading songs...</h4>}
+                      endMessage={<p>No more songs</p>}
+                    >
+                      {recommendedSongs !== null &&
+                        recommendedSongs.map((item) => (
+                          <SongItem item={item} playMusic={playMusic} />
+                        ))}
+                    </InfiniteScroll>
+                  </div>
                 </div>
               </div>
             </div>

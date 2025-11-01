@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getSong } from "../../services/controller";
+import { getSong, patchSong } from "../../services/controller";
 import { resolve } from "../../services/utils";
 
 const SongEditor = () => {
@@ -17,23 +17,7 @@ const SongEditor = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    try {
-      const response = await fetch(
-        `http://localhost:30002/api/v1/songs/${song.id}`,
-        {
-          method: "PATCH",
-          body: formData,
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      navigate("/profile");
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    patchSong(songId, formData, () => navigate("/profile"));
   };
 
   return (

@@ -13,7 +13,13 @@ public enum ProtectionType {
     private final String name;
 
     public static ProtectionType getRandomPrivilege() {
-        var vals = ProtectionType.values();
-        return vals[new Random().nextInt(0, Integer.MAX_VALUE) % vals.length];
+        int rand = new Random().nextInt(0, Integer.MAX_VALUE);
+        if (rand % 10 == 0 || rand % 7 == 0) {
+            return PROTECTED;
+        } else if (rand % 3 == 0) {
+            return PRIVATE;
+        } else {
+            return PUBLIC;
+        }
     }
 }

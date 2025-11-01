@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getImage, getUserData, logout } from "../../services/controller";
-import { resolve } from "../../services/utils";
+import { getToken, getUserData, logout } from "../../services/controller";
 
 const Navbar = (props) => {
   const navigate = useNavigate();
-  const [imgURL, setimgURL] = useState("");
   const {
     loggedIn,
     profilePic,
@@ -15,22 +13,31 @@ const Navbar = (props) => {
   } = props;
 
   useEffect(() => {
-      const fetch = async () =>
-        getUserData((data) => {
+    const token = getToken();
+    if (!token) {
+      setLoggedIn(false);
+      setUsername(null);
+      setProfilePic(null);
+      return;
+    }
+    
+    if (!loggedIn || !profilePic) {
+      (async () => {
+        await getUserData((data) => {
           if (data) {
             setLoggedIn(true);
             setUsername(data.username);
             setProfilePic(data.profilePicture);
+          } else {
+            localStorage.removeItem("jwtToken");
+            setLoggedIn(false);
+            setUsername(null);
+            setProfilePic(null);
           }
         });
-      fetch();
-    }, [setLoggedIn, setUsername, setProfilePic]);
-
-  useEffect(() => {
-      const fetch = async () =>
-        getImage(profilePic, resolve(setimgURL));
-      fetch();
-  }, [profilePic]);
+      })();
+    }
+  }, [loggedIn, profilePic, setLoggedIn, setUsername, setProfilePic]);
 
   return (
     <nav className="navbar navbar-expand">
@@ -43,7 +50,7 @@ const Navbar = (props) => {
                   alt=""
                   width="50px"
                   height="50px"
-                  src={`${imgURL}`}
+                  src={`${profilePic}`}
                   className="profile"
                 />
               </a>
@@ -98,7 +105,7 @@ const Navbar = (props) => {
             </div>
           )}
           <button onClick={() => navigate("/search")}>
-            <ion-icon name="search-outline"></ion-icon>
+            Search
           </button>
         </div>
       </div>

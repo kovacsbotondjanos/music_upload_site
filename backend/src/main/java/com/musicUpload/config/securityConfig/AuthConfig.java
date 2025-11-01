@@ -1,7 +1,6 @@
 package com.musicUpload.config.securityConfig;
 
 import com.musicUpload.dataHandler.services.UserService;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,17 +37,11 @@ public class AuthConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/**", "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(
-                                (request, response, authException) ->
-                                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "unauthenticated")
-                        )
-                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -66,11 +59,6 @@ public class AuthConfig {
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
         return source;
-    }
-
-    @Bean
-    public UserService userDetailsService() {
-        return userService;
     }
 
     @Bean

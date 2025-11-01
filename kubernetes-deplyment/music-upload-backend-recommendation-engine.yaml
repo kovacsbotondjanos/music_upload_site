@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: music-upload-recommendation-engine
 spec:
-  replicas: 3
   selector:
     matchLabels:
       app: music-upload-recommendation-engine
@@ -31,11 +30,23 @@ spec:
               value: ASD123
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: "800Mi"
+              cpu: "750m"
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "1024Mi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -49,3 +60,33 @@ spec:
       port: 9090
       targetPort: 9090
   type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: music-upload-recommendation-engine-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: music-upload-recommendation-engine
+  minReplicas: 1
+  maxReplicas: 2
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 120
+    scaleUp:
+      stabilizationWindowSeconds: 30
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 85
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 85

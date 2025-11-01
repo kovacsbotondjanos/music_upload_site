@@ -1,10 +1,9 @@
 import axios from "axios";
 
-const getToken = () => localStorage.getItem("jwtToken");
+export const getToken = () => localStorage.getItem("jwtToken");
 
 const apiWithCredentials = axios.create({
   headers: {
-    "Content-Type": "application/json",
     "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
   },
 });
@@ -13,7 +12,6 @@ apiWithCredentials.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log(token)
   } else {
     delete config.headers.Authorization;
   }
@@ -23,6 +21,24 @@ apiWithCredentials.interceptors.request.use((config) => {
 const basePost = (endpointName, success) => {
   apiWithCredentials
     .post(endpointName)
+    .then((resp) => success(resp.data))
+    .catch((error) =>
+      console.error("There was a problem with the fetch operation:", error)
+    );
+};
+
+const basePostForm = (endpointName, body, success) => {
+  apiWithCredentials
+    .post(endpointName, body)
+    .then((resp) => success(resp.data))
+    .catch((error) =>
+      console.error("There was a problem with the fetch operation:", error)
+    );
+};
+
+const basePatch = (endpointName, body, success) => {
+  apiWithCredentials
+    .patch(endpointName, body)
     .then((resp) => success(resp.data))
     .catch((error) =>
       console.error("There was a problem with the fetch operation:", error)
@@ -61,8 +77,8 @@ export const login = async (username, password, success) => axios
 
 export const logout = () => localStorage.removeItem("jwtToken");
 
-export const getRecommendedSongs = async (success) =>
-  baseGet("/api/v1/users/recommended", success);
+export const getRecommendedSongs = async (pageNumber, success) =>
+  baseGet("/api/v1/users/recommended?pageNumber=" + pageNumber + "&pageSize=10", success);
 
 export const getUserData = async (success) => baseGet("/api/v1/users", success);
 
@@ -76,6 +92,9 @@ export const getUsers = async (userName, success) =>
 export const followUser = async (userId, success) => 
   basePost("/api/v1/users/follow?userId=" + userId, success);
 
+export const register = async (body, success) =>
+  basePostForm("/api/v1/users/add", new URLSearchParams(body), success);
+
 //ALBUMS
 export const getAlbums = async (success) =>
   baseGet("/api/v1/albums", success);
@@ -88,6 +107,15 @@ export const searchAlbums = async (albumName, success) =>
 
 export const removeAlbum = async (albumId, success) => 
   baseDelete("/api/v1/albums/" + albumId, success);
+
+export const patchAlbum = async (albumId, body, success) => 
+  basePatch("/api/v1/albums/" + albumId, body, success);
+
+export const addAlbum = async (body, success) => 
+  basePostForm("/api/v1/albums", body, success);
+
+export const getRecommendedSongsForAlbum = async (pageNumber, albumId, success) =>
+  baseGet("/api/v1/albums/recommended/" + albumId + "?pageNumber=" + pageNumber + "&pageSize=10", success);
 
 //TAGS
 export const getTags = async (tagName, success) =>
@@ -106,9 +134,15 @@ export const searchSongs = async (songName, success) =>
 export const removeSong = async (songId, success) => 
   baseDelete("/api/v1/songs/" + songId, success);
 
-//FILES
-export const getImage = async (imageName, success) =>
-  baseGet("/api/v1/files/image/" + imageName, success);
+export const patchSong = async (songId, body, success) => 
+  basePatch("/api/v1/songs/" + songId, body, success);
 
+export const addSong = async (body, success) => 
+  basePostForm("/api/v1/songs", body, success);
+
+export const getRecommendedSongsForSong = async (pageNumber, songId, success) =>
+  baseGet("/api/v1/songs/recommended/" + songId + "?pageNumber=" + pageNumber + "&pageSize=10", success);
+
+//FILES
 export const getMusic = async (nameHashed, success) =>
   baseGet("/api/v1/files/music/" + nameHashed, success);

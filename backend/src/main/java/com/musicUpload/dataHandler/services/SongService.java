@@ -15,8 +15,9 @@ import com.musicUpload.exceptions.UnauthenticatedException;
 import com.musicUpload.exceptions.UnprocessableException;
 import com.musicUpload.exceptions.WrongFormatException;
 import com.musicUpload.util.ImageFactory;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SongService {
     private final SongRepository songRepository;
     private final UserRepository userRepository;
@@ -36,23 +38,6 @@ public class SongService {
     private final MinioService minioService;
     private final SongListenCountUpdateScheduler songListenCountUpdateScheduler;
     private final TagService tagService;
-
-    @Autowired
-    public SongService(SongRepository songRepository,
-                       UserRepository userRepository,
-                       AlbumRepository albumRepository,
-                       ImageFactory imageFactory,
-                       MinioService minioService,
-                       SongListenCountUpdateScheduler songListenCountUpdateScheduler,
-                       TagService tagService) {
-        this.songRepository = songRepository;
-        this.userRepository = userRepository;
-        this.albumRepository = albumRepository;
-        this.imageFactory = imageFactory;
-        this.minioService = minioService;
-        this.songListenCountUpdateScheduler = songListenCountUpdateScheduler;
-        this.tagService = tagService;
-    }
 
     public Song addSong(SongDAO song, MultipartFile image, MultipartFile songFile) {
         return addSong(
@@ -101,8 +86,7 @@ public class SongService {
             }
             song.setImage(minioService.uploadImage(image));
         } else {
-            String img = imageFactory.getRandomImage();
-            song.setImage(img);
+            song.setImage(imageFactory.getRandomImage(name));
         }
 
         if (!songFile.isEmpty()) {
@@ -118,23 +102,24 @@ public class SongService {
     public List<SongDTO> getSongs() {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
-        log.info("userdetails = {}", userDetails);
-
         User u = userRepository.findById(userDetails.getId())
                 .orElseThrow(NotFoundException::new);
 
-        return songRepository.findByUser(u).stream().map(SongDTO::new).toList();
+        var songs = songRepository.findByUser(u);
+
+        var songImageMap = minioService.getImageMap(songs.stream().map(Song::getImage).toList());
+
+        return songs.stream().map(s -> SongDTO.of(s, songImageMap.get(s.getImage()))).toList();
     }
 
     public SongDTO findById(Long id) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetails();
 
-        Song song = songRepository.findById(id)
-                .orElseThrow(NotFoundException::new);
+        Song song = songRepository.findById(id).orElseThrow(NotFoundException::new);
 
         if (!song.getProtectionType().equals(ProtectionType.PRIVATE) ||
             userDetails != null && song.getUser().getId().equals(userDetails.getId())) {
-            return SongDTO.of(song);
+            return SongDTO.of(song, minioService.getImage(song.getImage()));
         }
         throw new UnauthenticatedException();
     }
@@ -144,13 +129,11 @@ public class SongService {
 
         Long userId = userDetails != null ? userDetails.getId() : 0L;
 
-        return songRepository.findByIdInAndUserOrIdInAndProtectionType(
-                        ids,
-                        userId,
-                        ProtectionType.PUBLIC
-                ).stream()
-                .map(SongDTO::of)
-                .toList();
+        var songs = songRepository.findByIdInAndUserOrIdInAndProtectionType(ids, userId);
+
+        var songImageMap = minioService.getImageMap(songs.stream().map(Song::getImage).toList());
+
+        return songs.stream().map(s -> SongDTO.of(s, songImageMap.get(s.getImage()))).toList();
     }
 
     public List<SongDTO> findByNameLike(String name,
@@ -160,13 +143,11 @@ public class SongService {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        return songRepository.findByNameLike(
-                        name,
-                        userId,
-                        ProtectionType.PUBLIC,
-                        pageable
-                )
-                .stream().map(SongDTO::of).toList();
+        var songs = songRepository.findByNameLike(name, userId, pageable);
+
+        var songImageMap = minioService.getImageMap(songs.stream().map(Song::getImage).toList());
+
+        return songs.stream().map(s -> SongDTO.of(s, songImageMap.get(s.getImage()))).toList();
     }
 
     public String getSong(String nameHashed) {
@@ -184,15 +165,10 @@ public class SongService {
     }
 
     public void patchSong(Long id, SongDAO song, MultipartFile image) {
-        patchSong(
-                id,
-                song.getProtectionType(),
-                song.getName(),
-                song.getTags(),
-                image
-        );
+        patchSong(id, song.getProtectionType(), song.getName(), song.getTags(), image);
     }
 
+    @Transactional
     public void patchSong(Long id,
                           String protectionType,
                           String name,
@@ -225,8 +201,11 @@ public class SongService {
             minioService.deleteImage(song.getImage());
             song.setImage(minioService.uploadImage(image));
         }
+
+        songRepository.save(song);
     }
 
+    @Transactional
     public Song deleteSong(Long id) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
@@ -244,7 +223,7 @@ public class SongService {
             albumRepository.save(a);
         });
 
-        songRepository.delete(song);
+        songRepository.deleteById(id);
         minioService.deleteImage(song.getImage());
         minioService.deleteSong(song.getNameHashed());
 

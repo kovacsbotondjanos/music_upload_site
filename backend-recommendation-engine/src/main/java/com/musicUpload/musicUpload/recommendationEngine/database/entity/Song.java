@@ -10,10 +10,7 @@ import java.util.*;
 @Data
 @Table(
         name = Song.NAME,
-        indexes = {
-                @Index(columnList = "id"),
-                @Index(columnList = "user_id")
-        }
+        indexes = @Index(columnList = "user_id")
 )
 @ToString(exclude = {"user", "albums"})
 @AllArgsConstructor
@@ -24,7 +21,7 @@ public class Song implements Serializable {
     public final static String NAME = "`SONG`";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String image;
@@ -32,7 +29,7 @@ public class Song implements Serializable {
     private String nameHashed;
     private Long listenCount = 0L;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private ProtectionType protectionType;
 
     @ManyToOne

@@ -47,6 +47,12 @@ public class DeleteAlbumTest {
     private AlbumRepository albumRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private SongService songService;
+    @Mock
+    private ImageFactory imageFactory;
+    @Mock
+    private MinioService minioService;
     @InjectMocks
     private AlbumService albumService;
     private List<Album> albums;
@@ -56,37 +62,10 @@ public class DeleteAlbumTest {
     void onSetUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         albums = List.of(
-                Album.builder()
-                        .id(1L)
-                        .image("")
-                        .name("foo")
-                        .protectionType(protectionType)
-                        .user(new User())
-                        .songs(new ArrayList<>())
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build(),
-                Album.builder()
-                        .id(2L)
-                        .image("")
-                        .name("bar")
-                        .protectionType(protectionType)
-                        .user(new User())
-                        .songs(new ArrayList<>())
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build(),
-                Album.builder()
-                        .id(3L)
-                        .image("")
-                        .name("baz")
-                        .protectionType(protectionType)
-                        .user(new User())
-                        .songs(new ArrayList<>())
-                        .createdAt(new Date())
-                        .updatedAt(new Date())
-                        .build()
-                );
+                createAlbum(1L, "foo"),
+                createAlbum(2L, "bar"),
+                createAlbum(3L, "baz")
+            );
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(securityContext.getAuthentication()).thenReturn(authentication);
     }
@@ -132,5 +111,18 @@ public class DeleteAlbumTest {
         assertEquals(albums.getFirst(), a);
         assertFalse(u.getAlbums().contains(a));
         SecurityContextHolder.clearContext();
+    }
+
+    private Album createAlbum(Long id, String name) {
+        return Album.builder()
+                .id(id)
+                .image("")
+                .name("name")
+                .protectionType(protectionType)
+                .user(new User())
+                .songs(new ArrayList<>())
+                .createdAt(new Date())
+                .updatedAt(new Date())
+                .build();
     }
 }

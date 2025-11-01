@@ -18,8 +18,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -36,6 +39,11 @@ public class MinioService {
 
     @Value("${link.expiration.time}")
     private int expirationTime;
+
+    public Map<String, String> getImageMap(List<String> names) {
+        return names.parallelStream().map(name -> Map.entry(name, getImage(name)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1));
+    }
 
     public String uploadSong(MultipartFile file) {
         return uploadFile(file, songBucket);

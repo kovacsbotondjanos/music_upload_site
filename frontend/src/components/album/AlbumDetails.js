@@ -16,7 +16,7 @@ const AlbumDetail = () => {
 
   return (
     <div className="black-bg">
-      <Album album={album} />
+      { album == null ? null : <Album album={album} /> }
     </div>
   );
 }

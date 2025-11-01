@@ -1,5 +1,5 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import { addAlbum } from "../../services/controller";
 
 const UploadAlbum = () => {
   const navigate = useNavigate();
@@ -7,21 +7,7 @@ const UploadAlbum = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    try {
-      const response = await fetch("http://localhost:30002/api/v1/albums", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      navigate("/profile");
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    addAlbum(formData, navigate("/profile"));
   };
 
   return (

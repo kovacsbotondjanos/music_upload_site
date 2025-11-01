@@ -1,27 +1,27 @@
-#TODO: docker login when we are not already logged in on a remote server
-
-docker image rm kovacsbotondjanos/musicupload-spring-app:latest
 docker image rm kovacsbotondjanos/musicupload-recommendation-engine:latest
+docker image rm kovacsbotondjanos/musicupload-spring-app:latest
 docker image rm kovacsbotondjanos/musicupload-react-app:latest
 
 docker build --no-cache -t kovacsbotondjanos/musicupload-spring-app:latest ./backend
 docker push kovacsbotondjanos/musicupload-spring-app:latest
 
-docker build --no-cache -t kovacsbotondjanos/musicupload-recommendation-engine:latest ./backend-recommendation-engine
-docker push kovacsbotondjanos/musicupload-recommendation-engine:latest
-
 docker build --no-cache -t kovacsbotondjanos/musicupload-react-app:latest ./frontend
 docker push kovacsbotondjanos/musicupload-react-app:latest
 
-minikube start --driver=docker
+docker build --no-cache -t kovacsbotondjanos/musicupload-recommendation-engine:latest ./backend-recommendation-engine
+docker push kovacsbotondjanos/musicupload-recommendation-engine:latest
+
+minikube start --driver=docker --cpus=8 --memory=7000 --disk-size=50g
 
 kubectl apply -f kubernetes-deplyment/music-upload-mysql-db-deployment.yaml
 kubectl apply -f kubernetes-deplyment/music-upload-minio-deployment.yaml
-kubectl apply -f kubernetes-deplyment/music-upload-backend-deployment.yaml
 kubectl apply -f kubernetes-deplyment/music-upload-backend-recommendation-engine.yaml
+kubectl apply -f kubernetes-deplyment/music-upload-backend-deployment.yaml
 kubectl apply -f kubernetes-deplyment/music-upload-frontend-deployment.yaml
+kubectl apply -f kubernetes-deplyment/music-upload-redis-deployment.yaml
 
 do {
+    Clear-Host
     $statuses = kubectl get pods -o jsonpath="{range .items[*]}{.metadata.name}={.status.phase}{'\n'}{end}"
     Write-Output "Current pod statuses:"
     $statusLines = $statuses -split "\\n"
@@ -36,11 +36,11 @@ do {
         }
     }
     if (-not $allRunning) {
-        Start-Sleep -Seconds 10
+        Start-Sleep -Seconds 1
     }
 } until ($allRunning)
 
-Write-Output "✅ All pods are Running!"
+Write-Output "All pods are Running!"
 
 Start-Job -Name "MinikubeTunnel" -ScriptBlock { minikube tunnel }
 

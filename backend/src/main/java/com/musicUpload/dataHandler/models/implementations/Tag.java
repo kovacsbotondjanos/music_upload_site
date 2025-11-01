@@ -1,14 +1,13 @@
 package com.musicUpload.dataHandler.models.implementations;
 
+import com.musicUpload.dataHandler.DTOs.TagDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -45,6 +44,11 @@ public class Tag {
         this.name = name;
     }
 
+    public Tag(TagDTO tagDTO) {
+        this(tagDTO.getName());
+        this.id = tagDTO.getId();
+    }
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = new Date();
@@ -53,13 +57,5 @@ public class Tag {
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
-    }
-
-    public void addSongs(List<Song> songs) {
-        this.songs.addAll(songs);
-    }
-
-    public void addSongs(Song... songs) {
-        addSongs(Arrays.asList(songs));
     }
 }

@@ -2,20 +2,18 @@ package com.musicUpload.dataHandler.models.implementations;
 
 import com.musicUpload.dataHandler.models.CustomEntityInterface;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
 @Entity
 @Data
+@Builder
 @Table(
         name = UserSong.NAME,
         indexes = {
-                @Index(columnList = "userId"),
-                @Index(columnList = "songId")
+                @Index(name = "idx_user_song_created_song_user", columnList = "created_at, songId, userId"),
+                @Index(name = "idx_user_song_song_user_created", columnList = "songId, userId, created_at")
         }
 )
 @AllArgsConstructor
@@ -26,7 +24,7 @@ public class UserSong implements CustomEntityInterface {
     public final static String NAME = "`USER_SONG`";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long userId;
@@ -40,18 +38,19 @@ public class UserSong implements CustomEntityInterface {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    public UserSong(Long songId, Long userId, Date date) {
+    public UserSong(Long songId, Long userId) {
         this.userId = userId;
         this.songId = songId;
-        this.createdAt = date;
-    }
-
-    public UserSong(Long songId, Long userId) {
-        this(songId, userId, new Date());
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = new Date();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        updatedAt = new Date();
+        createdAt = new Date();
     }
 }

@@ -4,7 +4,7 @@ import com.github.javafaker.Faker;
 import com.musicUpload.dataHandler.enums.Privilege;
 import com.musicUpload.dataHandler.models.implementations.User;
 import com.musicUpload.dataHandler.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
 @Service
+@RequiredArgsConstructor
 public class UserFactory {
     private final UserService userService;
 
@@ -27,11 +28,6 @@ public class UserFactory {
 
     @Value("${admin.email}")
     private String adminEmail;
-
-    @Autowired
-    public UserFactory(UserService userService) {
-        this.userService = userService;
-    }
 
     public List<User> createFollow(List<User> users, ExecutorService executorService) {
         Random random = new Random();

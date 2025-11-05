@@ -2,12 +2,7 @@ import { React } from "react";
 import User from "./userComponent/User";
 
 const userComponent = (props) => {
-  const {
-    loggedIn,
-    profilePic,
-    username,
-    playMusic
-  } = props;
+  const { loggedIn, profilePic, username, playMusic } = props;
 
   return (
     <div className="black-bg">
@@ -19,6 +14,6 @@ const userComponent = (props) => {
       />
     </div>
   );
-}
+};
 
 export default userComponent;

@@ -6,6 +6,7 @@ import {
   getRecommendedSongsForSong,
 } from "../../../services/controller";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { formatStringToDate } from "../../../services/utils";
 
 const Song = (props) => {
   const navigate = useNavigate();
@@ -26,6 +27,9 @@ const Song = (props) => {
   };
 
   useEffect(() => {
+    setPage(0);
+    setHasMore(true);
+    setSongs([]);
     if (song) {
       fetchSongs();
     }
@@ -67,13 +71,19 @@ const Song = (props) => {
                     >
                       <ion-icon name="trash-outline"></ion-icon>
                     </button>
+                    <button
+                      className="custom-button"
+                      onClick={() => navigate("/songs/edit/" + song.id)}
+                    >
+                      <ion-icon name="create"></ion-icon>
+                    </button>
                   </div>
                 ) : null}
               </div>
 
               <div>
                 <div className="col">
-                  <h1>{song.createdAt}</h1>
+                  <h1>{formatStringToDate(song.createdAt)}</h1>
                 </div>
               </div>
 
@@ -93,7 +103,7 @@ const Song = (props) => {
 
               <div>
                 <div className="col">
-                  <h1>{song.userId}</h1>
+                  <h1>{song.username}</h1>
                 </div>
               </div>
 

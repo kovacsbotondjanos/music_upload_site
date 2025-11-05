@@ -4,8 +4,6 @@ package com.musicUpload.recommendationEngine.benchmark;
 import com.musicUpload.musicUpload.recommendationEngine.Application;
 import com.musicUpload.musicUpload.recommendationEngine.database.service.RecommendationEngine;
 import lombok.extern.slf4j.Slf4j;
-import org.databene.contiperf.PerfTest;
-import org.databene.contiperf.Required;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,8 +26,7 @@ public class RecommendationEnginePerformanceTest {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public RecommendationEnginePerformanceTest(
-            RecommendationEngine recommendationEngine, JdbcTemplate jdbcTemplate) {
+    public RecommendationEnginePerformanceTest(RecommendationEngine recommendationEngine, JdbcTemplate jdbcTemplate) {
         this.recommendationEngine = recommendationEngine;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -74,8 +71,14 @@ public class RecommendationEnginePerformanceTest {
         benchmarkTest(2000L, 2000L);
     }
 
-    @PerfTest(invocations = 100)
-    @Required(average = 100)
+//    @Test
+//    @Sql(scripts = "/init-scripts/performance-test-data/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+//    @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+//    public void benchMarkHardQuery_4() {
+//        createData(1_000_000);
+//        benchmarkTest(2500L, 2500L);
+//    }
+
     private void benchmarkTest(Long userRecommendationMillis, Long songRecommendationMillis) {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("recommend-user");

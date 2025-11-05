@@ -7,7 +7,7 @@ import UserComponent from "./components/user/UserComponent";
 import UploadSong from "./components/upload_music/UploadSong";
 import UploadAlbum from "./components/upload_album/UploadAlbum";
 import SongDetail from "./components/song/SongDetails";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import AlbumDetail from "./components/album/AlbumDetails";
 import SongEditor from "./components/edit_song/SongEditor";
 import AlbumEditor from "./components/edit_album/AlbumEditor";
@@ -21,6 +21,7 @@ import {
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(0)
   const [profilePic, setProfilePic] = useState(null);
   const [audio, setAudio] = useState(null);
 
@@ -74,6 +75,7 @@ const App = () => {
           setLoggedIn={setLoggedIn}
           setUsername={setUsername}
           setProfilePic={setProfilePic}
+          setCurrentUserId={setCurrentUserId}
         />
         <Routes>
           <Route
@@ -104,11 +106,11 @@ const App = () => {
           <Route path="/album/add" element={<UploadAlbum />} />
           <Route
             path="/songs/:songId"
-            element={<SongDetail playMusic={playMusic} />}
+            element={<SongDetail playMusic={playMusic} currentUserId={currentUserId} />}
           />
           <Route
             path="/albums/:albumId"
-            element={<AlbumDetail playMusic={playMusic} />}
+            element={<AlbumDetail playMusic={playMusic} currentUserId={currentUserId} />}
           />
           <Route
             path="songs/edit/:songId"

@@ -15,6 +15,7 @@ public class AlbumDTO {
     private String image;
     private String protectionType;
     private Long userId;
+    private String username;
     private Date createdAt;
 
     public AlbumDTO(Album album, String imageName, Map<String, String> songImageMap) {
@@ -24,6 +25,7 @@ public class AlbumDTO {
         this.image = imageName;
         this.protectionType = album.getProtectionType().getName();
         this.userId = album.getUser().getId();
+        this.username = album.getUser().getUsername();
         this.createdAt = album.getCreatedAt();
     }
 

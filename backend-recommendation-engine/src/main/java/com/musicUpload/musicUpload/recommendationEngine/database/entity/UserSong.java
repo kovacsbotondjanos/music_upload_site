@@ -2,7 +2,6 @@ package com.musicUpload.musicUpload.recommendationEngine.database.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.util.Date;
 
@@ -12,8 +11,9 @@ import java.util.Date;
 @Table(
         name = UserSong.NAME,
         indexes = {
-                @Index(name = "idx_user_song_created_song_user", columnList = "created_at, songId, userId"),
-                @Index(name = "idx_user_song_song_user_created", columnList = "songId, userId, created_at")
+                @Index(name = "idx_user_song_created_song_user", columnList = "created_at, song_id, user_id"),
+                @Index(name = "idx_user_song_song_user_created", columnList = "song_id, user_id, created_at"),
+                @Index(name = "idx_user_song_created_at", columnList = "created_at")
         }
 )
 @AllArgsConstructor
@@ -57,16 +57,5 @@ public class UserSong {
 
     public UserSong(Long songId, Long userId) {
         this(songId, userId, new Date());
-    }
-
-    public static RowMapper<UserSong> getRowMapper() {
-        return (row, r) ->
-            UserSong.builder()
-                    .id(row.getLong("id"))
-                    .userId(row.getLong("userId"))
-                    .songId(row.getLong("songId"))
-                    .createdAt(row.getObject("createdAt", Date.class))
-                    .updatedAt(row.getObject("updatedAt", Date.class))
-                    .build();
     }
 }

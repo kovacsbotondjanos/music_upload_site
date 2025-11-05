@@ -76,7 +76,6 @@ body {
   background-color: #181818 !important;
 }
 
-
 html {
   background-color: #181818 !important;
   color: white;
@@ -186,6 +185,25 @@ a.profile_div:hover {
   z-index: 1000;
 }
 
+.scrollable-results {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #333;
+  border-radius: 8px;
+  margin-top: 10px;
+  background-color: white;
+  color: black;
+  z-index: 10;
+  position: relative;
+}
+
+.scrollable-result-item {
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #ccc;
+  transition: background-color 0.2s ease;
+}
+
 div.login-button {
   padding: 10px;
 }
@@ -259,7 +277,6 @@ audio {
   color: white;
   min-height: 100vh;
 }
-
 
 a {
   color: green !important;

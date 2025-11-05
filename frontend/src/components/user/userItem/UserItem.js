@@ -7,7 +7,13 @@ const UserItem = (props) => {
 
   return (
     <div className="container mt-5 mb-5 d-flex justify-content-between align-items-center rounded">
-      <img width="50px" height="50px" src={`${item.profilePicture}`} alt="" className="profile" />
+      <img
+        width="50px"
+        height="50px"
+        src={`${item.profilePicture}`}
+        alt=""
+        className="profile"
+      />
       <div className="d-flex align-items-center">
         <a href="" onClick={() => navigate(`/users/${item.id}`)}>
           <h2 className="text-white">{item.username}</h2>

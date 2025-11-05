@@ -13,6 +13,7 @@ public class SongDTO {
     private String nameHashed;
     private String protectionType;
     private Long userId;
+    private String username;
     private Date createdAt;
     private Long listenCount;
 
@@ -23,6 +24,7 @@ public class SongDTO {
         this.nameHashed = song.getNameHashed();
         this.protectionType = song.getProtectionType().getName();
         this.userId = song.getUser().getId();
+        this.username = song.getUser().getUsername();
         this.createdAt = song.getCreatedAt();
         this.listenCount = song.getListenCount();
     }

@@ -13,7 +13,6 @@ import java.util.List;
 @Table(
         name = Album.NAME,
         indexes = {
-                @Index(columnList = "id"),
                 @Index(columnList = "user_id")
         }
 )

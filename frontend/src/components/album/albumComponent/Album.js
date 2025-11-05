@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SongItem from "../../song/songItem/SongItem";
-import { formatStringToDate, resolve } from "../../../services/utils";
+import { formatStringToDate } from "../../../services/utils";
 import {
-  getUser,
   removeAlbum,
   getRecommendedSongsForAlbum,
 } from "../../../services/controller";
@@ -12,7 +11,6 @@ import InfiniteScroll from "react-infinite-scroll-component";
 const Album = (props) => {
   const navigate = useNavigate();
   const { album, playMusic, currentUserId } = props;
-  const [user, setUser] = useState(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [recommendedSongs, setSongs] = useState([]);
@@ -34,18 +32,11 @@ const Album = (props) => {
     }
   }, [album]);
 
-  useEffect(() => {
-    const fetch = async () => await getUser(album.userId, resolve(setUser));
-    if (album) {
-      fetch();
-    }
-  }, [album]);
-
   return (
     <div className="container container-fluid">
       <div className="row">
         <div className="col">
-          {album != null && user != null ? (
+          {album != null ? (
             <div>
               <div className="row">
                 <div className="col">
@@ -71,6 +62,12 @@ const Album = (props) => {
                       }
                     >
                       <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                    <button
+                      className="custom-button"
+                      onClick={() => navigate("/albums/edit/" + album.id)}
+                    >
+                      <ion-icon name="create"></ion-icon>
                     </button>
                   </div>
                 ) : null}
@@ -98,7 +95,7 @@ const Album = (props) => {
 
               <div>
                 <div className="col">
-                  <h1>{user.username}</h1>
+                  <h1>{album.username}</h1>
                 </div>
               </div>
 

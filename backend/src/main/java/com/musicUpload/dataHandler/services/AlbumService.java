@@ -22,9 +22,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -142,13 +144,15 @@ public class AlbumService {
         }
 
         if (songIds != null) {
-            songIds.forEach(songId -> songRepository.findById(songId).ifPresent(song -> {
+            List<Song> newSongs = songIds.stream().map(songId -> songRepository.findById(songId).map(song -> {
                 if (!song.getProtectionType().equals(ProtectionType.PRIVATE)
                         || album.getUser().getSongs().stream()
                         .anyMatch(s -> s.getId().equals(song.getId()))) {
-                    album.getSongs().add(song);
+                    return song;
                 }
-            }));
+                return null;
+            }).orElse(null)).filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
+            album.setSongs(newSongs);
         }
 
         var imageMap = minioService.getImageMap(album.getSongs().stream().map(Song::getImage).toList());

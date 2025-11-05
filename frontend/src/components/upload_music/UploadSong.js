@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addSong, getTags } from "../../services/controller";
-import { resolve } from "../../services/utils";
 import TagItem from "../tag/TagItem";
 
 const UploadSong = () => {
@@ -47,7 +46,7 @@ const UploadSong = () => {
     setSelectedTags((prevTags) => {
       return prevTags.filter((t) => t !== tag);
     });
-  }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -128,7 +127,7 @@ const UploadSong = () => {
                             Protection type
                           </label>
                           <br />
-                          <select name="protectionType" id="protection_type">
+                          <select name="protectionType" id="protectionType">
                             <option value="PRIVATE">PRIVATE</option>
                             <option value="PROTECTED">PROTECTED</option>
                             <option value="PUBLIC">PUBLIC</option>
@@ -148,24 +147,32 @@ const UploadSong = () => {
                             name="name"
                             value={searchTerm}
                             onChange={handleInputChange}
+                            className="tag-input"
+                            placeholder="Search tags..."
                           />
+                          {searchTerm && (
+                            <div id="scrollableResults">
+                              {tags.map((item) => (
+                                <div
+                                  key={item.name}
+                                  className="scrollable-result-item"
+                                  onClick={() => addTag(item.name)}
+                                >
+                                  {item.name}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
                     <div>
-                      <div className="bg-secondary p-2 rounded">
-                        {tags.map((item) => (
-                          <div className="row">
-                            <div className="col">
-                              <a className="text-white" onClick={() => addTag(item.name)}>
-                                {item.name}
-                              </a>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
                       {selectedTags.map((item, index) => (
-                        <TagItem item={item} index={index + 1} removeTag={removeTag} />
+                        <TagItem
+                          item={item}
+                          index={index + 1}
+                          removeTag={removeTag}
+                        />
                       ))}
                     </div>
 

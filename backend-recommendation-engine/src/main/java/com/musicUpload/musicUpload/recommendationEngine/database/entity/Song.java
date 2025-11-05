@@ -10,7 +10,11 @@ import java.util.*;
 @Data
 @Table(
         name = Song.NAME,
-        indexes = @Index(columnList = "user_id")
+        indexes = {
+                @Index(name = "idx_song_protection_type", columnList = "protection_type"),
+                @Index(name = "idx_song_user_protection_type", columnList = "user_id, protection_type"),
+                @Index(name = "idx_song_protection_type_user", columnList = "protection_type, user_id, id")
+        }
 )
 @ToString(exclude = {"user", "albums"})
 @AllArgsConstructor
@@ -45,8 +49,8 @@ public class Song implements Serializable {
             joinColumns = @JoinColumn(name = "song_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"),
             indexes = {
-                    @Index(name = "idx_song_id", columnList = "song_id"),
-                    @Index(name = "idx_tag_id", columnList = "tag_id")
+                    @Index(name = "idx_tag_song_tag_song", columnList = "tag_id, song_id"),
+                    @Index(name = "idx_tag_song_song_tag", columnList = "song_id, tag_id")
             }
     )
     private Set<Tag> tags = new HashSet<>();

@@ -7,7 +7,7 @@ const UploadAlbum = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    addAlbum(formData, navigate("/profile"));
+    addAlbum(formData, () => navigate("/profile"));
   };
 
   return (
@@ -45,9 +45,9 @@ const UploadAlbum = () => {
                           <label className="button-label">Song cover</label>
                           <br />
                           <span className="icon">
-                          <ion-icon name="image-outline"></ion-icon>
+                            <ion-icon name="image-outline"></ion-icon>
                           </span>
-                          <input type="file" id="image" name="image"/>
+                          <input type="file" id="image" name="image" />
                         </div>
                       </div>
                     </div>
@@ -58,9 +58,11 @@ const UploadAlbum = () => {
                           <span className="icon">
                             <ion-icon name="lock-closed-outline"></ion-icon>
                           </span>
-                          <label className="button-label">Protection type</label>
+                          <label className="button-label">
+                            Protection type
+                          </label>
                           <br />
-                          <select name="protectionType" id="protection_type">
+                          <select name="protectionType" id="protectionType">
                             <option value="PRIVATE">PRIVATE</option>
                             <option value="PROTECTED">PROTECTED</option>
                             <option value="PUBLIC">PUBLIC</option>
@@ -91,6 +93,6 @@ const UploadAlbum = () => {
       </div>
     </div>
   );
-}
+};
 
 export default UploadAlbum;

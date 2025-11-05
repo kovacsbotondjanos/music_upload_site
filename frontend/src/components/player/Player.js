@@ -9,6 +9,6 @@ const Player = memo(() => {
       </audio>
     </div>
   );
-})
+});
 
 export default Player;

@@ -164,11 +164,11 @@ public class SongService {
         throw new NotFoundException();
     }
 
+    @Transactional
     public void patchSong(Long id, SongDAO song, MultipartFile image) {
         patchSong(id, song.getProtectionType(), song.getName(), song.getTags(), image);
     }
 
-    @Transactional
     public void patchSong(Long id,
                           String protectionType,
                           String name,

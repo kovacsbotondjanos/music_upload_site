@@ -1,22 +1,71 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAlbum, patchAlbum } from "../../services/controller";
-import { resolve } from "../../services/utils";
+import { getAlbum, patchAlbum, searchSongs } from "../../services/controller";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const AlbumEditor = () => {
   const navigate = useNavigate();
   const { albumId } = useParams();
   const [album, setAlbum] = useState(null);
+  const [query, setQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     const fetch = async () =>
-      getAlbum(albumId, resolve(setAlbum));
+      getAlbum(albumId, (data) => {
+        if (data) {
+          setAlbum(data);
+        }
+      });
     fetch();
   }, [albumId]);
+
+  const removeSong = (song) => {
+    setAlbum({
+      ...album,
+      songs: album.songs.filter((s) => s.id !== song.id),
+    });
+  };
+
+  const fetchSongs = async () => {
+    if (!query.trim()) return;
+    await searchSongs(page, query, (data) => {
+      if (!data || data.length === 0) {
+        setHasMore(false);
+      } else {
+        setSearchResults((prev) => [...prev, ...data]);
+        setPage((prev) => prev + 1);
+      }
+    });
+  };
+
+  const handleSearch = async (e) => {
+    const val = e.target.value;
+    setQuery(val);
+    setSearchResults([]);
+    setPage(0);
+    setHasMore(true);
+    if (val.trim()) {
+      await fetchSongs();
+    }
+  };
+
+  const addSongToAlbum = (song) => {
+    if (!album.songs.some((s) => s.id === song.id)) {
+      setAlbum({
+        ...album,
+        songs: [...album.songs, song],
+      });
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
+    // formData.append("songIds", JSON.stringify(album.songs.map((s) => s.id)));
+    album.songs.forEach((s) => formData.append("songIds", s.id));
     patchAlbum(album.id, formData, () => navigate("/profile"));
   };
 
@@ -92,6 +141,74 @@ const AlbumEditor = () => {
                         </div>
                       </div>
 
+                      {album.songs?.length ? (
+                        <div>
+                          {album.songs.map((song) => (
+                            <div>
+                              <div className="row">
+                                <div className="col">
+                                  <h4>{song.name}</h4>
+                                </div>
+                                <div className="col">
+                                  <button
+                                    type="button"
+                                    onClick={() => removeSong(song)}
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                      <p>Add songs:</p>
+                      <div className="row mt-4">
+                        <div className="col">
+                          <label className="button-label">
+                            Search and Add Songs
+                          </label>
+                          <input
+                            type="text"
+                            value={query}
+                            onChange={handleSearch}
+                            placeholder="Type song name..."
+                            className="form-control"
+                          />
+                          {query && (
+                            <div id="scrollableResults">
+                              <InfiniteScroll
+                                dataLength={searchResults.length}
+                                next={fetchSongs}
+                                hasMore={hasMore}
+                                scrollableTarget="scrollableResults"
+                                loader={
+                                  <p style={{ padding: "8px" }}>
+                                    Loading more...
+                                  </p>
+                                }
+                                endMessage={
+                                  <p style={{ padding: "8px" }}>
+                                    No more results
+                                  </p>
+                                }
+                              >
+                                {searchResults.map((song) => (
+                                  <div
+                                    key={song.id}
+                                    className="scrollable-result-item"
+                                    onClick={() => addSongToAlbum(song)}
+                                  >
+                                    {" "}
+                                    {song.name}
+                                  </div>
+                                ))}
+                              </InfiniteScroll>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                       <div className="row">
                         <div className="col">
                           <div className="login-button">
@@ -115,6 +232,6 @@ const AlbumEditor = () => {
       </div>
     </div>
   );
-}
+};
 
 export default AlbumEditor;

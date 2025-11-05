@@ -7,21 +7,21 @@ const Home = (props) => {
   const [songs, setSongs] = useState([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const { playMusic } = props
+  const { playMusic } = props;
 
   var fetchSongs = async () => {
     await getRecommendedSongs(page, (data) => {
-       if (!data || data.length === 0) {
+      if (!data || data.length === 0) {
         setHasMore(false);
       } else {
         setSongs((prev) => [...prev, ...data]);
         setPage((prev) => prev + 1);
       }
-    })
+    });
   };
 
   useEffect(() => fetchSongs(), []);
-  
+
   return (
     <div className="container container-fluid">
       <div className="row">
@@ -36,12 +36,14 @@ const Home = (props) => {
             endMessage={<p>No more songs</p>}
           >
             {songs !== null &&
-              songs.map((item) => <SongItem item={item} playMusic={playMusic} />)}
+              songs.map((item) => (
+                <SongItem item={item} playMusic={playMusic} />
+              ))}
           </InfiniteScroll>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Home;

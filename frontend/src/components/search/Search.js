@@ -2,8 +2,12 @@ import { useState } from "react";
 import SongItem from "../song/songItem/SongItem";
 import AlbumItem from "../album/albumItem/AlbumItem";
 import UserItem from "../user/userItem/UserItem";
-import { searchSongs, searchAlbums, getUsers } from "../../services/controller";
-import { resolve } from "../../services/utils";
+import {
+  searchSongs,
+  searchAlbums,
+  searchUser,
+} from "../../services/controller";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const Search = (props) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,17 +15,55 @@ const Search = (props) => {
   const [songs, setSongs] = useState([]);
   const [albums, setAlbums] = useState([]);
   const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const { playMusic } = props;
 
-  const fetchSongs = async (name) => searchSongs(name, resolve(setSongs));
-  const fetchAlbums = async (name) => searchAlbums(name, resolve(setAlbums));
-  const fetchUsers = async (name) => getUsers(name, resolve(setUsers));
+  const fetchSongs = async (name) =>
+    searchSongs(page, name, (data) => {
+      if (!data || data.length === 0) {
+        setHasMore(false);
+      } else {
+        setSongs((prev) => [...prev, ...data]);
+        setPage((prev) => prev + 1);
+      }
+    });
+  const fetchAlbums = async (name) =>
+    searchAlbums(page, name, (data) => {
+      if (!data || data.length === 0) {
+        setHasMore(false);
+      } else {
+        setAlbums((prev) => [...prev, ...data]);
+        setPage((prev) => prev + 1);
+      }
+    });
+  const fetchUsers = async (name) =>
+    searchUser(page, name, (data) => {
+      if (!data || data.length === 0) {
+        setHasMore(false);
+      } else {
+        setUsers((prev) => [...prev, ...data]);
+        setPage((prev) => prev + 1);
+      }
+    });
 
   const handleDropdownChange = (e) => {
     setSongs([]);
     setAlbums([]);
     setUsers([]);
+    setPage(0);
+    setHasMore(true);
     setSearchType(e.target.value);
+  };
+
+  const handleScrollDown = async () => {
+    if (searchType === "SONG") {
+      await fetchSongs(page, searchTerm);
+    } else if (searchType === "ALBUM") {
+      await fetchAlbums(page, searchTerm);
+    } else if (searchType === "USER") {
+      await fetchUsers(page, searchTerm);
+    }
   };
 
   const handleInputChange = (event) => {
@@ -44,7 +86,7 @@ const Search = (props) => {
     if (searchTerm !== "") {
       searchSongs(searchTerm);
       searchAlbums(searchTerm);
-      getUsers(searchTerm);
+      searchUser(searchTerm);
     }
   };
 
@@ -95,17 +137,41 @@ const Search = (props) => {
           <div>
             {songs !== null &&
               songs.map((item) => (
-                <SongItem item={item} playMusic={playMusic} />
+                <InfiniteScroll
+                  dataLength={songs.length}
+                  next={handleScrollDown}
+                  hasMore={hasMore}
+                  loader={<h4>Loading songs...</h4>}
+                  endMessage={<p>No more songs</p>}
+                >
+                  <SongItem item={item} playMusic={playMusic} />
+                </InfiniteScroll>
               ))}
           </div>
           <div>
             {albums.map((item) => (
-              <AlbumItem item={item} playMusic={playMusic} />
+              <InfiniteScroll
+                dataLength={songs.length}
+                next={handleScrollDown}
+                hasMore={hasMore}
+                loader={<h4>Loading songs...</h4>}
+                endMessage={<p>No more songs</p>}
+              >
+                <AlbumItem item={item} playMusic={playMusic} />
+              </InfiniteScroll>
             ))}
           </div>
           <div>
             {users.map((item) => (
-              <UserItem item={item} playMusic={playMusic} />
+              <InfiniteScroll
+                dataLength={songs.length}
+                next={handleScrollDown}
+                hasMore={hasMore}
+                loader={<h4>Loading songs...</h4>}
+                endMessage={<p>No more songs</p>}
+              >
+                <UserItem item={item} playMusic={playMusic} />
+              </InfiniteScroll>
             ))}
           </div>
         </div>

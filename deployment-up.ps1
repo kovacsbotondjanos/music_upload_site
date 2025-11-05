@@ -22,23 +22,38 @@ kubectl apply -f kubernetes-deployment/music-upload-redis-deployment.yaml
 
 do {
     Clear-Host
-    $statuses = kubectl get pods -o jsonpath="{range .items[*]}{.metadata.name}={.status.phase}{'\n'}{end}"
-    Write-Output "Current pod statuses:"
-    $statusLines = $statuses -split "\\n"
-    $statusLines | ForEach-Object { Write-Output $_ }
-    $allRunning = $true
-    foreach ($status in $statusLines) {
-        if ($status -match "=") {
-            $phase = $status.Split("=")[1]
-            if ($phase -ne "Running") {
-                $allRunning = $false
+    $statuses = kubectl get pods -o jsonpath="{range .items[*]}{.metadata.name}={.status.containerStatuses[*].ready}{'\n'}{end}"
+
+    if (-not $statuses) {
+        Write-Host "No pods found." -ForegroundColor Yellow
+        Start-Sleep -Seconds 2
+        continue
+    }
+
+    $statusLines = $statuses -split "\n"
+    $allReady = $true
+
+    foreach ($line in $statusLines) {
+        if ($line -match "=") {
+            $name, $readyStates = $line -split "="
+            $readyValues = $readyStates -split " "
+            $readyCount = ($readyValues | Where-Object { $_ -eq "true" }).Count
+            $totalCount = $readyValues.Length
+
+            Write-Host "$name => $readyCount/$totalCount ready"
+
+            if ($readyCount -ne $totalCount -or $totalCount -eq 0) {
+                $allReady = $false
             }
         }
     }
-    if (-not $allRunning) {
-        Start-Sleep -Seconds 1
+
+    if (-not $allReady) {
+        Write-Host "`nWaiting for all pods to be ready..."
+        Start-Sleep -Seconds 2
     }
-} until ($allRunning)
+
+} until ($allReady)
 
 Write-Output "All pods are Running!"
 

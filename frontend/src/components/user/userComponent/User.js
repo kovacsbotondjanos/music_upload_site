@@ -3,7 +3,6 @@ import { React, useState, useEffect } from "react";
 import SongItem from "../../song/songItem/SongItem";
 import AlbumItem from "../../album/albumItem/AlbumItem";
 import { getSongs, getAlbums } from "../../../services/controller";
-import { resolve } from "../../../services/utils";
 
 const User = (props) => {
   const navigate = useNavigate();
@@ -18,10 +17,14 @@ const User = (props) => {
       });
     fetch();
   }, []);
-  
+
   useEffect(() => {
     const fetch = async () =>
-      await getAlbums(resolve(setAlbums));
+      await getAlbums((data) => {
+        if (data) {
+          setAlbums(data);
+        }
+      });
     fetch();
   }, []);
 

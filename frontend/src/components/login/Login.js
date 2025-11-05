@@ -15,16 +15,16 @@ const Login = (props) => {
       formDataJson[key] = value;
     });
 
-    login(formDataJson['username'], formDataJson['password'], () => {
-      getCurrentUser(data => {
-          if (data) {
-            setLoggedIn(true);
-            setUsername(data.username);
-            setProfilePic(data.profilePicture);
-            navigate("/");
-          }
-        })
-    })
+    login(formDataJson["username"], formDataJson["password"], () => {
+      getCurrentUser((data) => {
+        if (data) {
+          setLoggedIn(true);
+          setUsername(data.username);
+          setProfilePic(data.profilePicture);
+          navigate("/");
+        }
+      });
+    });
   };
 
   return (
@@ -110,6 +110,6 @@ const Login = (props) => {
       </div>
     </div>
   );
-}
+};
 
 export default Login;

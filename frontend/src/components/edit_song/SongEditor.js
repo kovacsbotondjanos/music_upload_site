@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSong, patchSong } from "../../services/controller";
-import { resolve } from "../../services/utils";
 
 const SongEditor = () => {
   const navigate = useNavigate();
@@ -10,7 +9,11 @@ const SongEditor = () => {
 
   useEffect(() => {
     const fetch = async () =>
-      getSong(songId, resolve(setSong));
+      getSong(songId, (data) => {
+        if (data) {
+          setSong(data);
+        }
+      });
     fetch();
   }, [songId]);
 
@@ -80,8 +83,8 @@ const SongEditor = () => {
                             </label>
                             <br />
                             <select
-                              name="protection_type"
-                              id="protection_type"
+                              name="protectionType"
+                              id="protectionType"
                               defaultValue={song.protectionType}
                             >
                               <option value="PRIVATE">PRIVATE</option>
@@ -115,6 +118,6 @@ const SongEditor = () => {
       </div>
     </div>
   );
-}
+};
 
 export default SongEditor;

@@ -10,6 +10,7 @@ const Navbar = (props) => {
     setLoggedIn,
     setUsername,
     setProfilePic,
+    setCurrentUserId,
   } = props;
 
   useEffect(() => {
@@ -18,9 +19,10 @@ const Navbar = (props) => {
       setLoggedIn(false);
       setUsername(null);
       setProfilePic(null);
+      setCurrentUserId(0);
       return;
     }
-    
+
     if (!loggedIn || !profilePic) {
       (async () => {
         await getUserData((data) => {
@@ -28,11 +30,13 @@ const Navbar = (props) => {
             setLoggedIn(true);
             setUsername(data.username);
             setProfilePic(data.profilePicture);
+            setCurrentUserId(data.id);
           } else {
             localStorage.removeItem("jwtToken");
             setLoggedIn(false);
             setUsername(null);
             setProfilePic(null);
+            setCurrentUserId(0);
           }
         });
       })();
@@ -104,13 +108,11 @@ const Navbar = (props) => {
               </div>
             </div>
           )}
-          <button onClick={() => navigate("/search")}>
-            Search
-          </button>
+          <button onClick={() => navigate("/search")}>Search</button>
         </div>
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;

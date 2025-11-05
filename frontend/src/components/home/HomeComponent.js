@@ -9,6 +9,6 @@ const HomeComponent = (props) => {
       <Home playMusic={playMusic} />
     </div>
   );
-}
+};
 
 export default HomeComponent;

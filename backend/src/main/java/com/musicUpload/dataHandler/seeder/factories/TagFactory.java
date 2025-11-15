@@ -3,6 +3,7 @@ package com.musicUpload.dataHandler.seeder.factories;
 import com.github.javafaker.Faker;
 import com.musicUpload.dataHandler.models.implementations.Tag;
 import com.musicUpload.dataHandler.repositories.TagRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -13,13 +14,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
+@RequiredArgsConstructor
 public class TagFactory {
 
     private final TagRepository tagRepository;
-
-    public TagFactory(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
-    }
 
     public List<Tag> initTags(int number) {
         Set<String> tagNames = new HashSet<>();

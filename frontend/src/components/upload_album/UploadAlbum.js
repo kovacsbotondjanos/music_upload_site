@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { addAlbum } from "../../services/controller";
+import { addAlbum, getToken } from "../../services/controller";
 
 const UploadAlbum = () => {
   const navigate = useNavigate();
@@ -9,6 +10,13 @@ const UploadAlbum = () => {
     const formData = new FormData(event.target);
     addAlbum(formData, () => navigate("/profile"));
   };
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      navigate("/");
+    }
+  });
 
   return (
     <div className="black-bg">

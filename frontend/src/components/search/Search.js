@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SongItem from "../song/songItem/SongItem";
 import AlbumItem from "../album/albumItem/AlbumItem";
 import UserItem from "../user/userItem/UserItem";
@@ -17,7 +17,10 @@ const Search = (props) => {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [typingTimeout, setTypingTimeout] = useState(null);
   const { playMusic } = props;
+
+  useEffect(() => {}, []);
 
   const fetchSongs = async (name) =>
     searchSongs(page, name, (data) => {
@@ -53,35 +56,48 @@ const Search = (props) => {
     setUsers([]);
     setPage(0);
     setHasMore(true);
+    setSearchTerm("")
     setSearchType(e.target.value);
   };
 
   const handleScrollDown = async () => {
     if (searchType === "SONG") {
-      await fetchSongs(page, searchTerm);
+      await fetchSongs(searchTerm);
     } else if (searchType === "ALBUM") {
-      await fetchAlbums(page, searchTerm);
+      await fetchAlbums(searchTerm);
     } else if (searchType === "USER") {
-      await fetchUsers(page, searchTerm);
+      await fetchUsers(searchTerm);
     }
   };
 
   const handleInputChange = (event) => {
     setSearchTerm(event.target.value);
     const name = event.target.value;
-    if (name !== "") {
-      if (searchType === "SONG") {
-        fetchSongs(name);
-      } else if (searchType === "ALBUM") {
-        fetchAlbums(name);
-      } else if (searchType === "USER") {
-        fetchUsers(name);
-      }
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
     }
+
+    const timeout = setTimeout(() => {
+      setPage(0);
+      setHasMore(true)
+      if (name !== "") {
+        if (searchType === "SONG") {
+          setSongs([]);
+          fetchSongs(name);
+        } else if (searchType === "ALBUM") {
+          setAlbums([]);
+          fetchAlbums(name);
+        } else if (searchType === "USER") {
+          setUsers([]);
+          fetchUsers(name);
+        }
+      }
+    }, 500);
+
+    setTypingTimeout(timeout);
   };
 
   const handleSubmit = (event) => {
-    setSearchTerm(event.target.value);
     event.preventDefault();
     if (searchTerm !== "") {
       searchSongs(searchTerm);
@@ -131,48 +147,47 @@ const Search = (props) => {
               </form>
             </div>
           </div>
-          {searchTerm === "SONG" ? <h2>Songs:</h2> : null}
-          {searchTerm === "ALBUM" ? <h2>Albums:</h2> : null}
-          {searchTerm === "USER" ? <h2>Users:</h2> : null}
           <div>
-            {songs !== null &&
-              songs.map((item) => (
-                <InfiniteScroll
-                  dataLength={songs.length}
-                  next={handleScrollDown}
-                  hasMore={hasMore}
-                  loader={<h4>Loading songs...</h4>}
-                  endMessage={<p>No more songs</p>}
-                >
-                  <SongItem item={item} playMusic={playMusic} />
-                </InfiniteScroll>
-              ))}
-          </div>
-          <div>
-            {albums.map((item) => (
+            {searchType === "SONG" && (
               <InfiniteScroll
                 dataLength={songs.length}
                 next={handleScrollDown}
                 hasMore={hasMore}
-                loader={<h4>Loading songs...</h4>}
                 endMessage={<p>No more songs</p>}
               >
-                <AlbumItem item={item} playMusic={playMusic} />
+                {songs.map((item) => (
+                  <SongItem key={item.id} item={item} playMusic={playMusic} />
+                ))}
               </InfiniteScroll>
-            ))}
+            )}
           </div>
           <div>
-            {users.map((item) => (
+            {searchType === "ALBUM" && (
               <InfiniteScroll
-                dataLength={songs.length}
+                dataLength={albums.length}
                 next={handleScrollDown}
                 hasMore={hasMore}
-                loader={<h4>Loading songs...</h4>}
-                endMessage={<p>No more songs</p>}
+                endMessage={<p>No more albums</p>}
               >
-                <UserItem item={item} playMusic={playMusic} />
+                {albums.map((item) => (
+                  <AlbumItem key={item.id} item={item} playMusic={playMusic} />
+                ))}
               </InfiniteScroll>
-            ))}
+            )}
+          </div>
+          <div>
+            {searchType === "USER" && (
+              <InfiniteScroll
+                dataLength={users.length}
+                next={handleScrollDown}
+                hasMore={hasMore}
+                endMessage={<p>No more users</p>}
+              >
+                {users.map((item) => (
+                  <UserItem key={item.id} item={item} playMusic={playMusic} />
+                ))}
+              </InfiniteScroll>
+            )}
           </div>
         </div>
       </div>

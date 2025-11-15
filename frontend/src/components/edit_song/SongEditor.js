@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getSong, patchSong } from "../../services/controller";
+import { getSong, patchSong, getToken } from "../../services/controller";
 
 const SongEditor = () => {
   const navigate = useNavigate();
   const { songId } = useParams();
   const [song, setSong] = useState(null);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      navigate("/");
+    }
+  });
 
   useEffect(() => {
     const fetch = async () =>

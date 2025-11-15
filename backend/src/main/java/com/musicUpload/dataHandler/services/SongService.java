@@ -7,7 +7,6 @@ import com.musicUpload.dataHandler.details.UserDetailsImpl;
 import com.musicUpload.dataHandler.enums.ProtectionType;
 import com.musicUpload.dataHandler.models.implementations.Song;
 import com.musicUpload.dataHandler.models.implementations.User;
-import com.musicUpload.dataHandler.repositories.AlbumRepository;
 import com.musicUpload.dataHandler.repositories.SongRepository;
 import com.musicUpload.dataHandler.repositories.UserRepository;
 import com.musicUpload.exceptions.NotFoundException;
@@ -33,7 +32,6 @@ import java.util.Objects;
 public class SongService {
     private final SongRepository songRepository;
     private final UserRepository userRepository;
-    private final AlbumRepository albumRepository;
     private final ImageFactory imageFactory;
     private final MinioService minioService;
     private final SongListenCountUpdateScheduler songListenCountUpdateScheduler;
@@ -41,19 +39,11 @@ public class SongService {
 
     public Song addSong(SongDAO song, MultipartFile image, MultipartFile songFile) {
         return addSong(
-                song.getProtectionType(),
-                song.getName(),
-                song.getTags(),
-                image,
-                songFile
-        );
+                song.getProtectionType(), song.getName(), song.getTags(), image, songFile);
     }
 
-    public Song addSong(String protectionType,
-                        String name,
-                        List<String> tags,
-                        MultipartFile image,
-                        MultipartFile songFile) {
+    public Song addSong(
+            String protectionType, String name, List<String> tags, MultipartFile image, MultipartFile songFile) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         if (name == null || protectionType == null || songFile == null) {
@@ -136,9 +126,7 @@ public class SongService {
         return songs.stream().map(s -> SongDTO.of(s, songImageMap.get(s.getImage()))).toList();
     }
 
-    public List<SongDTO> findByNameLike(String name,
-                                        int pageNumber,
-                                        int pageSize) {
+    public List<SongDTO> findByNameLike(String name, int pageNumber, int pageSize) {
         Long userId = UserService.getCurrentUserId();
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -169,11 +157,7 @@ public class SongService {
         patchSong(id, song.getProtectionType(), song.getName(), song.getTags(), image);
     }
 
-    public void patchSong(Long id,
-                          String protectionType,
-                          String name,
-                          List<String> tags,
-                          MultipartFile image) {
+    public void patchSong(Long id, String protectionType, String name, List<String> tags, MultipartFile image) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         User user = userRepository.findById(userDetails.getId())
@@ -216,12 +200,8 @@ public class SongService {
                 .orElseThrow(UnauthenticatedException::new);
 
         user.getSongs().remove(song);
-        userRepository.save(user);
 
-        song.getAlbums().forEach(a -> {
-            a.getSongs().remove(song);
-            albumRepository.save(a);
-        });
+        song.getAlbums().forEach(a -> a.getSongs().remove(song));
 
         songRepository.deleteById(id);
         minioService.deleteImage(song.getImage());

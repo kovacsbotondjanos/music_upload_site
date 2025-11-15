@@ -32,10 +32,7 @@ public class UserController {
     public ResponseEntity<LogInResponseDTO> login(@RequestBody LogInDTO loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
-        );
+                        loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -52,9 +49,10 @@ public class UserController {
     }
 
     @GetMapping("/search/{name}")
-    public List<FilteredUserDTO> getUserByNameLike(@PathVariable String name,
-                                                   @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
-                                                   @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
+    public List<FilteredUserDTO> getUserByNameLike(
+            @PathVariable String name,
+            @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
         return userService.findByNameLike(name, pageNumber, pageSize);
     }
 
@@ -64,8 +62,9 @@ public class UserController {
     }
 
     @GetMapping("/recommended")
-    public List<SongDTO> getRecommendedSongs(@RequestParam(name = "pageNumber", defaultValue = "0", required = false) long pageNumber,
-                                             @RequestParam(name = "pageSize", defaultValue = "10", required = false) long pageSize) {
+    public List<SongDTO> getRecommendedSongs(
+            @RequestParam(name = "pageNumber", defaultValue = "0", required = false) long pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10", required = false) long pageSize) {
         return userRecommendationService.getRecommendationsForUser(pageSize, pageNumber);
     }
 
@@ -86,12 +85,7 @@ public class UserController {
     public void patchUser(@ModelAttribute UserDAO userPatch,
                           @RequestParam(name = "image", required = false) MultipartFile image) {
         userService.patchUser(
-                userPatch.getUsername(),
-                userPatch.getEmail(),
-                userPatch.getPassword(),
-                userPatch.getOldPassword(),
-                image
-        );
+                userPatch.getUsername(), userPatch.getEmail(), userPatch.getPassword(), userPatch.getOldPassword(), image);
     }
 
     @DeleteMapping

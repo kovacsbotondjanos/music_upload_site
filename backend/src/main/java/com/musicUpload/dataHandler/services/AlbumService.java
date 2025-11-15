@@ -37,9 +37,7 @@ public class AlbumService {
     private final ImageFactory imageFactory;
     private final MinioService minioService;
 
-    public AlbumDTO saveAlbum(String protectionType,
-                           String name,
-                           MultipartFile image) {
+    public AlbumDTO saveAlbum(String protectionType, String name, MultipartFile image) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         if (protectionType == null || name == null) {
@@ -78,8 +76,7 @@ public class AlbumService {
         List<Album> albums = albumRepository.findByUser(user);
 
         return albums.stream()
-                .map(a -> AlbumCardDTO.of(a, minioService.getImage(a.getImage())))
-                .toList();
+                .map(a -> AlbumCardDTO.of(a, minioService.getImage(a.getImage()))).toList();
     }
 
     public AlbumDTO findById(Long id) {
@@ -97,11 +94,10 @@ public class AlbumService {
                         Optional.ofNullable(UserService.getCurrentUserDetails())
                                 .map(UserDetailsImpl::getId)
                                 .orElse(-1L)
-                )
-                .orElseThrow(UnauthenticatedException::new);
+                ).orElseThrow(UnauthenticatedException::new);
+
         return albumRepository.findByIdInAndUserOrIdInAndProtectionType(ids, user.getId()).stream()
-                .map(a -> AlbumCardDTO.of(a, minioService.getImage(a.getImage())))
-                .toList();
+                .map(a -> AlbumCardDTO.of(a, minioService.getImage(a.getImage()))).toList();
     }
 
     public List<AlbumCardDTO> findByNameLike(String name, int pageNumber, int pageSize) {
@@ -110,15 +106,10 @@ public class AlbumService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         return albumRepository.findByNameLike(name, userId, pageable).stream()
-                .map(a -> AlbumCardDTO.of(a, minioService.getImage(a.getImage())))
-                .toList();
+                .map(a -> AlbumCardDTO.of(a, minioService.getImage(a.getImage()))).toList();
     }
 
-    public AlbumDTO patchAlbum(Long id,
-                            String protectionType,
-                            List<Long> songIds,
-                            String name,
-                            MultipartFile image) {
+    public AlbumDTO patchAlbum(Long id, String protectionType, List<Long> songIds, String name, MultipartFile image) {
         UserDetailsImpl userDetails = UserService.getCurrentUserDetailsOrThrowError();
 
         User user = userRepository.findById(userDetails.getId())
@@ -191,7 +182,6 @@ public class AlbumService {
                 .orElseThrow(UnauthenticatedException::new);
 
         user.getAlbums().remove(album);
-        userRepository.save(user);
 
         albumRepository.deleteById(album.getId());
         minioService.deleteImage(album.getImage());

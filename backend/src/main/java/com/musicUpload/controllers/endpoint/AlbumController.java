@@ -37,22 +37,19 @@ public class AlbumController {
     }
 
     @GetMapping("/recommended/{id}")
-    public List<SongDTO> getRecommendedSongs(@PathVariable Long id,
-                                             @RequestParam(name = "pageNumber", defaultValue = "0", required = false) long pageNumber,
-                                             @RequestParam(name = "pageSize", defaultValue = "10", required = false) long pageSize) {
+    public List<SongDTO> getRecommendedSongs(
+            @PathVariable Long id,
+            @RequestParam(name = "pageNumber", defaultValue = "0", required = false) long pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10", required = false) long pageSize) {
         return userRecommendationService.getRecommendationsForAlbum(id, pageSize, pageNumber);
     }
 
     @GetMapping("/search/{name}")
-    public List<AlbumCardDTO> getAlbumByNameLike(@PathVariable String name,
-                                             @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
-                                             @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
+    public List<AlbumCardDTO> getAlbumByNameLike(
+            @PathVariable String name,
+            @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
         return albumService.findByNameLike(name, pageNumber, pageSize);
-    }
-
-    @GetMapping("/recommendations/{id}")
-    public List<Long> getRecommendedSongsForAlbum(@PathVariable Long id) {
-        return null;
     }
 
     @PostMapping

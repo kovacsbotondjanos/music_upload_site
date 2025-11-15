@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ResourceController {
     private final SongService songService;
-    private final MinioService minioService;
 
     @GetMapping("/music/{name}")
     public String getSong(@PathVariable String name) {

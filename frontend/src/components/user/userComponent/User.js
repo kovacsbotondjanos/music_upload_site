@@ -2,13 +2,20 @@ import { useNavigate } from "react-router-dom";
 import { React, useState, useEffect } from "react";
 import SongItem from "../../song/songItem/SongItem";
 import AlbumItem from "../../album/albumItem/AlbumItem";
-import { getSongs, getAlbums } from "../../../services/controller";
+import { getSongs, getAlbums, getToken } from "../../../services/controller";
 
 const User = (props) => {
   const navigate = useNavigate();
   const [userSongs, setUserSongs] = useState([]);
   const [albums, setAlbums] = useState([]);
   const { playMusic } = props;
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      navigate("/");
+    }
+  });
 
   useEffect(() => {
     const fetch = async () =>

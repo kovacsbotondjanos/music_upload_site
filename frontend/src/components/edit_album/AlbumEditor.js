@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAlbum, patchAlbum, searchSongs } from "../../services/controller";
+import { getAlbum, patchAlbum, searchSongs, getToken } from "../../services/controller";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 const AlbumEditor = () => {
@@ -11,6 +11,13 @@ const AlbumEditor = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      navigate("/");
+    }
+  });
 
   useEffect(() => {
     const fetch = async () =>

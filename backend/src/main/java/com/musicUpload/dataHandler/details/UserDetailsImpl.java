@@ -22,11 +22,8 @@ public class UserDetailsImpl implements UserDetails {
     private boolean credentialsNonExpired;
     private boolean enabled;
 
-    public UserDetailsImpl(Long id,
-                           String username,
-                           String password,
-                           Collection<? extends GrantedAuthority> authorities,
-                           String profilePicture) {
+    public UserDetailsImpl(
+            Long id, String username, String password, Collection<? extends GrantedAuthority> authorities, String profilePicture) {
         this.id = id;
         this.username = username;
         this.password = password;

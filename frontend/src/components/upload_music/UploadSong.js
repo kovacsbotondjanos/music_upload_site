@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { addSong, getTags } from "../../services/controller";
+import { addSong, getTags, getToken } from "../../services/controller";
 import TagItem from "../tag/TagItem";
 
 const UploadSong = () => {
@@ -9,6 +9,13 @@ const UploadSong = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      navigate("/");
+    }
+  });
 
   const handleInputChange = (event) => {
     setSearchTerm(event.target.value);

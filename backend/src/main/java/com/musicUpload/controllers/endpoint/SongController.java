@@ -35,16 +35,18 @@ public class SongController {
     }
 
     @GetMapping("/search/{name}")
-    public List<SongDTO> getSongByNameLike(@PathVariable String name,
-                                           @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
-                                           @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
+    public List<SongDTO> getSongByNameLike(
+            @PathVariable String name,
+            @RequestParam(name = "pageNumber", defaultValue = "0", required = false) int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10", required = false) int pageSize) {
         return songService.findByNameLike(name, pageNumber, pageSize);
     }
 
     @GetMapping("/recommended/{id}")
-    public List<SongDTO> getRecommendedSongs(@PathVariable Long id,
-                                             @RequestParam(name = "pageNumber", defaultValue = "0", required = false) long pageNumber,
-                                             @RequestParam(name = "pageSize", defaultValue = "10", required = false) long pageSize) {
+    public List<SongDTO> getRecommendedSongs(
+            @PathVariable Long id,
+            @RequestParam(name = "pageNumber", defaultValue = "0", required = false) long pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10", required = false) long pageSize) {
         return userRecommendationService.getRecommendationsForSong(id, pageSize, pageNumber);
     }
 

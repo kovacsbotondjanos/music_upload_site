@@ -21,14 +21,10 @@ public class AlbumFactory {
     private final ImageFactory imageFactory;
     private final AlbumRepository albumRepository;
 
-    public List<Album> createAlbums(int number, List<User> users,
-                                    List<Song> songs) {
-
+    public List<Album> createAlbums(int number, List<User> users, List<Song> songs) {
         return albumRepository.saveAll(
                 IntStream.range(0, number)
-                        .mapToObj(__ -> createAlbum(users, songs))
-                        .toList()
-        );
+                        .mapToObj(__ -> createAlbum(users, songs)).toList());
     }
 
     @Transactional

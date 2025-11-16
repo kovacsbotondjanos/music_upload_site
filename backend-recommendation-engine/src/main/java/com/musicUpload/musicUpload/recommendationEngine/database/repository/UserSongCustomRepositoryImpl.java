@@ -38,6 +38,7 @@ public class UserSongCustomRepositoryImpl implements UserSongCustomRepository {
             INNER JOIN tag_song ts ON us.song_id = ts.song_id
             INNER JOIN song s ON us.song_id = s.id
             WHERE ts.tag_id IN (:tagIds)
+            AND us.created_at >= :end6
             AND us.song_id NOT IN (:songIds)
             AND (:userId is NULL OR s.user_id <> :userId)
             AND protection_type = 'PUBLIC'
@@ -51,7 +52,7 @@ public class UserSongCustomRepositoryImpl implements UserSongCustomRepository {
             FROM user_song us
             INNER JOIN tag_song ts ON us.song_id = ts.song_id
             INNER JOIN song s ON us.song_id = s.id
-            WHERE us.created_at BETWEEN :startDate AND :endDate
+            WHERE us.created_at >= :startDate
             AND ts.tag_id IN (:tagIds)
             AND (s.user_id = :userId OR protection_type = 'PUBLIC')
             AND (us.user_id <> :userId OR :userId IS NULL)
@@ -150,7 +151,7 @@ public class UserSongCustomRepositoryImpl implements UserSongCustomRepository {
 
     @Override
     public List<Long> findSongsForGivenUser(
-            Collection<Long> songIds, Collection<Long> tagIds, Long userId, List<Long> restrictedSongIds, Long pageSize, Long pageNumber, Date startDate, Date endDate) {
+            Collection<Long> songIds, Collection<Long> tagIds, Long userId, List<Long> restrictedSongIds, Long pageSize, Long pageNumber, Date startDate) {
         if (songIds.isEmpty()) {
             return List.of();
         }
@@ -160,7 +161,6 @@ public class UserSongCustomRepositoryImpl implements UserSongCustomRepository {
                 .addValue(TAG_IDS, tagIds)
                 .addValue(USER_ID, userId)
                 .addValue(START_DATE, startDate)
-                .addValue(END_DATE, endDate)
                 .addValue(RESTRICTED_SONGS_EMPTY, restrictedSongIds.isEmpty())
                 .addValue(RESTRICTED_SONG_IDS, restrictedSongIds.isEmpty() ? null : restrictedSongIds)
                 .addValue(OFFSET, pageNumber * pageSize)

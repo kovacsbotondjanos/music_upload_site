@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class AlbumDTO {
+    public class AlbumDTO {
     private Long id;
     private String name;
     private List<SongDTO> songs;

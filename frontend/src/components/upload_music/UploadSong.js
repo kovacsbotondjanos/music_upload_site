@@ -9,6 +9,8 @@ const UploadSong = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [songFile, setSongFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     const token = getToken();
@@ -100,26 +102,62 @@ const UploadSong = () => {
 
                     <div className="row">
                       <div className="col">
-                        <div className="input-box">
-                          <label className="button-label">MP3 file</label>
-                          <br />
-                          <span className="icon">
-                            <ion-icon name="musical-notes-outline"></ion-icon>
-                          </span>
-                          <input type="file" id="song" name="song" required />
+                        <label className="button-label">MP3 file</label>
+                        <div
+                          className="upload-box"
+                          onClick={() =>
+                            document.getElementById("song").click()
+                          }
+                        >
+                          <ion-icon name="musical-notes-outline"></ion-icon>
+                          <p>
+                            {songFile
+                              ? songFile.name
+                              : "Click to upload MP3..."}
+                          </p>
+                          <input
+                            type="file"
+                            id="song"
+                            name="song"
+                            accept=".mp3"
+                            onChange={(e) => setSongFile(e.target.files[0])}
+                            hidden
+                            required
+                          />
                         </div>
                       </div>
-                    </div>
 
-                    <div className="row">
                       <div className="col">
-                        <div className="input-box">
-                          <label className="button-label">Song cover</label>
-                          <br />
-                          <span className="icon">
-                            <ion-icon name="image-outline"></ion-icon>
-                          </span>
-                          <input type="file" id="image" name="image" />
+                        <label className="button-label">Song cover</label>
+                        <div
+                          className="upload-box"
+                          onClick={() =>
+                            document.getElementById("image").click()
+                          }
+                        >
+                          {imagePreview ? (
+                            <img src={imagePreview} className="preview-img" />
+                          ) : (
+                            <>
+                              <ion-icon name="image-outline"></ion-icon>
+                              <p>Click to upload image...</p>
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            id="image"
+                            name="image"
+                            accept=".jpg,.jpeg,.png"
+                            onChange={(e) => {
+                              if (e.target.files[0]) {
+                                const url = URL.createObjectURL(
+                                  e.target.files[0]
+                                );
+                                setImagePreview(url);
+                              }
+                            }}
+                            hidden
+                          />
                         </div>
                       </div>
                     </div>

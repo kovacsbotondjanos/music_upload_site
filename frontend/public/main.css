@@ -287,3 +287,38 @@ a:hover {
   text-decoration: underline !important;
   cursor: pointer;
 }
+
+.upload-box {
+  width: 220px;
+  height: 220px;
+  border: 2px dashed #777;
+  background: #1a1a1a;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  color: white;
+  text-align: center;
+}
+
+.upload-box:hover {
+  background: #222;
+  border-color: #fff;
+}
+
+.upload-box ion-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.preview-img {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+}

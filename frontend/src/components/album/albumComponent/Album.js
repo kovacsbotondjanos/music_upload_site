@@ -40,7 +40,7 @@ const Album = (props) => {
             <div>
               <div className="row">
                 <div className="col">
-                  <h1>{album.name}</h1>
+                  <h1>{"name: " + album.name}</h1>
                 </div>
                 <div className="col ms-auto text-end">
                   <img
@@ -75,7 +75,13 @@ const Album = (props) => {
 
               <div>
                 <div className="col">
-                  <h1>{formatStringToDate(album.createdAt)}</h1>
+                  <h1>{"creation date: " + formatStringToDate(album.createdAt)}</h1>
+                </div>
+              </div>
+
+              <div>
+                <div className="col">
+                  <h1>{"created by: " + album.username}</h1>
                 </div>
               </div>
 
@@ -90,12 +96,6 @@ const Album = (props) => {
                         : "link-outline"
                     }
                   ></ion-icon>
-                </div>
-              </div>
-
-              <div>
-                <div className="col">
-                  <h1>{album.username}</h1>
                 </div>
               </div>
 

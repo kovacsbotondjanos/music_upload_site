@@ -14,7 +14,6 @@ import com.musicUpload.dataHandler.services.AlbumService;
 import com.musicUpload.dataHandler.services.MinioService;
 import com.musicUpload.dataHandler.services.SongService;
 import com.musicUpload.exceptions.UnauthenticatedException;
-import com.musicUpload.util.ImageFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

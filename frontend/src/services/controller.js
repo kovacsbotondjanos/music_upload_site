@@ -76,7 +76,10 @@ export const login = async (username, password, success) =>
       console.error("Login failed:", error);
     });
 
-export const logout = () => localStorage.removeItem("jwtToken");
+export const logout = (success) => {
+  localStorage.removeItem("jwtToken")
+  success();
+};
 
 export const getRecommendedSongs = async (pageNumber, success) =>
   baseGet(

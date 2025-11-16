@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAlbum, patchAlbum, searchSongs, getToken } from "../../services/controller";
+import {
+  getAlbum,
+  patchAlbum,
+  searchSongs,
+  getToken,
+} from "../../services/controller";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 const AlbumEditor = () => {
@@ -11,6 +16,7 @@ const AlbumEditor = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     const token = getToken();
@@ -71,7 +77,6 @@ const AlbumEditor = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    // formData.append("songIds", JSON.stringify(album.songs.map((s) => s.id)));
     album.songs.forEach((s) => formData.append("songIds", s.id));
     patchAlbum(album.id, formData, () => navigate("/profile"));
   };
@@ -85,7 +90,7 @@ const AlbumEditor = () => {
               <div className="container">
                 <div className="row">
                   <div className="col">
-                    <h2>Path an Album</h2>
+                    <h2>Patch an Album</h2>
                   </div>
                 </div>
               </div>
@@ -113,14 +118,48 @@ const AlbumEditor = () => {
                       </div>
 
                       <div className="row">
-                        <div className="col">
-                          <div className="input-box">
+                        <div className="col d-flex flex-column align-items-center">
+                          <div
+                            className="input-box"
+                            style={{ textAlign: "center" }}
+                          >
                             <label className="button-label">Album cover</label>
-                            <br />
-                            <span className="icon">
-                              <ion-icon name="image-outline"></ion-icon>
-                            </span>
-                            <input type="file" id="image" name="image" />
+
+                            <div
+                              className="upload-box"
+                              style={{ marginTop: "10px" }}
+                              onClick={() =>
+                                document.getElementById("image").click()
+                              }
+                            >
+                              {imagePreview ? (
+                                <img
+                                  src={imagePreview}
+                                  className="preview-img"
+                                />
+                              ) : (
+                                <>
+                                  <ion-icon name="image-outline"></ion-icon>
+                                  <p>Click to upload image...</p>
+                                </>
+                              )}
+
+                              <input
+                                type="file"
+                                id="image"
+                                name="image"
+                                accept=".jpg,.jpeg,.png"
+                                hidden
+                                onChange={(e) => {
+                                  if (e.target.files[0]) {
+                                    const url = URL.createObjectURL(
+                                      e.target.files[0]
+                                    );
+                                    setImagePreview(url);
+                                  }
+                                }}
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>

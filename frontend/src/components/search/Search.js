@@ -20,7 +20,9 @@ const Search = (props) => {
   const [typingTimeout, setTypingTimeout] = useState(null);
   const { playMusic } = props;
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    console.log("Search init starts");
+  }, []);
 
   const fetchSongs = async (name) =>
     searchSongs(page, name, (data) => {
@@ -97,14 +99,7 @@ const Search = (props) => {
     setTypingTimeout(timeout);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (searchTerm !== "") {
-      searchSongs(searchTerm);
-      searchAlbums(searchTerm);
-      searchUser(searchTerm);
-    }
-  };
+  const handleSubmit = (event) => event.preventDefault();
 
   return (
     <div className="container container-fluid">

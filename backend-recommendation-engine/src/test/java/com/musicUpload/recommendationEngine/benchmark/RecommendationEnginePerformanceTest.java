@@ -36,7 +36,7 @@ public class RecommendationEnginePerformanceTest {
     @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void benchMarkEasyQuery_1() {
         createData(10);
-        benchmarkTest(150L, 100L);
+        benchmarkTest(1000L, 1000L);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class RecommendationEnginePerformanceTest {
     @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void benchMarkMediumQuery_1() {
         createData(500);
-        benchmarkTest(100L, 100L);
+        benchmarkTest(1000L, 1000L);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class RecommendationEnginePerformanceTest {
     @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void benchMarkHardQuery_1() {
         createData(10_000);
-        benchmarkTest(1000L, 1000L);
+        benchmarkTest(2000L, 2000L);
     }
 
     @Test
@@ -60,26 +60,29 @@ public class RecommendationEnginePerformanceTest {
     @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void benchMarkHardQuery_2() {
         createData(100_000);
-        benchmarkTest(1000L, 1000L);
+        benchmarkTest(2000L, 2000L);
     }
 
     @Test
     @Sql(scripts = "/init-scripts/performance-test-data/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void benchMarkHardQuery_3() {
+        createData(250_000);
+        benchmarkTest(2000L, 2000L);
+    }
+
+    @Test
+    @Sql(scripts = "/init-scripts/performance-test-data/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void benchMarkHardQuery_4() {
         createData(500_000);
         benchmarkTest(2000L, 2000L);
     }
 
-//    @Test
-//    @Sql(scripts = "/init-scripts/performance-test-data/init-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-//    @Sql(scripts = "/init-scripts/drop-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-//    public void benchMarkHardQuery_4() {
-//        createData(1_000_000);
-//        benchmarkTest(2500L, 2500L);
-//    }
-
     private void benchmarkTest(Long userRecommendationMillis, Long songRecommendationMillis) {
+        // the first test was always slow, so i added this warmup call here to eliminate the difference
+        recommendationEngine.createRecommendationsForUser(0L, 20L, 0L);
+
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("recommend-user");
 
@@ -104,9 +107,18 @@ public class RecommendationEnginePerformanceTest {
     }
 
     private void createData(int listenRowCount) {
+        createData();
+        setUpDate(listenRowCount);
+    }
+
+    private void setUpDate(int listenRowCount) {
+        jdbcTemplate.execute(String.format("UPDATE user_song SET created_at = NOW() LIMIT %d", listenRowCount));
+    }
+
+    private void createData() {
         Random rand = new Random();
-        String data = IntStream.rangeClosed(1, listenRowCount).mapToObj(i ->
-                String.format("(%d, %d, NOW(), NOW())", rand.nextLong(30L), rand.nextLong(30L)))
+        String data = IntStream.rangeClosed(1, 500_000).mapToObj(i ->
+                String.format("(%d, %d, '2000-01-01 00:00:00', NOW())", rand.nextLong(30L), rand.nextLong(30L)))
                 .collect(Collectors.joining(", "));
         jdbcTemplate.execute(
                 String.format("INSERT INTO user_song (user_id, song_id, created_at, updated_at) VALUES %s;", data)

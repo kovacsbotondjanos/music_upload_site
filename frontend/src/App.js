@@ -23,7 +23,6 @@ const App = () => {
   const [username, setUsername] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(0)
   const [profilePic, setProfilePic] = useState(null);
-  const [audio, setAudio] = useState(null);
 
   const playMusic = async (nameHashed) => {
     if (nameHashed != null) {

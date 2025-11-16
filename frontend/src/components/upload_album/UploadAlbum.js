@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addAlbum, getToken } from "../../services/controller";
 
 const UploadAlbum = () => {
   const navigate = useNavigate();
+  const [imagePreview, setImagePreview] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -27,7 +28,7 @@ const UploadAlbum = () => {
               <div className="container">
                 <div className="row">
                   <div className="col">
-                    <h2>Upload a new Song</h2>
+                    <h2>Upload a new Album</h2>
                   </div>
                 </div>
               </div>
@@ -48,14 +49,45 @@ const UploadAlbum = () => {
                     </div>
 
                     <div className="row">
-                      <div className="col">
-                        <div className="input-box">
-                          <label className="button-label">Song cover</label>
-                          <br />
-                          <span className="icon">
-                            <ion-icon name="image-outline"></ion-icon>
-                          </span>
-                          <input type="file" id="image" name="image" />
+                      <div className="col d-flex flex-column align-items-center">
+                        <div
+                          className="input-box"
+                          style={{ textAlign: "center" }}
+                        >
+                          <label className="button-label">Album cover</label>
+
+                          <div
+                            className="upload-box"
+                            style={{ marginTop: "10px" }}
+                            onClick={() =>
+                              document.getElementById("image").click()
+                            }
+                          >
+                            {imagePreview ? (
+                              <img src={imagePreview} className="preview-img" />
+                            ) : (
+                              <>
+                                <ion-icon name="image-outline"></ion-icon>
+                                <p>Click to upload image...</p>
+                              </>
+                            )}
+
+                            <input
+                              type="file"
+                              id="image"
+                              name="image"
+                              accept=".jpg,.jpeg,.png"
+                              hidden
+                              onChange={(e) => {
+                                if (e.target.files[0]) {
+                                  const url = URL.createObjectURL(
+                                    e.target.files[0]
+                                  );
+                                  setImagePreview(url);
+                                }
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>

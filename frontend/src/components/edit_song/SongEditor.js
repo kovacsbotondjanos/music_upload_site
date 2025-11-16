@@ -6,6 +6,7 @@ const SongEditor = () => {
   const navigate = useNavigate();
   const { songId } = useParams();
   const [song, setSong] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     const token = getToken();
@@ -39,7 +40,7 @@ const SongEditor = () => {
               <div className="container">
                 <div className="row">
                   <div className="col">
-                    <h2>Path a Song</h2>
+                    <h2>Patch a Song</h2>
                   </div>
                 </div>
               </div>
@@ -70,11 +71,39 @@ const SongEditor = () => {
                         <div className="col">
                           <div className="input-box">
                             <label className="button-label">Song cover</label>
-                            <br />
-                            <span className="icon">
-                              <ion-icon name="image-outline"></ion-icon>
-                            </span>
-                            <input type="file" id="image" name="image" />
+                            <div
+                              className="upload-box"
+                              onClick={() =>
+                                document.getElementById("image").click()
+                              }
+                            >
+                              {imagePreview ? (
+                                <img
+                                  src={imagePreview}
+                                  className="preview-img"
+                                />
+                              ) : (
+                                <>
+                                  <ion-icon name="image-outline"></ion-icon>
+                                  <p>Click to upload image...</p>
+                                </>
+                              )}
+                              <input
+                                type="file"
+                                id="image"
+                                name="image"
+                                accept=".jpg,.jpeg,.png"
+                                onChange={(e) => {
+                                  if (e.target.files[0]) {
+                                    const url = URL.createObjectURL(
+                                      e.target.files[0]
+                                    );
+                                    setImagePreview(url);
+                                  }
+                                }}
+                                hidden
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -73,7 +73,7 @@ public class UserService implements UserDetailsService {
 
     public User registerUser(User user) {
 
-        if (user.getEmail() == null || user.getPassword() == null || user.getUsername() == null) {
+            if (user.getEmail() == null || user.getPassword() == null || user.getUsername() == null) {
             throw new WrongFormatException("Please fill out all the fields");
         }
 

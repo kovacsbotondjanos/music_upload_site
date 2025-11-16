@@ -161,7 +161,7 @@ public class AlbumService {
                 .orElseThrow(UnauthenticatedException::new);
 
         if (songIds != null) {
-            songIds.forEach(songId -> songRepository
+                songIds.forEach(songId -> songRepository
                     .findByIdAndProtectionTypeInOrUser(album.getId(), userDetails.getId())
                     .ifPresent(song -> album.getSongs().add(song)));
         }

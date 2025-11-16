@@ -43,7 +43,7 @@ const Song = (props) => {
             <div>
               <div className="row">
                 <div className="col">
-                  <h1>{song.name}</h1>
+                  <h1>{"name: " + song.name}</h1>
                 </div>
                 <div className="col ms-auto text-end">
                   <button
@@ -83,7 +83,13 @@ const Song = (props) => {
 
               <div>
                 <div className="col">
-                  <h1>{formatStringToDate(song.createdAt)}</h1>
+                  <h1>{"creation date: " + formatStringToDate(song.createdAt)}</h1>
+                </div>
+              </div>
+
+              <div>
+                <div className="col">
+                  <h1>{"artist: " + song.username}</h1>
                 </div>
               </div>
 
@@ -98,12 +104,6 @@ const Song = (props) => {
                         : "link-outline"
                     }
                   ></ion-icon>
-                </div>
-              </div>
-
-              <div>
-                <div className="col">
-                  <h1>{song.username}</h1>
                 </div>
               </div>
 

@@ -72,11 +72,9 @@ public class RecommendationEngine {
         List<Long> songTags = userSongCustomRepository.getSongIdToTagIdMap(songs);
 
         Date startDate = getDateMonthsFromToday(1);
-        Date endDate = new Date();
-
 
         List<Long> sortedSongIds = userSongCustomRepository.findSongsForGivenUser(
-                songs, songTags, userId, restrictedSongs, pageSize, pageNumber, startDate, endDate);
+                songs, songTags, userId, restrictedSongs, pageSize, pageNumber, startDate);
 
         return fallbackToDefaultRecommendations(sortedSongIds, pageSize, pageNumber);
     }

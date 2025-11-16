@@ -19,6 +19,6 @@ public interface UserSongCustomRepository {
 
     List<Long> findSongsForGivenUser(
             Collection<Long> songIds, Collection<Long> tagIds, Long userId,
-            List<Long> restrictedSongIds, Long pageSize, Long pageNumber, Date startDate, Date endDate
+            List<Long> restrictedSongIds, Long pageSize, Long pageNumber, Date startDate
     );
 }

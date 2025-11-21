@@ -39,10 +39,14 @@ public class RecommendationEngine {
             return defaultRecommendations(pageSize, pageNumber);
         }
 
+        var dateMap = getDateMap();
+
         List<Long> songTags = userSongCustomRepository.getSongIdToTagIdMap(List.of(songId));
 
+        List<Long> userIds = userSongCustomRepository.getUserIdsForSongs(List.of(songId), dateMap.get(6).getStartDate());
+
         List<Long> sortedSongsIds = userSongCustomRepository.findSongsGroupedWithMonthlyListens(
-                songTags, userId, List.of(songId), getDateMap(),
+                songTags, userId, List.of(songId), userIds, dateMap,
                 monthToMultiplierMap, pageSize, pageNumber
         );
 
@@ -73,8 +77,10 @@ public class RecommendationEngine {
 
         Date startDate = getDateMonthsFromToday(1);
 
+        List<Long> userIds = userSongCustomRepository.getUserIdsForSongs(songs, startDate);
+
         List<Long> sortedSongIds = userSongCustomRepository.findSongsForGivenUser(
-                songs, songTags, userId, restrictedSongs, pageSize, pageNumber, startDate);
+                songs, songTags, userId, userIds, restrictedSongs, pageSize, pageNumber, startDate);
 
         return fallbackToDefaultRecommendations(sortedSongIds, pageSize, pageNumber);
     }
@@ -83,13 +89,17 @@ public class RecommendationEngine {
         Album a = albumRepository.findById(albumId)
                 .orElseThrow(NotFoundException::new);
 
+        var dateMap = getDateMap();
+
         List<Long> songs = a.getSongs().stream().map(Song::getId).toList();
         Set<Long> restrictedSongs = new HashSet<>(userSongCustomRepository.findRestrictedSongs(userId, songs));
         songs = songs.stream().filter(s -> !restrictedSongs.contains(s)).toList();
         List<Long> songTags = userSongCustomRepository.getSongIdToTagIdMap(songs);
 
+        List<Long> userIds = userSongCustomRepository.getUserIdsForSongs(songs, dateMap.get(6).getStartDate());
+
         List<Long> sortedSongIds = userSongCustomRepository.findSongsGroupedWithMonthlyListens(
-                songTags, userId, songs, getDateMap(),
+                songTags, userId, songs, userIds, dateMap,
                 monthToMultiplierMap, pageSize, pageNumber);
 
         return fallbackToDefaultRecommendations(sortedSongIds, pageSize, pageNumber);

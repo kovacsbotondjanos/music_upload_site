@@ -13,7 +13,9 @@ import java.util.Date;
         indexes = {
                 @Index(name = "idx_user_song_created_song_user", columnList = "created_at, song_id, user_id"),
                 @Index(name = "idx_user_song_song_user_created", columnList = "song_id, user_id, created_at"),
-                @Index(name = "idx_user_song_created_at", columnList = "created_at")
+                @Index(name = "idx_user_song_user_created", columnList = "user_id, created_at"),
+                @Index(name = "idx_user_song_song_id_created_at", columnList = "song_id, created_at"),
+//                @Index(name = "idx_user_song_created_at", columnList = "created_at")
         }
 )
 @AllArgsConstructor

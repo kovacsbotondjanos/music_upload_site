@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { getToken, getUserData, logout } from "../../services/controller";
 
 const Navbar = (props) => {
@@ -49,7 +49,14 @@ const Navbar = (props) => {
         <div className="d-flex w-100 align-items-center justify-content-between">
           <div>
             {loggedIn && (
-              <a className="profile_div" href="/profile">
+              <Link
+                className="profile_div" 
+                to="/profile"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.href = "/profile";
+                }}
+              >
                 <img
                   alt=""
                   width="50px"
@@ -57,46 +64,73 @@ const Navbar = (props) => {
                   src={profilePic}
                   className="profile"
                 />
-              </a>
+              </Link>
             )}
           </div>
 
           <div className="d-flex align-items-center gap-4 ms-auto">
-            <a className="nav-link text-white" href="/">
+            <Link
+              className="nav-link text-white"
+              to="/"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = "/";
+              }}
+            >
               Home
-            </a>
+            </Link>
 
             {loggedIn ? (
-              <a
+              <Link
                 className="nav-link text-white custom-button"
-                onClick={() =>
+                onClick={(e) => 
                   logout(() => {
                     setLoggedIn(false);
                     setProfilePic(null);
                     setUsername(null);
-                    navigate("/login");
+                    e.preventDefault();
+                    window.location.href = "/login";
                   })
                 }
+                to="/login"
               >
                 Log out
-              </a>
+              </Link>
             ) : (
               <>
-                <a className="nav-link text-white" href="/register">
+                <Link
+                  className="nav-link text-white"
+                  to="/register"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = "/register";
+                  }}
+                >
                   Register
-                </a>
-                <a className="nav-link text-white" href="/login">
+                </Link>
+                <Link 
+                  className="nav-link text-white"
+                  to="/login"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = "/login";
+                  }}
+                >
                   Log in
-                </a>
+                </Link>
               </>
             )}
 
-            <a
+            <Link
               className="nav-link text-white"
-              onClick={() => navigate("/search")}
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = "/search";
+              }}
+              to="/search"
             >
               Search
-            </a>
+            </Link>
           </div>
         </div>
       </div>

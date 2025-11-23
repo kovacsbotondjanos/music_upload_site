@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import SongItem from "../song/songItem/SongItem";
 import AlbumItem from "../album/albumItem/AlbumItem";
 import UserItem from "../user/userItem/UserItem";
@@ -21,36 +21,56 @@ const Search = (props) => {
   const { playMusic } = props;
 
   useEffect(() => {
-    console.log("Search init starts");
+    setPage(0);
+    setHasMore(true);
+    setSongs([]);
+    setAlbums([]);
+    setUsers([]);
   }, []);
 
-  const fetchSongs = async (name) =>
-    searchSongs(page, name, (data) => {
-      if (!data || data.length === 0) {
-        setHasMore(false);
-      } else {
-        setSongs((prev) => [...prev, ...data]);
-        setPage((prev) => prev + 1);
-      }
+  useEffect(() => () => clearTimeout(typingTimeout), [typingTimeout]);
+
+  const fetchSongs = async (name) => {
+    setPage(prev => {
+      const nextPage = prev;
+      searchSongs(nextPage, name, (data) => {
+        if (!data || data.length === 0) {
+          setHasMore(false);
+        } else {
+          setSongs(prevSongs => [...prevSongs, ...data]);
+        }
+      });
+      return prev + 1;
     });
-  const fetchAlbums = async (name) =>
-    searchAlbums(page, name, (data) => {
-      if (!data || data.length === 0) {
-        setHasMore(false);
-      } else {
-        setAlbums((prev) => [...prev, ...data]);
-        setPage((prev) => prev + 1);
-      }
+  };
+
+  const fetchAlbums = async (name) => {
+    setPage(prev => {
+      const currentPage = prev;
+      searchAlbums(currentPage, name, (data) => {
+        if (!data || data.length === 0) {
+          setHasMore(false);
+        } else {
+          setAlbums(prevAlbums => [...prevAlbums, ...data]);
+        }
+      });
+      return prev + 1;
     });
-  const fetchUsers = async (name) =>
-    searchUser(page, name, (data) => {
-      if (!data || data.length === 0) {
-        setHasMore(false);
-      } else {
-        setUsers((prev) => [...prev, ...data]);
-        setPage((prev) => prev + 1);
-      }
+  };
+
+  const fetchUsers = async (name) => {
+    setPage(prev => {
+      const currentPage = prev;
+      searchUser(currentPage, name, (data) => {
+        if (!data || data.length === 0) {
+          setHasMore(false);
+        } else {
+          setUsers(prevUsers => [...prevUsers, ...data]);
+        }
+      });
+      return prev + 1;
     });
+  };
 
   const handleDropdownChange = (e) => {
     setSongs([]);
@@ -58,7 +78,7 @@ const Search = (props) => {
     setUsers([]);
     setPage(0);
     setHasMore(true);
-    setSearchTerm("")
+    setSearchTerm("");
     setSearchType(e.target.value);
   };
 
@@ -73,6 +93,11 @@ const Search = (props) => {
   };
 
   const handleInputChange = (event) => {
+    setPage(0);
+    setHasMore(true);
+    setSongs([]);
+    setAlbums([]);
+    setUsers([]);
     setSearchTerm(event.target.value);
     const name = event.target.value;
     if (typingTimeout) {
@@ -80,8 +105,6 @@ const Search = (props) => {
     }
 
     const timeout = setTimeout(() => {
-      setPage(0);
-      setHasMore(true)
       if (name !== "") {
         if (searchType === "SONG") {
           setSongs([]);

@@ -17,6 +17,7 @@ const AlbumEditor = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [imagePreview, setImagePreview] = useState(null);
+  const [typingTimeout, setTypingTimeout] = useState(null);
 
   useEffect(() => {
     const token = getToken();
@@ -42,9 +43,9 @@ const AlbumEditor = () => {
     });
   };
 
-  const fetchSongs = async () => {
-    if (!query.trim()) return;
-    await searchSongs(page, query, (data) => {
+  const fetchSongs = async (q) => {
+    if (!q.trim()) return;
+    await searchSongs(page, q, (data) => {
       if (!data || data.length === 0) {
         setHasMore(false);
       } else {
@@ -60,9 +61,13 @@ const AlbumEditor = () => {
     setSearchResults([]);
     setPage(0);
     setHasMore(true);
-    if (val.trim()) {
-      await fetchSongs();
-    }
+    if (typingTimeout) clearTimeout(typingTimeout);
+     const timeout = setTimeout(async () => {
+      if (val.trim()) {
+        await fetchSongs(val);
+      }
+    }, 500);
+    setTypingTimeout(timeout);
   };
 
   const addSongToAlbum = (song) => {
@@ -80,6 +85,10 @@ const AlbumEditor = () => {
     album.songs.forEach((s) => formData.append("songIds", s.id));
     patchAlbum(album.id, formData, () => navigate("/profile"));
   };
+
+  useEffect(() => {
+    return () => clearTimeout(typingTimeout);
+  }, [typingTimeout]);
 
   return (
     <div className="black-bg">
@@ -222,10 +231,10 @@ const AlbumEditor = () => {
                             className="form-control"
                           />
                           {query && (
-                            <div id="scrollableResults">
+                            <div id="scrollableResults" className="scrollable-results">
                               <InfiniteScroll
                                 dataLength={searchResults.length}
-                                next={fetchSongs}
+                                next={() => fetchSongs(query)}
                                 hasMore={hasMore}
                                 scrollableTarget="scrollableResults"
                                 loader={
